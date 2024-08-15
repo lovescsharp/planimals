@@ -370,4 +370,4 @@ FodyWeavers.xsd
 !bin/Debug/card_log.mdf
 
 # Unignore the assets folder (assuming it's currently being ignored)
-!assets/
+!bin/Debug/assets/
