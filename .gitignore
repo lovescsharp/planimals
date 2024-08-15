@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore all .mdf files in general
+*.mdf
+
+# But do not ignore the specific .mdf files in bin/Debug
+!bin/Debug/cards.mdf
+!bin/Debug/card_log.mdf
+
+# Unignore the assets folder (assuming it's currently being ignored)
+!assets/
