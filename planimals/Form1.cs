@@ -42,8 +42,12 @@ namespace planimals
         private Rectangle fieldRectangle;
 
         private PictureBox drawCardButton = new PictureBox();
-        private Image back;
+        private Image drawCardButtonBack;
         private Rectangle cardRectangle;
+
+        private PictureBox chainButton = new PictureBox();
+        private Image chainButtonBack;
+        private Rectangle chainButtonRectangle;
 
         public Form1()
         {
@@ -71,16 +75,27 @@ namespace planimals
             timer.Start();
             sw.Start();
 
-            back = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
+            drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
             drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
             drawCardButton.Width = workingHeight / 8;
             drawCardButton.Height = workingWidth / 10;
-            drawCardButton.Location = new Point(workingWidth - drawCardButton.Width - workingHeight / 100 * 5, workingHeight / 2 - drawCardButton.Height / 2);
-            cardRectangle = new Rectangle(workingWidth - drawCardButton.Width - workingHeight / 100 * 5, workingHeight / 2 - drawCardButton.Height / 2, workingHeight / 8, workingWidth / 10);
-            drawCardButton.Image = back;
+            drawCardButton.Location = new Point(drawCardButton.Width - workingHeight / 100 * 5, workingHeight / 2 - drawCardButton.Height / 2);
+            cardRectangle = new Rectangle(drawCardButton.Width - workingHeight / 100 * 5, workingHeight / 2 - drawCardButton.Height / 2, workingHeight / 8, workingWidth / 10);
+            drawCardButton.Image = drawCardButtonBack;
             Controls.Add(drawCardButton);
             drawCardButton.Click += new EventHandler(drawCardButton_Click);
             drawCardButton.MouseMove += DrawCardButton_MouseMove;
+
+            chainButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\chain.png");
+            chainButton.SizeMode = PictureBoxSizeMode.StretchImage;
+            chainButton.Width = workingWidth / 10;
+            chainButton.Height = workingHeight / 10;
+            chainButton.Location = new Point(workingWidth - drawCardButton.Width - workingHeight / 10, workingHeight / 2 - drawCardButton.Height / 2);
+            chainButtonRectangle = new Rectangle(workingWidth - drawCardButton.Width - workingHeight / 10, workingHeight / 2 - drawCardButton.Height / 2, workingWidth / 10, workingHeight / 10);
+            chainButton.Image = chainButtonBack;
+            Controls.Add(chainButton);
+            chainButton.Click += new EventHandler(chainButton_Click);
+            chainButton.MouseMove += chainButton_MouseMove;
 
             rnd = new Random();
             playerHand = new List<Card>();
@@ -124,6 +139,25 @@ namespace planimals
             {
                 drawCardButton.Width = workingHeight / 8;
                 drawCardButton.Height = workingWidth / 10;
+            }
+        }
+
+        public void chainButton_Click(object sender, EventArgs e)
+        {
+            //Chain();
+        }
+
+        private void chainButton_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
+            {
+                chainButton.Width = workingWidth / 10 + 5;
+                chainButton.Height = workingHeight / 10 + 5;
+            }
+            else
+            {
+                chainButton.Width = workingWidth / 10;
+                chainButton.Height = workingHeight / 10;
             }
         }
 
