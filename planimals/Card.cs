@@ -20,6 +20,8 @@ namespace planimals
         public static int pictureBoxWidth = Form1.workingHeight / 8;
         public static int pictureBoxHeight = Form1.workingWidth / 10;
 
+        public static MouseButtons lastMouseButtonUp = MouseButtons.None;
+
         public Card(string sname, string cname, string desc, string path, int hier, string habt, Point position)
         {
             scientific_name = sname;
@@ -44,6 +46,7 @@ namespace planimals
             ContextMenu = cm;
 
             MouseClick += new MouseEventHandler(cardLeftClick);
+            MouseUp += new MouseEventHandler(LastMouseButtonUp);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -75,18 +78,53 @@ namespace planimals
             }
         }
 
+
+        private void Drop(Card c) {
+            c.Picked = false;
+            c.BackColor = Color.Gray;
+        }
+        private void Pick(Card c) {
+            c.Picked = true;
+            c.BackColor = Color.White;
+            BringToFront();
+        }
+
+        private void LastMouseButtonUp(object sender, MouseEventArgs e)
+        {
+            lastMouseButtonUp = e.Button;
+        }
+
         public void cardLeftClick(object sender, EventArgs e)
         {
-            if (!Picked)
-            {
-                Picked = true;
-                BackColor = Color.White;
-                this.BringToFront();
+            if (lastMouseButtonUp == MouseButtons.Left && Picked == true) {
+                if (Form1.playerChain.Count == 1) 
+                {
+                    Location = new Point(Form1.fieldRectangle.Left + Form1.fieldRectangle.Width / 10, Form1.fieldRectangle.Top + Form1.fieldRectangle.Height / 2);
+                    Drop(this);
+                }
+                lastMouseButtonUp = MouseButtons.None;
             }
-            else
+            else 
             {
-                Picked = false;
-                BackColor = Color.Gray;
+                if (!Picked)
+                {
+                    foreach (Card cardCurrentlyHeld in Form1.playerHand)
+                    {
+                        if (cardCurrentlyHeld.Picked)
+                        {
+                            Drop(cardCurrentlyHeld);
+                            Pick(this);
+                        }
+                        else
+                        {
+                            Pick(this);
+                        }
+                    }
+                }
+                else
+                {
+                    Drop(this);
+                }
             }
         }
     }
