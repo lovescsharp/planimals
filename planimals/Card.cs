@@ -9,13 +9,13 @@ namespace planimals
     public class Card : PictureBox
     {
         public bool Picked;
-        public Point previousLocation;
+        public Point prevLocation;
 
         public string scientific_name;
         public string common_name;
-        public string description;
+        private string description;
         private int hierarchy;
-        public string habitat;
+        private string habitat;
 
         public static int pictureBoxWidth = Form1.workingHeight / 8;
         public static int pictureBoxHeight = Form1.workingWidth / 10;
@@ -37,7 +37,7 @@ namespace planimals
             SizeMode = PictureBoxSizeMode.Zoom;
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
-            previousLocation = Location;
+            prevLocation = Location;
             BackColor = Color.Gray;
             Picked = false;
 
@@ -80,6 +80,7 @@ namespace planimals
                 if (Form1.playerChain.Count == 1) 
                 {
                     Location = new Point(Form1.fieldRectangle.Left + Form1.fieldRectangle.Width / 10, Form1.fieldRectangle.Top + Form1.fieldRectangle.Height / 2);
+                    //Form1.playerHand.Remove(this);
                     Drop(this);
                 }
                 lastMouseButtonUp = MouseButtons.None;
