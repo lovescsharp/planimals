@@ -4,6 +4,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
 
@@ -78,7 +81,6 @@ namespace planimals
             workingWidth = ClientRectangle.Width;
 
             fieldRectangle = new Rectangle(workingWidth / 100 * 20, workingHeight / 4, workingWidth / 10 * 6, workingHeight / 2);
-
 
             BackColor = Color.Black;
 
@@ -160,17 +162,77 @@ namespace planimals
                 drawCardButton.Height = workingWidth / 10;
             }
         }
-
         private void Chain(List<List<Card>> chain) {
-            MessageBox.Show("Not yet implemented.");
+            bool valid = true;
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                if (chain[0].Count < 2) { label.Text = "The chain must consist of at least two organisms."; }
+                else
+                {
+                    sqlConnection.Open();
+                    for (int i = 0; i < chain[0].Count; i++)
+                    {
+                        if (i == chain.Count)
+                        {
+                            break;
+                        }
+                        SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[0][i+1].scientific_name}' AND Consumed='{chain[0][i].scientific_name}'", sqlConnection);
+                        int b = (int) cmd.ExecuteScalar(); //1 - then relation exists. 0 - does not exist
+                        if (b == 0) { 
+                            label.Text = "Food chain is invalid";
+                            valid = false;
+                            //put cards back to hand
+                            //PutToHand(chain[0]);
+                            break;
+                        }
+                    }
+
+                    sqlConnection.Close();
+                    if (valid)
+                    {
+                        MessageBox.Show($"+{CalcScore(chain[0].Count)} points");
+                        //delete cards from table
+                        //TidyUp();
+                    }
+                }
+            }
+        }
+        private void FixChainIndices(List<Card> chain) {
+            for (int i = 0; i < chain.Count; i++) {
+                if (i == chain.Count) {
+                    break;
+                }
+
+                if (chain[i].Location.X > chain[i + 1].Location.X) {
+                    Card temp = chain[i];
+                    chain[i] = chain[i + 1];
+                    chain[i + 1] = temp;
+                }
+            }
+        }
+
+        //private void TidyUp(List<Card> chain) {
+        //      foreach (Card c in chain) {
+        //          playerHand[].remove or something
+        //      }
+        //}
+
+        //make function PutToHand() to put cards from the table back to the players hand
+        
+
+        private int CalcScore(int noOfCards) {
+            int score = 0;
+            for (int i = 0; i < noOfCards; i++)
+            {
+                score += 5 + 5 * i;
+            }
+            return score;
         }
 
         public void chainButton_Click(object sender, EventArgs e)
         {
             Chain(playerChain);
         }
-        
-
         private void chainButton_MouseMove(object sender, MouseEventArgs e)
         {
             if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
@@ -263,6 +325,7 @@ namespace planimals
                             }
                         }
                     }
+                    sqlConnection.Close();
                 }
             }
             else
@@ -271,11 +334,10 @@ namespace planimals
             }
 
         }
-        //Daniel's code
         #region fancy card moving
         private void EaseInOut(Card card, Point endPosition, long length)
         {
-            if (endPosition.X < fieldRectangle.Right && endPosition.X > fieldRectangle.Left && endPosition.Y > fieldRectangle.Top && endPosition.Y < fieldRectangle.Bottom)
+            if (endPosition.X < fieldRectangle.Right && endPosition.X > fieldRectangle.Left && endPosition.Y > fieldRectangle.Top && endPosition.Y < fieldRectangle.Bottom) //check whether user wants to move card onto the table or just messing with them
             {
                 Point offset = new Point(endPosition.X - card.Location.X - card.Width / 2, endPosition.Y - card.Location.Y - card.Height / 2);
                 (Card, Point, Point, long, long) data = (card, card.Location, offset, length, sw1.ElapsedMilliseconds);
@@ -319,24 +381,18 @@ namespace planimals
         {
             if (timeThrough >= 1) { return 1; }
             double x = timeThrough;
-            double y = Math.Pow(1 - Math.Pow(x - 1, 2), 0.5f);
+            //double y = Math.Pow(1 - Math.Pow(x - 1, 2), 0.5f);
+            double y = Math.Sin((Math.PI * x)/2);
             return y;
         }
         private void MouseLeftClick(object sender, MouseEventArgs e)
         {
             MoveList.Clear();
-            int i = SearchPickedCard();
-            if (i == 0 && playerHand[0].Picked)
-            {
-                EaseInOut(playerHand[i], e.Location, 1000);
-            }
-            else if (i != 0)
-            {
-                EaseInOut(playerHand[i], e.Location, 1000);
-            }
+            int i = PickedCard();
+            EaseInOut(playerHand[i], e.Location, 500);
             Card.lastMouseButtonUp = MouseButtons.None;
         }
-        private int SearchPickedCard()
+        private int PickedCard()
         {
             foreach (Card c in playerHand)
             {

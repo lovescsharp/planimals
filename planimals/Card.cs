@@ -59,26 +59,6 @@ namespace planimals
             }
         }
 
-        public void cardRightClick(object sender, EventArgs e)
-        {
-            switch (hierarchy)
-            {
-                case (1):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore\nPrimarily lives in {habitat}");
-                    break;
-                case (2):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore/Omnivore\nPrimarily lives in {habitat}");
-                    break;
-                case (3):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Herbivore\nPrimarily lives in {habitat}");
-                    break;
-                case (4):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Producer\nPrimarily lives in {habitat}");
-                    break;
-            }
-        }
-
-
         private void Drop(Card c) {
             c.Picked = false;
             c.BackColor = Color.Gray;
@@ -127,5 +107,24 @@ namespace planimals
                 }
             }
         }
+        public void cardRightClick(object sender, EventArgs e)
+        {
+            switch (hierarchy)
+            {
+                case (1):
+                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore\nPrimarily lives in {habitat}");
+                    break;
+                case (2):
+                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore/Omnivore\nPrimarily lives in {habitat}");
+                    break;
+                case (3):
+                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Herbivore\nPrimarily lives in {habitat}");
+                    break;
+                case (4):
+                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Producer\nPrimarily lives in {habitat}");
+                    break;
+            }
+        }
     }
+
 }
