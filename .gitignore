@@ -262,7 +262,6 @@ ServiceFabricBackup/
 *.rptproj.bak
 
 # SQL Server files
-*.mdf
 *.ldf
 *.ndf
 
@@ -366,8 +365,7 @@ FodyWeavers.xsd
 *.mdf
 
 # But do not ignore the specific .mdf files in bin/Debug
-!bin/Debug/cards.mdf
-!bin/Debug/card_log.mdf
+!bin\Debug\cards.mdf
+!bin\Debug\card_log.mdf
 
-# Unignore the assets folder (assuming it's currently being ignored)
-!bin/Debug/assets/
+!bin\Debug\assets\

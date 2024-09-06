@@ -224,43 +224,48 @@ namespace planimals
             FixChainIndices();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                if (chain[0].Count < 2) { label.Text = "The chain must consist of at least two organisms."; }
+                if (chain[0].Count < 2) { label.Text = "The chain must consist of at least two organisms."; return; }
                 else
                 {
                     sqlConnection.Open();
-                    for (int i = 0; i < chain[0].Count; i++)
+                    for (int i = 0; i < chain[0].Count - 1; i++)
                     {
-                        if (i == chain.Count - 1)
-                        {
-                            break;
-                        }
                         SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[0][i + 1].scientific_name}' AND Consumed='{chain[0][i].scientific_name}'", sqlConnection);
                         int b = (int)cmd.ExecuteScalar(); //1 - then relation exists. 0 - does not exist
                         if (b == 0) {
                             label.Text = "Food chain is invalid";
                             valid = false;
-                            for (int j = 0; j < playerChain[0].Count; i++)
+                            for (int j = 0; j < playerChain[0].Count; j++)
                             {
                                 EaseInOut(playerChain[0][j], playerChain[0][j].prevLocation, 200);
                             }
-                            break;
+                            playerChain[0].Clear();
+                            return;
+
                         }
                     }
                     sqlConnection.Close();
                     if (valid)
                     {
                         label.Text = $"+{CalcScore(chain[0].Count)} points";
-                        foreach (Card c in chain[0]) { 
-                            Controls.Remove(c);
-                            c.Image.Dispose();
-                            playerHand.Remove(c);
+                        foreach (Card c in chain[0])
+                        {
+                            if (playerHand.Contains(c))
+                            {
+                                Controls.Remove(c);
+                                playerHand.Remove(c);
+                                c.Image.Dispose();
+                            }
                         }
-                        playerChain.Clear();
+
+                        playerChain[0].Clear();
 
                         for (int j = 0; j < playerHand.Count; j++)
                         {
-                            playerHand[0].Location = new Point(Card.pictureBoxWidth * (j + 1) * playerHand.Count, Height - Card.pictureBoxHeight);
-                        }
+                            playerHand[j].Location = new Point(
+                                Card.pictureBoxWidth * (j + 1),
+                                Height - Card.pictureBoxHeight);
+                        }   
                     }
                 }
             }
@@ -384,7 +389,9 @@ namespace planimals
                 MoveList.Add(data);
                 c.Picked = false;
                 c.BackColor = Color.Gray;
+                //after playerChain[0].Clear Out of range is thrown
                 playerChain[0].Add(c);
+                //
             }
             if (InRectangle(c.Location) && !InRectangle(endPosition)) {
                 Point offset = new Point(c.prevLocation.X - c.Location.X, c.prevLocation.Y - c.Location.Y);
@@ -392,7 +399,6 @@ namespace planimals
                 MoveList.Add(data);
                 c.Picked = false;
                 c.BackColor = Color.Gray;
-                playerChain[0].Remove(c);
             }
             else
             {
