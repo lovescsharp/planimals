@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -14,7 +15,7 @@ namespace planimals
         public string scientific_name;
         public string common_name;
         private string description;
-        private int hierarchy;
+        public int hierarchy;
         private string habitat;
 
         public static int pictureBoxWidth = Form1.workingHeight / 8;
@@ -33,7 +34,15 @@ namespace planimals
             Height = pictureBoxHeight;
             Width = pictureBoxWidth;
 
-            Image = Image.FromFile(path);
+            try
+            {
+                Image = Image.FromFile(path);
+            }
+            catch
+            {
+                MessageBox.Show(path);
+            }
+
             SizeMode = PictureBoxSizeMode.Zoom;
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
@@ -46,7 +55,6 @@ namespace planimals
             ContextMenu = cm;
 
             MouseClick += new MouseEventHandler(cardLeftClick);
-            MouseUp += new MouseEventHandler(LastMouseButtonUp);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -69,43 +77,26 @@ namespace planimals
             BringToFront();
         }
 
-        private void LastMouseButtonUp(object sender, MouseEventArgs e)
-        {
-            lastMouseButtonUp = e.Button;
-        }
-
         public void cardLeftClick(object sender, EventArgs e)
         {
-            if (lastMouseButtonUp == MouseButtons.Left && Picked == true) {
-                if (Form1.playerChain.Count == 1) 
-                {
-                    Location = new Point(Form1.fieldRectangle.Left + Form1.fieldRectangle.Width / 10, Form1.fieldRectangle.Top + Form1.fieldRectangle.Height / 2);
-                    //Form1.playerHand.Remove(this);
-                    Drop(this);
-                }
-                lastMouseButtonUp = MouseButtons.None;
-            }
-            else 
+            if (!Picked)
             {
-                if (!Picked)
+                foreach (Card cardCurrentlyHeld in Form1.playerHand)
                 {
-                    foreach (Card cardCurrentlyHeld in Form1.playerHand)
+                    if (cardCurrentlyHeld.Picked)
                     {
-                        if (cardCurrentlyHeld.Picked)
-                        {
-                            Drop(cardCurrentlyHeld);
-                            Pick(this);
-                        }
-                        else
-                        {
-                            Pick(this);
-                        }
+                        Drop(cardCurrentlyHeld);
+                        Pick(this);
+                    }
+                    else
+                    {
+                        Pick(this);
                     }
                 }
-                else
-                {
-                    Drop(this);
-                }
+            }
+            else
+            {
+                Drop(this);
             }
         }
         public void cardRightClick(object sender, EventArgs e)
