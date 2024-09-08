@@ -93,11 +93,27 @@ namespace planimals
                         Pick(this);
                     }
                 }
+                foreach (List<Card> ch in Form1.playerChain)
+                {
+                    foreach (Card cardCurrentlyHeld in ch)
+                    {
+                        if (cardCurrentlyHeld.Picked)
+                        {
+                            Drop(cardCurrentlyHeld);
+                            Pick(this);
+                        }
+                        else
+                        {
+                            Pick(this);
+                        }
+                    }
+                }
             }
             else
             {
                 Drop(this);
             }
+
         }
         public void cardRightClick(object sender, EventArgs e)
         {
@@ -116,6 +132,10 @@ namespace planimals
                     MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Producer\nPrimarily lives in {habitat}");
                     break;
             }
+        }
+
+        public static bool InRectangle(Point p) {
+            return p.X < Form1.fieldRectangle.Right && p.X > Form1.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > Form1.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < Form1.fieldRectangle.Bottom;
         }
     }
 

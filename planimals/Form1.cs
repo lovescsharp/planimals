@@ -6,7 +6,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Windows;
 using System.Windows.Documents;
@@ -26,7 +28,7 @@ namespace planimals
         //push and pull changes to Cards.mdf
 
 
-        private List<(Card, Point, Point, long, long)> MoveList;
+        public static List<(Card, Point, Point, long, long)> MoveList;
         private static Random rnd;
         private Timer timer1;
         private Stopwatch sw1;
@@ -46,18 +48,19 @@ namespace planimals
         public static List<Card> playerHand;
         public static List<List<Card>> playerChain;
         public static Rectangle fieldRectangle;
+        public static Rectangle cardRectangle;
 
 
         private PictureBox drawCardButton;
         private Image drawCardButtonBack;
-        private Rectangle cardRectangle;
+        private Rectangle drawCardRectangle;
 
         private PictureBox chainButton;
         private Image chainButtonBack;
         private Rectangle chainButtonRectangle;
 
 
-        private Label label = new Label();
+        private System.Windows.Forms.Label label = new System.Windows.Forms.Label();
 
         public Form1()
         {
@@ -92,6 +95,13 @@ namespace planimals
                 workingWidth / 10 * 6,
                 workingHeight / 2
             );
+            /*
+            cardRectangle = new Rectangle(
+                fieldRectangle.Left + fieldRectangle.Left / 10,
+                fieldRectangle.Bottom - Card.pictureBoxHeight - 10,
+                Card.pictureBoxWidth,
+                Card.pictureBoxHeight);
+            */
 
             BackColor = Color.Black;
 
@@ -104,7 +114,7 @@ namespace planimals
                 drawCardButton.Width - workingHeight / 100 * 5,
                 workingHeight / 2 - drawCardButton.Height / 2
             );
-            cardRectangle = new Rectangle(
+            drawCardRectangle = new Rectangle(
                 drawCardButton.Width - workingHeight / 100 * 5,
                 workingHeight / 2 - drawCardButton.Height / 2,
                 workingHeight / 8,
@@ -152,35 +162,29 @@ namespace planimals
             //Resize += new EventHandler(OnResize);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
-
         private void OnResize(object sender, EventArgs e)
         {
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;
 
-
             fieldRectangle = new Rectangle(
                 workingWidth / 100 * 20,
                 workingHeight / 4,
                 workingWidth / 10 * 6,
-                workingHeight / 2
-            );
+                workingHeight / 2);
+
             drawCardButton.Width = workingHeight / 8;
             drawCardButton.Height = workingWidth / 10;
+
             drawCardButton.Location = new Point(
                 drawCardButton.Width - workingHeight / 100 * 5,
-                workingHeight / 2 - drawCardButton.Height / 2
-            );
+                workingHeight / 2 - drawCardButton.Height / 2);
 
             chainButton.Width = workingWidth / 10;
             chainButton.Height = workingHeight / 10;
             chainButton.Location = new Point(
                 workingWidth - drawCardButton.Width - workingHeight / 10,
-                workingHeight / 2 - drawCardButton.Height / 2
-            );
+                workingHeight / 2 - drawCardButton.Height / 2);
 
             foreach (Card c in playerHand)
             {
@@ -188,8 +192,7 @@ namespace planimals
                 c.Height = workingWidth / 10;
                 c.Location = new Point(
                     workingWidth / 2 - c.Width,
-                    workingHeight - c.Height
-                );
+                    workingHeight - c.Height);
             }
             Invalidate();
         }
@@ -201,13 +204,14 @@ namespace planimals
                 e.Graphics.DrawRectangle(pen, fieldRectangle);
             }
         }
+
         public void drawCardButton_Click(object sender, EventArgs e)
         {
             DrawCard(playerHand);
         }
         private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MousePosition.X < cardRectangle.Right && MousePosition.X > cardRectangle.Left && MousePosition.Y < cardRectangle.Bottom && MousePosition.Y > cardRectangle.Top)
+            if (MousePosition.X < drawCardRectangle.Right && MousePosition.X > drawCardRectangle.Left && MousePosition.Y < drawCardRectangle.Bottom && MousePosition.Y > drawCardRectangle.Top)
             {
                 drawCardButton.Width = workingHeight / 8 + 5;
                 drawCardButton.Height = workingWidth / 10 + 5;
@@ -218,84 +222,93 @@ namespace planimals
                 drawCardButton.Height = workingWidth / 10;
             }
         }
-        private void Chain(List<List<Card>> chain)
+        private void Chain(List<Card> chain)
         {
             bool valid = true;
-            FixChainIndices();
+            string s = "";
+            foreach (Card c in chain) { s += $"{c.common_name}\n"; }
+            FixChainIndices(chain);
+
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                if (chain[0].Count < 2) { label.Text = "The chain must consist of at least two organisms."; return; }
+                if (chain.Count < 2) { Display("The chain must consist of at least two organisms."); return; }
                 else
                 {
                     sqlConnection.Open();
-                    for (int i = 0; i < chain[0].Count - 1; i++)
+                    for (int i = 0; i < chain.Count - 1; i++)
                     {
-                        SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[0][i + 1].scientific_name}' AND Consumed='{chain[0][i].scientific_name}'", sqlConnection);
-                        int b = (int)cmd.ExecuteScalar(); //1 - then relation exists. 0 - does not exist
+                        MessageBox.Show(playerHand.Count.ToString());
+                        SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i+1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
+                        int b = (int) sqlCommand.ExecuteScalar(); //1 - relation exists. 0 - does not exist
                         if (b == 0) {
-                            label.Text = "Food chain is invalid";
+                            Display("Food chain is invalid");
                             valid = false;
-                            for (int j = 0; j < playerChain[0].Count; j++)
+                            for (int j = 0; j < chain.Count; j++)
                             {
-                                EaseInOut(playerChain[0][j], playerChain[0][j].prevLocation, 200);
+                                Point location = chain[j].prevLocation;
+                                Point offset = new Point(location.X - chain[j].Location.X, location.Y - chain[j].Location.Y);
+                                (Card, Point, Point, long, long) data = (chain[j], chain[j].Location, offset, 800, sw1.ElapsedMilliseconds);
+                                MoveList.Add(data);
+                                chain[j].Picked = false;
+                                chain[j].BackColor = Color.Gray;
+                                playerHand.Add(chain[j]);
                             }
-                            playerChain[0].Clear();
+                            chain.Clear();
                             return;
-
                         }
                     }
                     sqlConnection.Close();
                     if (valid)
                     {
-                        label.Text = $"+{CalcScore(chain[0].Count)} points";
-                        foreach (Card c in chain[0])
+                        Display($"+{CalcScore(chain.Count)} points\n");
+                        foreach (Card c in chain)
                         {
-                            if (playerHand.Contains(c))
-                            {
-                                Controls.Remove(c);
-                                playerHand.Remove(c);
-                                c.Image.Dispose();
-                            }
+                            Controls.Remove(c);
+                            c.Image.Dispose();
                         }
+                        chain.Clear();
 
-                        playerChain[0].Clear();
 
                         for (int j = 0; j < playerHand.Count; j++)
                         {
-                            playerHand[j].Location = new Point(
+                            playerHand[j].Location = playerHand[j].prevLocation = new Point(
                                 Card.pictureBoxWidth * (j + 1),
                                 Height - Card.pictureBoxHeight);
-                        }   
+                        }
                     }
                 }
             }
         }
-        private void FixChainIndices() {
-            for (int i = 0; i < playerChain[0].Count; i++) {
-                if (i == playerChain[0].Count - 1) {
-                    break;
-                }
-                if (playerChain[0][i].Location.X > playerChain[0][i + 1].Location.X) {
-                    Card temp = playerChain[0][i];
-                    playerChain[0][i] = playerChain[0][i + 1];
-                    playerChain[0][i + 1] = temp;
+
+        private async void Display(string s) {
+            label.Text = s;
+            await System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => { Invoke(new MethodInvoker(() => label.Text = "")); });
+        }
+
+        private void FixChainIndices(List<Card> chain)
+        {
+            for (int i = 0; i < chain.Count - 1; i++)
+            {
+                if (chain[i].Location.X > chain[i + 1].Location.X)
+                {
+                    Card temp = chain[i];
+                    chain[i] = chain[i + 1];
+                    chain[i + 1] = temp;
                 }
             }
         }
-
         private int CalcScore(int noOfCards) {
             int score = 0;
             for (int i = 0; i < noOfCards; i++)
             {
-                score += 5 * (i+1);
+                //gonna make a better calculation of the score some day
+                score += i + 1;
             }
             return score;
         }
 
-        public void chainButton_Click(object sender, EventArgs e)
-        {
-            Chain(playerChain);
-        }
+        public void chainButton_Click(object sender, EventArgs e) { foreach (List<Card> chain in playerChain) Chain(chain); } 
+        
         private void chainButton_MouseMove(object sender, MouseEventArgs e)
         {
             if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
@@ -319,10 +332,7 @@ namespace planimals
                 sqlConnection.Open();
                 using (var reader = sqlCommand.ExecuteReader())
                 {
-                    while (reader.Read())
-                    {
-                        count = int.Parse(reader["num"].ToString());
-                    }
+                    while (reader.Read()) count = int.Parse(reader["num"].ToString());
                 }
             }
             return count;
@@ -337,19 +347,23 @@ namespace planimals
                 sqlConnection.Open();
                 using (var reader = sqlCommand.ExecuteReader())
                 {
-                    while (reader.Read())
-                    {
-                        return reader["Scientific_name"].ToString();
-                        
-                    }
+                    while (reader.Read()) { return reader["Scientific_name"].ToString(); }
                 }
             }
             return null;
         }
 
+        private int Count(List<List<Card>> chain) {
+            int counter = 0;
+            foreach (List<Card> subchain in chain) {
+                counter += subchain.Count;
+            }
+            return counter;
+        }
+
         public void DrawCard(List<Card> playerHand)
         {
-            if (playerHand.Count < 15)
+            if (playerHand.Count + Count(playerChain) < 15)
             {
                 string sciname = GetRandomScientificName();
                 using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -375,40 +389,13 @@ namespace planimals
             }
             else
             {
-                label.Text = "Cannot hold more than 15 cards.";
+                Display("Cannot hold more than 15 cards.");
             }
 
         }
         #region fancy card moving
-        private void EaseInOut(Card c, Point endPosition, long length)
-        {
-            if (InRectangle(endPosition)) //check whether user wants to move c onto the table or just messing with them          
-            {
-                Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
-                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
-                MoveList.Add(data);
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-                //after playerChain[0].Clear Out of range is thrown
-                playerChain[0].Add(c);
-                //
-            }
-            if (InRectangle(c.Location) && !InRectangle(endPosition)) {
-                Point offset = new Point(c.prevLocation.X - c.Location.X, c.prevLocation.Y - c.Location.Y);
-                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
-                MoveList.Add(data);
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-            }
-            else
-            {
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-            }
-        }
-        private bool InRectangle(Point p) {
-            return p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
-        }
+        Func<Point, bool> InRectangle = p => p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
+
         private void MoveCards(object sender, EventArgs e)
         {
             long currentTime = sw1.ElapsedMilliseconds;
@@ -416,14 +403,14 @@ namespace planimals
             int index = 0;
             foreach ((Card c, Point startPosition, Point offset, long length, long startTime) in MoveList)
             {
-                long dt = currentTime - startTime;
-                if (dt > length)
+                long durationTime = currentTime - startTime;
+                if (durationTime > length)
                 {
                     c.Location = new Point(startPosition.X + offset.X, startPosition.Y + offset.Y);
                     purgeIndexes.Add(index);
                     continue;
                 }
-                double f = F((double)(dt) / length, -3f);
+                double f = F((double)(durationTime) / length, -3f);
                 c.Location = new Point((int)(offset.X * f) + startPosition.X, (int)(offset.Y * f) + startPosition.Y);
                 index++;
             }
@@ -433,14 +420,56 @@ namespace planimals
                 MoveList.RemoveAt(purgeIndexes[i]);
             }
         }
+
         private static double F(double timeThrough, double a)
         {
-            if (timeThrough >= 1) { return 1; }
+            if (timeThrough >= 1) return 1;
             double x = timeThrough;
-            double y = Math.Pow(1 - Math.Pow(x - 1, 2), 0.5f);
-            //double y = Math.Sin((Math.PI * x)/2);
+            double y = Math.Sin((3 * x) / 2);
             return y;
         }
+
+        public void EaseInOut(Card c, Point endPosition, long length)
+        {
+            if (InRectangle(endPosition) && !InRectangle(c.Location)) //check whether user wants to move card onto the table or just messing with them          
+            {
+                Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
+                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                MoveList.Add(data);
+                c.Picked = false;
+                c.BackColor = Color.Gray;
+                playerChain[0].Add(c);
+                playerHand.Remove(c);
+                return;
+            }
+            else if (InRectangle(endPosition) && InRectangle(c.Location)) 
+            {
+                Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
+                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                MoveList.Add(data);
+                c.Picked = false;
+                c.BackColor = Color.Gray;
+                return;
+            }
+            else if (Card.InRectangle(c.Location) && !InRectangle(endPosition))
+            {
+                Point location = c.prevLocation;
+                Point offset = new Point(location.X - c.Location.X, location.Y - c.Location.Y);
+                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                MoveList.Add(data);
+                c.Picked = false;
+                c.BackColor = Color.Gray;
+                playerHand.Add(c);
+                playerChain[0].Remove(c);
+                return;
+            }
+            else
+            {
+                c.Picked = false;
+                c.BackColor = Color.Gray;
+            }
+        }
+
         private void MouseLeftClick(object sender, MouseEventArgs e)
         {
             foreach (Card c in playerHand)
@@ -449,6 +478,20 @@ namespace planimals
                 {
                     MoveList.Clear();
                     EaseInOut(c, e.Location, 500);
+                    return;
+                }
+            }
+
+            foreach (List<Card> chain in playerChain)
+            {
+                foreach (Card c in chain)
+                {
+                    if (c.Picked == true)
+                    {
+                        MoveList.Clear();
+                        EaseInOut(c, e.Location, 500);
+                        return;
+                    }
                 }
             }
         }
