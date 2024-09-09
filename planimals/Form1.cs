@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
@@ -30,9 +31,12 @@ namespace planimals
 
         public static List<(Card, Point, Point, long, long)> MoveList;
         private static Random rnd;
-        private Timer timer1;
+        private System.Windows.Forms.Timer timer1;
         private Stopwatch sw1;
 
+
+        private System.Windows.Forms.Timer countDownTimer;
+        private PictureBox readySteadyGo;
 
         private static string currentDir = Environment.CurrentDirectory;
         private static string dbPath = currentDir + "\\cards.mdf";
@@ -67,10 +71,11 @@ namespace planimals
             InitializeComponent();
 
             MoveList = new List<(Card, Point, Point, long, long)>();
-            timer1 = new Timer();
+            timer1 = new System.Windows.Forms.Timer();
             timer1.Tick += new EventHandler(MoveCards);
             timer1.Interval = 10;
             sw1 = new Stopwatch();
+
 
             timer1.Start();
             sw1.Start();
@@ -163,7 +168,20 @@ namespace planimals
             Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
             Resize += new EventHandler(OnResize);
+
+            readySteadyGo = new PictureBox();
+            readySteadyGo.Size = new Size(workingWidth/8, workingHeight/4);
+            readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width, workingHeight/2-readySteadyGo.Height);
+
+            //work on that one
+            for (int i = 1; i < 4; i++)
+            {
+                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + i.ToString() + ".png");
+                Thread.Sleep(1000);
+            }
         }
+
+
 
         private void OnResize(object sender, EventArgs e)
         {
@@ -304,7 +322,7 @@ namespace planimals
         {
             for (int i = 0; i < chain.Count - 1; i++)
             {
-                MessageBox.Show($"{chain[i].common_name} at {chain[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
+                //MessageBox.Show($"{chain[i].common_name} at {chain[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
                 if (chain[i].Location.X > chain[i + 1].Location.X)
                 {
                     Card temp = chain[i];
