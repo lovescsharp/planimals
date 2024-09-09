@@ -42,7 +42,6 @@ namespace planimals
 
         public static int workingHeight;
         public static int workingWidth;
-        private static int ratio;
 
 
         public static List<Card> playerHand;
@@ -77,17 +76,21 @@ namespace planimals
             sw1.Start();
 
             #region UI
+
             FormBorderStyle = FormBorderStyle.Fixed3D;
-            MinimizeBox = false;
+            MinimumSize = new Size(1120, 620);
             Text = "Planimals";
             StartPosition = FormStartPosition.CenterScreen;
+
+            //static size
+            MaximizeBox = false;
+            MinimizeBox = false;
+            //
 
             Height = Screen.PrimaryScreen.WorkingArea.Height;
             Width = Screen.PrimaryScreen.WorkingArea.Width;
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;
-            ratio = workingHeight / workingWidth;
-
 
             fieldRectangle = new Rectangle(
                 workingWidth / 100 * 20,
@@ -159,11 +162,12 @@ namespace planimals
             MouseClick += new MouseEventHandler(MouseLeftClick);
             Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
-            //Resize += new EventHandler(OnResize);
+            Resize += new EventHandler(OnResize);
         }
 
         private void OnResize(object sender, EventArgs e)
         {
+            Height = (int)(Width*0.5625);
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;
 
@@ -185,15 +189,32 @@ namespace planimals
             chainButton.Location = new Point(
                 workingWidth - drawCardButton.Width - workingHeight / 10,
                 workingHeight / 2 - drawCardButton.Height / 2);
-
-            foreach (Card c in playerHand)
+            
+            Card.pictureBoxWidth = workingHeight / 8;
+            Card.pictureBoxHeight = workingWidth / 10;
+            for (int i = 0; i < playerHand.Count; i++)
             {
-                c.Width = workingHeight / 8;
-                c.Height = workingWidth / 10;
-                c.Location = new Point(
-                    workingWidth / 2 - c.Width,
-                    workingHeight - c.Height);
+                playerHand[i].Width = workingHeight / 8;
+                playerHand[i].Height = workingWidth / 10;
+                playerHand[i].Location = playerHand[i].prevLocation = new Point(Card.pictureBoxWidth*i, workingHeight-Card.pictureBoxHeight);
             }
+            foreach (List<Card> chain in playerChain)
+            {
+                for (int i = 0; i < chain.Count; i++)
+                {
+                    chain[i].Width = workingHeight / 8;
+                    chain[i].Height = workingWidth / 10;
+                    //chain[i].Location = new Point((int)(chain[i].Location.X * 0.5625), (int)(chain[i].Location.Y * 0.5625));
+                    chain[i].prevLocation = new Point(playerHand.LastOrDefault().Location.X + Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
+                }
+            }
+            for (int i = 0; i < playerHand.Count; i++)
+            {
+                playerHand[i].Width = workingHeight / 8;
+                playerHand[i].Height = workingWidth / 10;
+                playerHand[i].Location = new Point(Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
+            }
+            label.Location = new Point(workingWidth/10, workingHeight/8);
             Invalidate();
         }
 
@@ -227,8 +248,9 @@ namespace planimals
             bool valid = true;
             string s = "";
             foreach (Card c in chain) { s += $"{c.common_name}\n"; }
+            //MessageBox.Show(s);
             FixChainIndices(chain);
-
+            //MessageBox.Show(s);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 if (chain.Count < 2) { Display("The chain must consist of at least two organisms."); return; }
@@ -237,7 +259,6 @@ namespace planimals
                     sqlConnection.Open();
                     for (int i = 0; i < chain.Count - 1; i++)
                     {
-                        MessageBox.Show(playerHand.Count.ToString());
                         SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i+1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
                         int b = (int) sqlCommand.ExecuteScalar(); //1 - relation exists. 0 - does not exist
                         if (b == 0) {
@@ -247,7 +268,7 @@ namespace planimals
                             {
                                 Point location = chain[j].prevLocation;
                                 Point offset = new Point(location.X - chain[j].Location.X, location.Y - chain[j].Location.Y);
-                                (Card, Point, Point, long, long) data = (chain[j], chain[j].Location, offset, 800, sw1.ElapsedMilliseconds);
+                                (Card, Point, Point, long, long) data = (chain[j], chain[j].Location, offset, 400, sw1.ElapsedMilliseconds);
                                 MoveList.Add(data);
                                 chain[j].Picked = false;
                                 chain[j].BackColor = Color.Gray;
@@ -268,13 +289,7 @@ namespace planimals
                         }
                         chain.Clear();
 
-
-                        for (int j = 0; j < playerHand.Count; j++)
-                        {
-                            playerHand[j].Location = playerHand[j].prevLocation = new Point(
-                                Card.pictureBoxWidth * (j + 1),
-                                Height - Card.pictureBoxHeight);
-                        }
+                        for (int j = 0; j < playerHand.Count; j++) { playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight); }
                     }
                 }
             }
@@ -289,6 +304,7 @@ namespace planimals
         {
             for (int i = 0; i < chain.Count - 1; i++)
             {
+                MessageBox.Show($"{chain[i].common_name} at {chain[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
                 if (chain[i].Location.X > chain[i + 1].Location.X)
                 {
                     Card temp = chain[i];
@@ -429,7 +445,7 @@ namespace planimals
             return y;
         }
 
-        public void EaseInOut(Card c, Point endPosition, long length)
+        public void EaseInOut(Card c, Point endPosition, long length, List<Card> chain)
         {
             if (InRectangle(endPosition) && !InRectangle(c.Location)) //check whether user wants to move card onto the table or just messing with them          
             {
@@ -438,7 +454,7 @@ namespace planimals
                 MoveList.Add(data);
                 c.Picked = false;
                 c.BackColor = Color.Gray;
-                playerChain[0].Add(c);
+                chain.Add(c);
                 playerHand.Remove(c);
                 return;
             }
@@ -460,7 +476,7 @@ namespace planimals
                 c.Picked = false;
                 c.BackColor = Color.Gray;
                 playerHand.Add(c);
-                playerChain[0].Remove(c);
+                chain.Remove(c);
                 return;
             }
             else
@@ -477,7 +493,7 @@ namespace planimals
                 if (c.Picked == true)
                 {
                     MoveList.Clear();
-                    EaseInOut(c, e.Location, 500);
+                    EaseInOut(c, e.Location, 400, playerChain[0]);
                     return;
                 }
             }
@@ -489,7 +505,7 @@ namespace planimals
                     if (c.Picked == true)
                     {
                         MoveList.Clear();
-                        EaseInOut(c, e.Location, 500);
+                        EaseInOut(c, e.Location, 400, playerChain[0]);
                         return;
                     }
                 }
