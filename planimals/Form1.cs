@@ -174,6 +174,7 @@ namespace planimals
             readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width, workingHeight/2-readySteadyGo.Height);
 
             //work on that one
+            //just a nice countdown before the round starts
             for (int i = 1; i < 4; i++)
             {
                 readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + i.ToString() + ".png");
