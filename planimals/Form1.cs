@@ -55,6 +55,8 @@ namespace planimals
         public static Rectangle fieldRectangle;
         public static Rectangle cardRectangle;
 
+        private PictureBox retryButton;
+        private PictureBox exitButton;
 
         private PictureBox drawCardButton;
         private Image drawCardButtonBack;
@@ -70,18 +72,17 @@ namespace planimals
         public Form1()
         {
             #region Init component
-            /*
-                   -=====-                             -=====-
-                    _..._                               _..._
-                  .~     `~.                         .~`     ~.
-          ,_     /          }                       {          \     _,
-         ,_\'--, \   _.'`~~/                         \~~`'._   / ,--'/_,
-          \'--,_`{_,}    -(                           )-    {,_}`_,--'/
-           '.`-.`\;--,___.'_                         _'.___,--;/`.-`.'
-             '._`/    |_ _{@}                       {@}_ _|    \`_.'
-                /     ` |-';/                        \;'-| `     \
-               /   \    / */
-            InitializeComponent();/* |  \    /   \
+        /*
+                -=====-                             -=====-
+                _..._                               _..._
+                .~     `~.                         .~`     ~.
+        ,_     /          }                       {          \     _,
+        ,_\'--, \   _.'`~~/                         \~~`'._   / ,--'/_,
+        \'--,_`{_,}    -(                           )-    {,_}`_,--'/
+        '.`-.`\;--,___.'_                         _'.___,--;/`.-`.'
+            '._`/    |_ _{@}                       {@}_ _|    \`_.'
+            /     ` |-';/                        \;'-| `     \
+           /   \    / */ InitializeComponent(); /*|  \    /   \
           /     '--;_                                _;--'     \
          _\          `\                            /`          /_
         / |`-.___.    /                           \    .___,-'| \
@@ -121,6 +122,23 @@ namespace planimals
 
             BackColor = Color.Black;
 
+
+            ///fix locations and sizes
+            retryButton = new PictureBox();
+            retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
+            retryButton.Size = new Size(20,20);
+            retryButton.Location = new Point(workingWidth / 2 - retryButton.Width - 10, workingHeight / 2 + retryButton.Height/2);
+            Controls.Add(retryButton);
+
+            exitButton = new PictureBox();
+            exitButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
+            exitButton.Size = new Size(20,30);
+            exitButton.Location = new Point(workingWidth / 2 + exitButton.Width, workingHeight / 2 - exitButton.Height / 2);
+            Controls.Add(exitButton);
+            ///hi im peppa pig
+
+
+
             drawCardButton = new PictureBox();
             drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
             drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -152,8 +170,7 @@ namespace planimals
                 workingWidth - drawCardButton.Width - workingHeight / 10,
                 workingHeight / 2 - drawCardButton.Height / 2,
                 workingWidth / 10,
-                workingHeight / 10
-            );
+                workingHeight / 10);
             chainButton.Image = chainButtonBack;
             Controls.Add(chainButton);
             chainButton.Click += new EventHandler(chainButton_Click);
@@ -191,11 +208,13 @@ namespace planimals
 
             countDownTimer = new System.Windows.Forms.Timer();
             countDownTimer.Interval = 1000;
-            timeLeft = 60;
+            timeLeft = 3;
             countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
             labelTimer = new System.Windows.Forms.Label();
-            labelTimer.Location = new Point(10, 10);
+            labelTimer.ForeColor = Color.White;
+            labelTimer.Font = new Font(label.Font.FontFamily, 25);
+            labelTimer.Location = new Point((int)((double)workingWidth * 0.9), (int)((double)workingHeight / 10));
             labelTimer.Size = new Size(100, 100);
             Controls.Add(labelTimer);
 
@@ -228,8 +247,9 @@ namespace planimals
                 Controls.Remove(readySteadyGo);
                 readySteadyGo.Dispose();
                 foreach (Control control in Controls) { control.Enabled = true; control.Show(); }
+                exitButton.Hide();
+                retryButton.Hide();
                 countDownTimer.Start();
-                labelTimer.BringToFront();
             }
         }
         private void countDownTimer_Tick(object sender, EventArgs e)
@@ -240,7 +260,11 @@ namespace planimals
             else
             {
                 countDownTimer.Stop();
-                labelTimer.Text = "times up";
+                foreach (Control control in Controls) control.Enabled = false;
+                retryButton.Show();
+                retryButton.Enabled = true;
+                exitButton.Show();
+                exitButton.Enabled = true;
             }
         }
         private void OnResize(object sender, EventArgs e)
@@ -456,7 +480,7 @@ namespace planimals
         public string GetRandomScientificName()
         {
             int noOfOrganisms = GetNumberOfOrganisms();
-            int randInx = rnd.Next(noOfOrganisms);
+            int randInx = rnd.Next(noOfOrganisms) + 1; //add one cause count starts from 1
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 SqlCommand sqlCommand = new SqlCommand($"WITH Numbered AS (SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) as ROW_NUM FROM Organisms) SELECT Scientific_name FROM Numbered where ROW_NUM = {randInx}", sqlConnection);
