@@ -20,12 +20,10 @@ namespace planimals
     public partial class Form1 : Form
     {
         ///UI
-        //fix animation, make a dynamic cards bar
+        //make a dynamic cards bar
 
 
         ///logic
-        //adapt the game only for one chain, then just iterate over the chains
-        //fix out of bounds as playerChain.Clear makes playerChain empty not only playerChain[0]
         //push and pull changes to Cards.mdf
 
 
@@ -34,8 +32,11 @@ namespace planimals
         private System.Windows.Forms.Timer timer1;
         private Stopwatch sw1;
 
-
         private System.Windows.Forms.Timer countDownTimer;
+        private int timeLeft;
+        private System.Windows.Forms.Label labelTimer;
+
+        private System.Windows.Forms.Timer readySteadyGoTimer;
         private static PictureBox readySteadyGo;
         private int imageI = 3;
 
@@ -68,17 +69,25 @@ namespace planimals
 
         public Form1()
         {
-
-            InitializeComponent();
-
-            Hide();
-
-            MoveList = new List<(Card, Point, Point, long, long)>();
-            timer1 = new System.Windows.Forms.Timer();
-            timer1.Tick += new EventHandler(MoveCards);
-            timer1.Interval = 10;
-            sw1 = new Stopwatch();
-
+            #region Init component
+            /*
+                   -=====-                             -=====-
+                    _..._                               _..._
+                  .~     `~.                         .~`     ~.
+          ,_     /          }                       {          \     _,
+         ,_\'--, \   _.'`~~/                         \~~`'._   / ,--'/_,
+          \'--,_`{_,}    -(                           )-    {,_}`_,--'/
+           '.`-.`\;--,___.'_                         _'.___,--;/`.-`.'
+             '._`/    |_ _{@}                       {@}_ _|    \`_.'
+                /     ` |-';/                        \;'-| `     \
+               /   \    / */
+            InitializeComponent();/* |  \    /   \
+          /     '--;_                                _;--'     \
+         _\          `\                            /`          /_
+        / |`-.___.    /                           \    .___,-'| \
+        `--`------'`--`^^^^^^^^^^^^^^^^^^^^^^^^^^^^`--`'------`--`
+        */
+            #endregion
             #region UI
 
             FormBorderStyle = FormBorderStyle.Fixed3D;
@@ -161,16 +170,34 @@ namespace planimals
             readySteadyGo.SizeMode = PictureBoxSizeMode.CenterImage;
             readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width / 2, workingHeight / 2 - readySteadyGo.Height / 2);
             Controls.Add(readySteadyGo);
+
             foreach (Control control in Controls)
             {
                 control.Enabled = false;
+                control.Hide();
             }
+
+            readySteadyGoTimer = new System.Windows.Forms.Timer();
+            readySteadyGoTimer.Interval = 1000;
+            readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
+
+            #endregion
+
+            MoveList = new List<(Card, Point, Point, long, long)>();
+            timer1 = new System.Windows.Forms.Timer();
+            timer1.Tick += new EventHandler(MoveCards);
+            timer1.Interval = 10;
+            sw1 = new Stopwatch();
 
             countDownTimer = new System.Windows.Forms.Timer();
             countDownTimer.Interval = 1000;
-            countDownTimer.Tick += CountDownTimer_Tick;
+            timeLeft = 60;
+            countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
-            #endregion
+            labelTimer = new System.Windows.Forms.Label();
+            labelTimer.Location = new Point(10, 10);
+            labelTimer.Size = new Size(100, 100);
+            Controls.Add(labelTimer);
 
             rnd = new Random();
             playerHand = new List<Card>();
@@ -181,30 +208,39 @@ namespace planimals
             Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
             Resize += new EventHandler(OnResize);
-            
-            foreach (Control control in Controls) { control.Enabled = false; }
         }
         private void OnLoad(object sender, EventArgs e)
         {
             readySteadyGo.Show();
             readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
-            countDownTimer.Start();
+            readySteadyGoTimer.Start();
 
             timer1.Start();
             sw1.Start();
         }
-        private void CountDownTimer_Tick(object sender, EventArgs e)
+        private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
             imageI--;
-            if (imageI > 0) {
-                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            if (imageI > 0) readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            else
+            {
+                readySteadyGoTimer.Stop();
+                Controls.Remove(readySteadyGo);
+                readySteadyGo.Dispose();
+                foreach (Control control in Controls) { control.Enabled = true; control.Show(); }
+                countDownTimer.Start();
+                labelTimer.BringToFront();
+            }
+        }
+        private void countDownTimer_Tick(object sender, EventArgs e)
+        {
+            if (timeLeft > 0) {
+                labelTimer.Text = timeLeft--.ToString();
             }
             else
             {
                 countDownTimer.Stop();
-                Controls.Remove(readySteadyGo);
-                readySteadyGo.Dispose();
-                foreach (Control control in Controls) { control.Enabled = true; }
+                labelTimer.Text = "times up";
             }
         }
         private void OnResize(object sender, EventArgs e)
@@ -441,7 +477,6 @@ namespace planimals
         }
         #region fancy card moving
         Func<Point, bool> InRectangle = p => p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
-
         private void MoveCards(object sender, EventArgs e)
         {
             long currentTime = sw1.ElapsedMilliseconds;
@@ -466,7 +501,6 @@ namespace planimals
                 MoveList.RemoveAt(purgeIndexes[i]);
             }
         }
-
         private static double F(double timeThrough, double a)
         {
             if (timeThrough >= 1) return 1;
@@ -474,7 +508,6 @@ namespace planimals
             double y = Math.Sin((3 * x) / 2);
             return y;
         }
-
         public void EaseInOut(Card c, Point endPosition, long length, List<Card> chain)
         {
             if (InRectangle(endPosition) && !InRectangle(c.Location)) //check whether user wants to move card onto the table or just messing with them          
@@ -515,7 +548,6 @@ namespace planimals
                 c.BackColor = Color.Gray;
             }
         }
-
         private void MouseLeftClick(object sender, MouseEventArgs e)
         {
             foreach (Card c in playerHand)
