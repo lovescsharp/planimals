@@ -1,4 +1,6 @@
-﻿namespace planimals
+﻿using System.Windows.Forms.VisualStyles;
+
+namespace planimals
 {
     partial class Form1
     {
@@ -20,7 +22,7 @@
             base.Dispose(disposing);
         }
 
-#region Windows Form Designer generated code
+        #region Windows Form Designer generated code
 
         /// <summary>
         /// Required method for Designer support - do not modify
@@ -37,8 +39,8 @@
             this.ClientSize = new System.Drawing.Size(1898, 1024);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Shown += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);
-
         }
 
         #endregion

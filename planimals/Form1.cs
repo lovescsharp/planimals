@@ -36,7 +36,8 @@ namespace planimals
 
 
         private System.Windows.Forms.Timer countDownTimer;
-        private PictureBox readySteadyGo;
+        private static PictureBox readySteadyGo;
+        private int imageI = 3;
 
         private static string currentDir = Environment.CurrentDirectory;
         private static string dbPath = currentDir + "\\cards.mdf";
@@ -63,22 +64,20 @@ namespace planimals
         private Rectangle chainButtonRectangle;
 
 
-        private System.Windows.Forms.Label label = new System.Windows.Forms.Label();
+        private System.Windows.Forms.Label label;
 
         public Form1()
         {
 
             InitializeComponent();
 
+            Hide();
+
             MoveList = new List<(Card, Point, Point, long, long)>();
             timer1 = new System.Windows.Forms.Timer();
             timer1.Tick += new EventHandler(MoveCards);
             timer1.Interval = 10;
             sw1 = new Stopwatch();
-
-
-            timer1.Start();
-            sw1.Start();
 
             #region UI
 
@@ -116,8 +115,7 @@ namespace planimals
             drawCardButton = new PictureBox();
             drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
             drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
-            drawCardButton.Width = workingHeight / 8;
-            drawCardButton.Height = workingWidth / 10;
+            drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
             drawCardButton.Location = new Point(
                 drawCardButton.Width - workingHeight / 100 * 5,
                 workingHeight / 2 - drawCardButton.Height / 2
@@ -130,7 +128,7 @@ namespace planimals
             );
             drawCardButton.Image = drawCardButtonBack;
             Controls.Add(drawCardButton);
-            drawCardButton.Click += new EventHandler(drawCardButton_Click);
+            drawCardButton.Click += new EventHandler(DrawCard);
             drawCardButton.MouseMove += DrawCardButton_MouseMove;
 
             chainButton = new PictureBox();
@@ -152,10 +150,25 @@ namespace planimals
             chainButton.Click += new EventHandler(chainButton_Click);
             chainButton.MouseMove += chainButton_MouseMove;
 
+            label = new System.Windows.Forms.Label();
             label.Location = new Point(workingWidth / 10, workingHeight / 20);
             label.ForeColor = Color.White;
             label.AutoSize = true;
             Controls.Add(label);
+
+            readySteadyGo = new PictureBox();
+            readySteadyGo.Size = new Size(workingWidth / 10, workingWidth / 4);
+            readySteadyGo.SizeMode = PictureBoxSizeMode.CenterImage;
+            readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width / 2, workingHeight / 2 - readySteadyGo.Height / 2);
+            Controls.Add(readySteadyGo);
+            foreach (Control control in Controls)
+            {
+                control.Enabled = false;
+            }
+
+            countDownTimer = new System.Windows.Forms.Timer();
+            countDownTimer.Interval = 1000;
+            countDownTimer.Tick += CountDownTimer_Tick;
 
             #endregion
 
@@ -168,22 +181,32 @@ namespace planimals
             Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
             Resize += new EventHandler(OnResize);
+            
+            foreach (Control control in Controls) { control.Enabled = false; }
+        }
+        private void OnLoad(object sender, EventArgs e)
+        {
+            readySteadyGo.Show();
+            readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            countDownTimer.Start();
 
-            readySteadyGo = new PictureBox();
-            readySteadyGo.Size = new Size(workingWidth/8, workingHeight/4);
-            readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width, workingHeight/2-readySteadyGo.Height);
-
-            //work on that one
-            //just a nice countdown before the round starts
-            for (int i = 1; i < 4; i++)
+            timer1.Start();
+            sw1.Start();
+        }
+        private void CountDownTimer_Tick(object sender, EventArgs e)
+        {
+            imageI--;
+            if (imageI > 0) {
+                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            }
+            else
             {
-                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + i.ToString() + ".png");
-                Thread.Sleep(1000);
+                countDownTimer.Stop();
+                Controls.Remove(readySteadyGo);
+                readySteadyGo.Dispose();
+                foreach (Control control in Controls) { control.Enabled = true; }
             }
         }
-
-
-
         private void OnResize(object sender, EventArgs e)
         {
             Height = (int)(Width*0.5625);
@@ -236,18 +259,12 @@ namespace planimals
             label.Location = new Point(workingWidth/10, workingHeight/8);
             Invalidate();
         }
-
         public void DrawFieldBorders(object sender, PaintEventArgs e)
         {
             using (Pen pen = new Pen(Color.White, 10.0f))
             {
                 e.Graphics.DrawRectangle(pen, fieldRectangle);
             }
-        }
-
-        public void drawCardButton_Click(object sender, EventArgs e)
-        {
-            DrawCard(playerHand);
         }
         private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
         {
@@ -260,6 +277,78 @@ namespace planimals
             {
                 drawCardButton.Width = workingHeight / 8;
                 drawCardButton.Height = workingWidth / 10;
+            }
+        }
+        public void DrawCard(object sender, EventArgs e)
+        {
+            if (playerHand.Count + Count(playerChain) < 15)
+            {
+                string sciname = GetRandomScientificName();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
+                    sqlConnection.Open();
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var cname = reader["Common_name"].ToString();
+                            var desc = reader["Description"].ToString();
+                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
+                            int hierarchy = (int)reader["Hierarchy"];
+                            var habitat = reader["Habitat"].ToString();
+                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
+                            playerHand.Add(c);
+                            Controls.Add(c);
+                        }
+                    }
+                    sqlConnection.Close();
+                }
+            }
+            else
+            {
+                Display("Cannot hold more than 15 cards.");
+            }
+
+        }
+        private async void Display(string s) {
+            label.Text = s;
+            await System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => { Invoke(new MethodInvoker(() => label.Text = "")); });
+        }
+        private void FixChainIndices(List<Card> chain)
+        {
+            for (int i = 0; i < chain.Count - 1; i++)
+            {
+                //MessageBox.Show($"{chain[i].common_name} at {chain[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
+                if (chain[i].Location.X > chain[i + 1].Location.X)
+                {
+                    Card temp = chain[i];
+                    chain[i] = chain[i + 1];
+                    chain[i + 1] = temp;
+                }
+            }
+        }
+        private int CalcScore(int noOfCards) {
+            int score = 0;
+            for (int i = 0; i < noOfCards; i++)
+            {
+                //gonna make a better calculation of the score some day
+                score += i + 1;
+            }
+            return score;
+        }
+        public void chainButton_Click(object sender, EventArgs e) { foreach (List<Card> chain in playerChain) Chain(chain); } 
+        private void chainButton_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
+            {
+                chainButton.Width = workingWidth / 10 + 5;
+                chainButton.Height = workingHeight / 10 + 5;
+            }
+            else
+            {
+                chainButton.Width = workingWidth / 10;
+                chainButton.Height = workingHeight / 10;
             }
         }
         private void Chain(List<Card> chain)
@@ -278,9 +367,10 @@ namespace planimals
                     sqlConnection.Open();
                     for (int i = 0; i < chain.Count - 1; i++)
                     {
-                        SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i+1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
-                        int b = (int) sqlCommand.ExecuteScalar(); //1 - relation exists. 0 - does not exist
-                        if (b == 0) {
+                        SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
+                        int b = (int)sqlCommand.ExecuteScalar(); //1 - relation exists. 0 - does not exist
+                        if (b == 0)
+                        {
                             Display("Food chain is invalid");
                             valid = false;
                             for (int j = 0; j < chain.Count; j++)
@@ -313,52 +403,7 @@ namespace planimals
                 }
             }
         }
-
-        private async void Display(string s) {
-            label.Text = s;
-            await System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => { Invoke(new MethodInvoker(() => label.Text = "")); });
-        }
-
-        private void FixChainIndices(List<Card> chain)
-        {
-            for (int i = 0; i < chain.Count - 1; i++)
-            {
-                //MessageBox.Show($"{chain[i].common_name} at {chain[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
-                if (chain[i].Location.X > chain[i + 1].Location.X)
-                {
-                    Card temp = chain[i];
-                    chain[i] = chain[i + 1];
-                    chain[i + 1] = temp;
-                }
-            }
-        }
-        private int CalcScore(int noOfCards) {
-            int score = 0;
-            for (int i = 0; i < noOfCards; i++)
-            {
-                //gonna make a better calculation of the score some day
-                score += i + 1;
-            }
-            return score;
-        }
-
-        public void chainButton_Click(object sender, EventArgs e) { foreach (List<Card> chain in playerChain) Chain(chain); } 
-        
-        private void chainButton_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
-            {
-                chainButton.Width = workingWidth / 10 + 5;
-                chainButton.Height = workingHeight / 10 + 5;
-            }
-            else
-            {
-                chainButton.Width = workingWidth / 10;
-                chainButton.Height = workingHeight / 10;
-            }
-        }
-
-        public int GetNumberOfOrganisms()
+        private int GetNumberOfOrganisms()
         {
             int count = 0;
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -387,46 +432,12 @@ namespace planimals
             }
             return null;
         }
-
         private int Count(List<List<Card>> chain) {
             int counter = 0;
             foreach (List<Card> subchain in chain) {
                 counter += subchain.Count;
             }
             return counter;
-        }
-
-        public void DrawCard(List<Card> playerHand)
-        {
-            if (playerHand.Count + Count(playerChain) < 15)
-            {
-                string sciname = GetRandomScientificName();
-                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-                {
-                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
-                    sqlConnection.Open();
-                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var cname = reader["Common_name"].ToString();
-                            var desc = reader["Description"].ToString();
-                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
-                            int hierarchy = (int)reader["Hierarchy"];
-                            var habitat = reader["Habitat"].ToString();
-                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth*playerHand.Count, Height - Card.pictureBoxHeight));
-                            playerHand.Add(c);
-                            Controls.Add(c);
-                        }
-                    }
-                    sqlConnection.Close();
-                }
-            }
-            else
-            {
-                Display("Cannot hold more than 15 cards.");
-            }
-
         }
         #region fancy card moving
         Func<Point, bool> InRectangle = p => p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
