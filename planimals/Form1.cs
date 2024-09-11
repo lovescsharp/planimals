@@ -19,13 +19,9 @@ namespace planimals
 {
     public partial class Form1 : Form
     {
-        ///UI
-        //make a dynamic cards bar
-
-
         ///logic
         //push and pull changes to Cards.mdf
-
+        //private string username;
 
         public static List<(Card, Point, Point, long, long)> MoveList;
         private static Random rnd;
@@ -38,17 +34,15 @@ namespace planimals
 
         private System.Windows.Forms.Timer readySteadyGoTimer;
         private static PictureBox readySteadyGo;
-        private int imageI = 3;
+        private int imageIndex = 3;
 
         private static string currentDir = Environment.CurrentDirectory;
         private static string dbPath = currentDir + "\\cards.mdf";
         private static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
         private static readonly SqlConnection sqlConnection = new SqlConnection(connectionString);
 
-
         public static int workingHeight;
         public static int workingWidth;
-
 
         public static List<Card> playerHand;
         public static List<List<Card>> playerChain;
@@ -66,28 +60,29 @@ namespace planimals
         private Image chainButtonBack;
         private Rectangle chainButtonRectangle;
 
-
         private System.Windows.Forms.Label label;
+
+        private int overallScore;
 
         public Form1()
         {
             #region Init component
-        /*
-                -=====-                             -=====-
-                _..._                               _..._
-                .~     `~.                         .~`     ~.
-        ,_     /          }                       {          \     _,
-        ,_\'--, \   _.'`~~/                         \~~`'._   / ,--'/_,
-        \'--,_`{_,}    -(                           )-    {,_}`_,--'/
-        '.`-.`\;--,___.'_                         _'.___,--;/`.-`.'
-            '._`/    |_ _{@}                       {@}_ _|    \`_.'
-            /     ` |-';/                        \;'-| `     \
-           /   \    / */ InitializeComponent(); /*|  \    /   \
-          /     '--;_                                _;--'     \
-         _\          `\                            /`          /_
-        / |`-.___.    /                           \    .___,-'| \
-        `--`------'`--`^^^^^^^^^^^^^^^^^^^^^^^^^^^^`--`'------`--`
-        */
+            /*
+                    -=====-                             -=====-
+                      _..._                               _..._
+                    .~     `~.                         .~`     ~.
+            ,_     /          }                       {          \     _,
+            ,_\'--, \   _.'`~~/                        \~~`'._   / ,--'/_,
+             \'--,_`{_,}    -(                          )-    {,_}`_,--'/
+              '.`-.`\;--,___.'_                        _'.___,--;/`.-`.'
+                '._`/    |_ _{@}                       {@}_ _|    \`_.'
+                /     ` |-';/                        \;'-| `     \
+               /   \    / */ InitializeComponent(); /*|  \    /   \
+              /     '--;_                                _;--'     \
+             _\          `\                            /`          /_
+            / |`-.___.    /                           \    .___,-'| \
+            `--`------'`--`^^^^^^^^^^^^^^^^^^^^^^^^^^^^`--`'------`--`
+            */
             #endregion
             #region UI
 
@@ -97,7 +92,6 @@ namespace planimals
             StartPosition = FormStartPosition.CenterScreen;
 
             //static size
-            MaximizeBox = false;
             MinimizeBox = false;
             //
 
@@ -112,32 +106,23 @@ namespace planimals
                 workingWidth / 10 * 6,
                 workingHeight / 2
             );
-            /*
-            cardRectangle = new Rectangle(
-                fieldRectangle.Left + fieldRectangle.Left / 10,
-                fieldRectangle.Bottom - Card.pictureBoxHeight - 10,
-                Card.pictureBoxWidth,
-                Card.pictureBoxHeight);
-            */
 
             BackColor = Color.Black;
-
-
-            ///fix locations and sizes
             retryButton = new PictureBox();
             retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
-            retryButton.Size = new Size(20,20);
-            retryButton.Location = new Point(workingWidth / 2 - retryButton.Width - 10, workingHeight / 2 + retryButton.Height/2);
+            retryButton.SizeMode = PictureBoxSizeMode.StretchImage;
+            retryButton.Size = new Size(workingWidth  / 10, workingWidth / 10);
+            retryButton.Location = new Point(workingWidth / 2 - retryButton.Width / 2, workingHeight / 2 - retryButton.Height/2);
+            retryButton.Click += retryButton_Click;
             Controls.Add(retryButton);
 
             exitButton = new PictureBox();
             exitButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
-            exitButton.Size = new Size(20,30);
+            exitButton.SizeMode = PictureBoxSizeMode.StretchImage;
+            exitButton.Size = new Size(workingWidth / 10, workingWidth / 8);
             exitButton.Location = new Point(workingWidth / 2 + exitButton.Width, workingHeight / 2 - exitButton.Height / 2);
+            exitButton.Click += exitButton_Click;
             Controls.Add(exitButton);
-            ///hi im peppa pig
-
-
 
             drawCardButton = new PictureBox();
             drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
@@ -145,14 +130,12 @@ namespace planimals
             drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
             drawCardButton.Location = new Point(
                 drawCardButton.Width - workingHeight / 100 * 5,
-                workingHeight / 2 - drawCardButton.Height / 2
-            );
+                workingHeight / 2 - drawCardButton.Height / 2);
             drawCardRectangle = new Rectangle(
                 drawCardButton.Width - workingHeight / 100 * 5,
                 workingHeight / 2 - drawCardButton.Height / 2,
                 workingHeight / 8,
-                workingWidth / 10
-            );
+                workingWidth / 10);
             drawCardButton.Image = drawCardButtonBack;
             Controls.Add(drawCardButton);
             drawCardButton.Click += new EventHandler(DrawCard);
@@ -188,12 +171,6 @@ namespace planimals
             readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width / 2, workingHeight / 2 - readySteadyGo.Height / 2);
             Controls.Add(readySteadyGo);
 
-            foreach (Control control in Controls)
-            {
-                control.Enabled = false;
-                control.Hide();
-            }
-
             readySteadyGoTimer = new System.Windows.Forms.Timer();
             readySteadyGoTimer.Interval = 1000;
             readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
@@ -208,7 +185,7 @@ namespace planimals
 
             countDownTimer = new System.Windows.Forms.Timer();
             countDownTimer.Interval = 1000;
-            timeLeft = 3;
+            timeLeft = 10; //duration of one game, could be set by the user in settings
             countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
             labelTimer = new System.Windows.Forms.Label();
@@ -220,7 +197,6 @@ namespace planimals
 
             rnd = new Random();
             playerHand = new List<Card>();
-
             playerChain = new List<List<Card>>() { new List<Card>() { } };
 
             MouseClick += new MouseEventHandler(MouseLeftClick);
@@ -228,10 +204,46 @@ namespace planimals
             MouseMove += DrawCardButton_MouseMove;
             Resize += new EventHandler(OnResize);
         }
+
+        #region flow
         private void OnLoad(object sender, EventArgs e)
         {
+            Start();
+        }
+        private void Start()
+        {
+            foreach (Card c in playerHand)
+            {
+                c.Hide();
+                c.Image.Dispose();
+                c.Dispose();
+            }
+            playerHand.Clear();
+
+            foreach (List<Card> subchain in playerChain)
+            {
+                foreach (Card c in subchain)
+                {
+                    c.Hide();
+                    c.Image.Dispose();
+                    c.Dispose();
+                }
+                subchain.Clear();
+            }
+            imageIndex = 3;
+            timeLeft = 10;
+            overallScore = 0;
+
+            foreach (Control control in Controls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
+            label.Location = new Point(workingWidth / 10, workingHeight / 20);
+
             readySteadyGo.Show();
-            readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            readySteadyGo.Enabled = true;
+            readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
             readySteadyGoTimer.Start();
 
             timer1.Start();
@@ -239,13 +251,12 @@ namespace planimals
         }
         private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
-            imageI--;
-            if (imageI > 0) readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageI.ToString() + ".png");
+            imageIndex--;
+            if (imageIndex > 0) readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
             else
             {
                 readySteadyGoTimer.Stop();
                 Controls.Remove(readySteadyGo);
-                readySteadyGo.Dispose();
                 foreach (Control control in Controls) { control.Enabled = true; control.Show(); }
                 exitButton.Hide();
                 retryButton.Hide();
@@ -254,19 +265,42 @@ namespace planimals
         }
         private void countDownTimer_Tick(object sender, EventArgs e)
         {
-            if (timeLeft > 0) {
+            if (timeLeft > 0)
+            {
                 labelTimer.Text = timeLeft--.ToString();
             }
             else
             {
                 countDownTimer.Stop();
-                foreach (Control control in Controls) control.Enabled = false;
-                retryButton.Show();
+              
+                foreach (Control control in Controls)
+                {
+                    control.Enabled = false;
+                    control.Hide();
+                }
+                label.Location = new Point(workingWidth / 2 - label.Width, workingHeight / 3);
+                label.Text = "Score: " + overallScore.ToString();
+                label.Show();
                 retryButton.Enabled = true;
-                exitButton.Show();
                 exitButton.Enabled = true;
+                retryButton.Show();
+                exitButton.Show();
+                retryButton.BringToFront();
+                exitButton.BringToFront();
+                
             }
         }
+        private void retryButton_Click(object sender, EventArgs e)
+        {
+            Start();
+        }
+        private void exitButton_Click(object sender, EventArgs e)
+        {
+            //store everything on db and then..
+            Application.Exit();
+        }
+        #endregion
+        #region ux/ui
         private void OnResize(object sender, EventArgs e)
         {
             Height = (int)(Width*0.5625);
@@ -375,6 +409,8 @@ namespace planimals
             label.Text = s;
             await System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => { Invoke(new MethodInvoker(() => label.Text = "")); });
         }
+        #endregion
+        #region logic
         private void FixChainIndices(List<Card> chain)
         {
             for (int i = 0; i < chain.Count - 1; i++)
@@ -451,6 +487,7 @@ namespace planimals
                     if (valid)
                     {
                         Display($"+{CalcScore(chain.Count)} points\n");
+                        overallScore += CalcScore(chain.Count);
                         foreach (Card c in chain)
                         {
                             Controls.Remove(c);
@@ -499,6 +536,7 @@ namespace planimals
             }
             return counter;
         }
+        #endregion
         #region fancy card moving
         Func<Point, bool> InRectangle = p => p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
         private void MoveCards(object sender, EventArgs e)
