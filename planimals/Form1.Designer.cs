@@ -39,7 +39,6 @@ namespace planimals
             this.ClientSize = new System.Drawing.Size(1898, 1024);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Shown += new System.EventHandler(this.OnLoad);
             this.ResumeLayout(false);
         }
 

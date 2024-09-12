@@ -21,7 +21,11 @@ namespace planimals
     {
         ///logic
         //push and pull changes to Cards.mdf
-        //private string username;
+        private Button playButton;
+        private Button loginButton;
+
+        private bool loggedIn;
+
 
         public static List<(Card, Point, Point, long, long)> MoveList;
         private static Random rnd;
@@ -60,7 +64,14 @@ namespace planimals
         private Image chainButtonBack;
         private Rectangle chainButtonRectangle;
 
+        private List<Control> gameControls;
+        private List<Control> menuControls;
+        private List<Control> endControls;
+
         private System.Windows.Forms.Label label;
+
+        private Font largeFont;
+        private Font smallFont; 
 
         private int overallScore;
 
@@ -91,6 +102,10 @@ namespace planimals
             Text = "Planimals";
             StartPosition = FormStartPosition.CenterScreen;
 
+            largeFont = new Font("Arial", 28);
+            largeFont = new Font("Arial", 28);
+            smallFont = new Font("Arial", 14);
+
             //static size
             MinimizeBox = false;
             //
@@ -108,6 +123,23 @@ namespace planimals
             );
 
             BackColor = Color.Black;
+
+            playButton = new Button();
+            playButton.Text = "play";
+            playButton.BackColor = Color.White;
+            playButton.Size = new Size(50, 30);
+            playButton.Location = new Point(workingWidth / 2 - playButton.Width, workingHeight / 2 - playButton.Height - 10);
+            Controls.Add(playButton);
+            playButton.Click += PlayButton_Click;
+
+            loginButton = new Button();
+            loginButton.Text = "login";
+            loginButton.BackColor = Color.White;
+            loginButton.Size = new Size(50, 30);
+            loginButton.Location = new Point((workingWidth / 2 - loginButton.Width), workingHeight / 2 + 10);
+            Controls.Add(loginButton);
+            loginButton.Click += Login;
+
             retryButton = new PictureBox();
             retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
             retryButton.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -165,6 +197,21 @@ namespace planimals
             label.AutoSize = true;
             Controls.Add(label);
 
+            labelTimer = new System.Windows.Forms.Label();
+            labelTimer.ForeColor = Color.White;
+            labelTimer.Font = new Font(label.Font.FontFamily, 25);
+            labelTimer.Location = new Point((int)((double)workingWidth * 0.9), (int)((double)workingHeight / 10));
+            labelTimer.Size = new Size(100, 100);
+            Controls.Add(labelTimer);
+
+            foreach (Control control in Controls)
+            {
+                if (control.GetType() == typeof(System.Windows.Forms.Label))
+                {
+                    if (Width < 1920 || Height < 1080) control.Font = smallFont;
+                    else control.Font = largeFont;
+                }
+            }
             readySteadyGo = new PictureBox();
             readySteadyGo.Size = new Size(workingWidth / 10, workingWidth / 4);
             readySteadyGo.SizeMode = PictureBoxSizeMode.CenterImage;
@@ -177,6 +224,8 @@ namespace planimals
 
             #endregion
 
+            loggedIn = false;
+
             MoveList = new List<(Card, Point, Point, long, long)>();
             timer1 = new System.Windows.Forms.Timer();
             timer1.Tick += new EventHandler(MoveCards);
@@ -188,27 +237,40 @@ namespace planimals
             timeLeft = 10; //duration of one game, could be set by the user in settings
             countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
-            labelTimer = new System.Windows.Forms.Label();
-            labelTimer.ForeColor = Color.White;
-            labelTimer.Font = new Font(label.Font.FontFamily, 25);
-            labelTimer.Location = new Point((int)((double)workingWidth * 0.9), (int)((double)workingHeight / 10));
-            labelTimer.Size = new Size(100, 100);
-            Controls.Add(labelTimer);
-
             rnd = new Random();
             playerHand = new List<Card>();
             playerChain = new List<List<Card>>() { new List<Card>() { } };
 
             MouseClick += new MouseEventHandler(MouseLeftClick);
-            //Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
+            Paint += new PaintEventHandler(DrawFieldBorders);
             Resize += new EventHandler(OnResize);
+
+            gameControls = new List<Control>() { drawCardButton, chainButton};
+            menuControls = new List<Control>() { loginButton, playButton, retryButton };
+            endControls = new List<Control>() { retryButton, exitButton};
+
+            foreach (Control control in gameControls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
+            foreach (Control control in endControls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
         }
 
         #region flow
-        private void OnLoad(object sender, EventArgs e)
-        {
-            Start();
+        private void PlayButton_Click(object sender, EventArgs e) 
+        { 
+            foreach (Control control in menuControls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
+            Start(); 
         }
         private void Start()
         {
@@ -235,21 +297,15 @@ namespace planimals
             labelTimer.Text = "";
             overallScore = 0;
             label.Text = "";
-
-            foreach (Control control in Controls)
-            {
-                control.Enabled = false;
-                control.Hide();
-            }
             label.Location = new Point(workingWidth / 10, workingHeight / 20);
 
             readySteadyGo.Show();
             readySteadyGo.Enabled = true;
             readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
-            readySteadyGoTimer.Start();
 
             timer1.Start();
             sw1.Start();
+            readySteadyGoTimer.Start();
         }
         private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
@@ -259,9 +315,9 @@ namespace planimals
             {
                 readySteadyGoTimer.Stop();
                 Controls.Remove(readySteadyGo);
-                foreach (Control control in Controls) { control.Enabled = true; control.Show(); }
-                exitButton.Hide();
-                retryButton.Hide();
+                
+                foreach (Control control in gameControls) { control.Enabled = true; control.Show(); }
+                foreach (Control control in endControls) { control.Enabled= false; control.Hide(); }
                 countDownTimer.Start();
             }
         }
@@ -274,26 +330,26 @@ namespace planimals
             else
             {
                 countDownTimer.Stop();
-              
-                foreach (Control control in Controls)
-                {
-                    control.Enabled = false;
-                    control.Hide();
-                }
-                label.Location = new Point(workingWidth / 2 - label.Width, workingHeight / 3);
 
-                label.Text = "Score: " + overallScore.ToString();
-                label.Show();
-                retryButton.Enabled = true;
-                exitButton.Enabled = true;
-                retryButton.Show();
-                exitButton.Show();
                 
+                label.Location = new Point(workingWidth / 2 - label.Width, 100);
+                label.Font = largeFont;
+                label.Text = "Score: " + overallScore.ToString();
+                foreach (Control control in endControls)
+                {
+                    control.Enabled = true; 
+                    control.Show();
+                }
             }
             timeLeft--;
         }
         private void retryButton_Click(object sender, EventArgs e)
         {
+            foreach (Control control in menuControls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
             Start();
         }
         private void exitButton_Click(object sender, EventArgs e)
@@ -357,11 +413,7 @@ namespace planimals
         }
         public void DrawFieldBorders(object sender, PaintEventArgs e)
         {
-
-            using (Pen pen = new Pen(Color.White, 10.0f))
-            {
-                e.Graphics.DrawRectangle(pen, fieldRectangle);
-            }
+            using (Pen pen = new Pen(Color.White, 10.0f)) e.Graphics.DrawRectangle(pen, fieldRectangle);
         }
         private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
         {
@@ -413,6 +465,13 @@ namespace planimals
             await System.Threading.Tasks.Task.Delay(5000).ContinueWith( ///ooh getting rusty
                 _ => Invoke(new MethodInvoker(() => label.Text = ""))
             );
+        }
+        #endregion
+        #region login and stuff
+        private void Login(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.ShowDialog();
         }
         #endregion
         #region logic
