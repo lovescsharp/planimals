@@ -61,9 +61,9 @@ namespace planimals
         {
             base.OnPaint(e);
             //ControlPaint.DrawBorder(e.Graphics, e.ClipRectangle, Color.Black, ButtonBorderStyle.Solid);
-            using (Font myFont = new Font("Arial", 8))
+            using (Font myFont = new Font("Arial", 10))
             {
-                e.Graphics.DrawString(common_name, myFont, Brushes.Yellow, new Point(10, 14));
+                e.Graphics.DrawString(common_name, myFont, Brushes.Yellow, new Point(Width/10, Height/20));
             }
         }
 
@@ -88,10 +88,7 @@ namespace planimals
                         Drop(cardCurrentlyHeld);
                         Pick(this);
                     }
-                    else
-                    {
-                        Pick(this);
-                    }
+                    else Pick(this);
                 }
                 foreach (List<Card> ch in Form1.playerChain)
                 {
@@ -102,18 +99,11 @@ namespace planimals
                             Drop(cardCurrentlyHeld);
                             Pick(this);
                         }
-                        else
-                        {
-                            Pick(this);
-                        }
+                        else Pick(this);
                     }
                 }
             }
-            else
-            {
-                Drop(this);
-            }
-
+            else Drop(this);
         }
         public void cardRightClick(object sender, EventArgs e)
         {

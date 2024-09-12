@@ -36,7 +36,7 @@ namespace planimals
         private static PictureBox readySteadyGo;
         private int imageIndex = 3;
 
-        private static string currentDir = Environment.CurrentDirectory;
+        public static string currentDir = Environment.CurrentDirectory;
         private static string dbPath = currentDir + "\\cards.mdf";
         private static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
         private static readonly SqlConnection sqlConnection = new SqlConnection(connectionString);
@@ -200,7 +200,7 @@ namespace planimals
             playerChain = new List<List<Card>>() { new List<Card>() { } };
 
             MouseClick += new MouseEventHandler(MouseLeftClick);
-            Paint += new PaintEventHandler(DrawFieldBorders);
+            //Paint += new PaintEventHandler(DrawFieldBorders);
             MouseMove += DrawCardButton_MouseMove;
             Resize += new EventHandler(OnResize);
         }
@@ -231,8 +231,10 @@ namespace planimals
                 subchain.Clear();
             }
             imageIndex = 3;
-            timeLeft = 10;
+            timeLeft = 20;
+            labelTimer.Text = "";
             overallScore = 0;
+            label.Text = "";
 
             foreach (Control control in Controls)
             {
@@ -265,9 +267,9 @@ namespace planimals
         }
         private void countDownTimer_Tick(object sender, EventArgs e)
         {
-            if (timeLeft > 0)
+            if (timeLeft > -1)
             {
-                labelTimer.Text = timeLeft--.ToString();
+                labelTimer.Text = timeLeft.ToString();
             }
             else
             {
@@ -279,16 +281,16 @@ namespace planimals
                     control.Hide();
                 }
                 label.Location = new Point(workingWidth / 2 - label.Width, workingHeight / 3);
+
                 label.Text = "Score: " + overallScore.ToString();
                 label.Show();
                 retryButton.Enabled = true;
                 exitButton.Enabled = true;
                 retryButton.Show();
                 exitButton.Show();
-                retryButton.BringToFront();
-                exitButton.BringToFront();
                 
             }
+            timeLeft--;
         }
         private void retryButton_Click(object sender, EventArgs e)
         {
@@ -355,6 +357,7 @@ namespace planimals
         }
         public void DrawFieldBorders(object sender, PaintEventArgs e)
         {
+
             using (Pen pen = new Pen(Color.White, 10.0f))
             {
                 e.Graphics.DrawRectangle(pen, fieldRectangle);
@@ -407,7 +410,9 @@ namespace planimals
         }
         private async void Display(string s) {
             label.Text = s;
-            await System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => { Invoke(new MethodInvoker(() => label.Text = "")); });
+            await System.Threading.Tasks.Task.Delay(5000).ContinueWith( ///ooh getting rusty
+                _ => Invoke(new MethodInvoker(() => label.Text = ""))
+            );
         }
         #endregion
         #region logic
