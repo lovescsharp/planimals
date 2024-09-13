@@ -42,7 +42,7 @@ namespace planimals
 
         public static string currentDir = Environment.CurrentDirectory;
         private static string dbPath = currentDir + "\\cards.mdf";
-        private static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
+        public static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
         private static readonly SqlConnection sqlConnection = new SqlConnection(connectionString);
 
         public static int workingHeight;
@@ -99,7 +99,7 @@ namespace planimals
 
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MinimumSize = new Size(1120, 620);
-            Text = "Planimals";
+            Text = "planimals";
             StartPosition = FormStartPosition.CenterScreen;
 
             largeFont = new Font("Arial", 28);
@@ -163,11 +163,10 @@ namespace planimals
             drawCardButton.Location = new Point(
                 drawCardButton.Width - workingHeight / 100 * 5,
                 workingHeight / 2 - drawCardButton.Height / 2);
-            drawCardRectangle = new Rectangle(
+            Point initPos = new Point(
                 drawCardButton.Width - workingHeight / 100 * 5,
-                workingHeight / 2 - drawCardButton.Height / 2,
-                workingHeight / 8,
-                workingWidth / 10);
+                workingHeight / 2 - drawCardButton.Height / 2);
+            drawCardRectangle = new Rectangle(drawCardButton.Location.X, drawCardButton.Location.Y, drawCardButton.Width, drawCardButton.Height);
             drawCardButton.Image = drawCardButtonBack;
             Controls.Add(drawCardButton);
             drawCardButton.Click += new EventHandler(DrawCard);
@@ -261,7 +260,6 @@ namespace planimals
                 control.Hide();
             }
         }
-
         #region flow
         private void PlayButton_Click(object sender, EventArgs e) 
         { 
@@ -340,6 +338,21 @@ namespace planimals
                     control.Enabled = true; 
                     control.Show();
                 }
+                foreach(Control control in gameControls)
+                {
+                    control.Enabled= false;
+                }
+                foreach (Card c in playerHand)
+                {
+                    c.Enabled = false;
+                }
+                foreach (List<Card> subchain in playerChain)
+                {
+                    foreach (Card card in subchain)
+                    {
+                        card.Enabled = false;
+                    }
+                }
             }
             timeLeft--;
         }
@@ -353,6 +366,11 @@ namespace planimals
             foreach (Control control in endControls)
             {
                 control.Enabled = false;
+                control.Hide();
+            }
+            foreach(Control control in gameControls)
+            {
+                control.Enabled= false;
                 control.Hide();
             }
             Start();
@@ -420,51 +438,6 @@ namespace planimals
         {
             using (Pen pen = new Pen(Color.White, 10.0f)) e.Graphics.DrawRectangle(pen, fieldRectangle);
         }
-        private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (MousePosition.X < drawCardRectangle.Right && MousePosition.X > drawCardRectangle.Left && MousePosition.Y < drawCardRectangle.Bottom && MousePosition.Y > drawCardRectangle.Top)
-            {
-                drawCardButton.Width = workingHeight / 8 + 5;
-                drawCardButton.Height = workingWidth / 10 + 5;
-            }
-            else
-            {
-                drawCardButton.Width = workingHeight / 8;
-                drawCardButton.Height = workingWidth / 10;
-            }
-        }
-        public void DrawCard(object sender, EventArgs e)
-        {
-            if (playerHand.Count + Count(playerChain) < 15)
-            {
-                string sciname = GetRandomScientificName();
-                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-                {
-                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
-                    sqlConnection.Open();
-                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var cname = reader["Common_name"].ToString();
-                            var desc = reader["Description"].ToString();
-                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
-                            int hierarchy = (int)reader["Hierarchy"];
-                            var habitat = reader["Habitat"].ToString();
-                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
-                            playerHand.Add(c);
-                            Controls.Add(c);
-                        }
-                    }
-                    sqlConnection.Close();
-                }
-            }
-            else
-            {
-                Display("Cannot hold more than 15 cards.");
-            }
-
-        }
         private async void Display(string s) {
             label.Text = s;
             await System.Threading.Tasks.Task.Delay(5000).ContinueWith( ///ooh getting rusty
@@ -520,13 +493,11 @@ namespace planimals
         {
             bool valid = true;
             string s = "";
-            foreach (Card c in chain) { s += $"{c.common_name}\n"; }
-            //MessageBox.Show(s);
+            foreach (Card c in chain) s += $"{c.common_name}\n";
             FixChainIndices(chain);
-            //MessageBox.Show(s);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                if (chain.Count < 2) { Display("The chain must consist of at least two organisms."); return; }
+                if (chain.Count < 2) { Display("the chain must consist of at least two organisms."); return; }
                 else
                 {
                     sqlConnection.Open();
@@ -604,6 +575,55 @@ namespace planimals
                 counter += subchain.Count;
             }
             return counter;
+        }
+        private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point initPos = new Point(drawCardButton.Width - workingHeight / 100 * 5,
+                workingHeight / 2 - drawCardButton.Height / 2);
+            if (MousePosition.X < drawCardRectangle.Right && MousePosition.X > drawCardRectangle.Left && MousePosition.Y < drawCardRectangle.Bottom && MousePosition.Y > drawCardRectangle.Top)
+            {
+                drawCardButton.Location = new Point(initPos.X - 5, initPos.Y - 5);
+                drawCardButton.Width = workingHeight / 8 + 5;
+                drawCardButton.Height = workingWidth / 10 + 5;
+            }
+            else
+            {
+                drawCardButton.Location = new Point(initPos.X + 5, initPos.Y + 5);
+                drawCardButton.Width = workingHeight / 8;
+                drawCardButton.Height = workingWidth / 10;
+            }
+        }
+        public void DrawCard(object sender, EventArgs e)
+        {
+            if (playerHand.Count + Count(playerChain) < 15)
+            {
+                string sciname = GetRandomScientificName();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
+                    sqlConnection.Open();
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var cname = reader["Common_name"].ToString();
+                            var desc = reader["Description"].ToString();
+                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
+                            int hierarchy = (int)reader["Hierarchy"];
+                            var habitat = reader["Habitat"].ToString();
+                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
+                            playerHand.Add(c);
+                            Controls.Add(c);
+                        }
+                    }
+                    sqlConnection.Close();
+                }
+            }
+            else
+            {
+                Display("cannot hold more than 15 cards");
+            }
+
         }
         #endregion
         #region fancy card moving

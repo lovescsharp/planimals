@@ -19,41 +19,66 @@ namespace planimals
         private Button signUpButton;
         private Button cancelButton;
 
-        private TextBox username;
-        private TextBox password;
+        private TextBox usernameInput;
+        private TextBox passwordInput;
 
         public Form2()
         {
             InitializeComponent();
 
-            workingHeight = Form1.workingHeight / 5;
-            workingWidth = Form1.workingWidth / 8;
+            FormBorderStyle = FormBorderStyle.Fixed3D;
+            MaximizeBox = false;
+            MinimizeBox = false;
+
+            Width = Screen.PrimaryScreen.WorkingArea.Width / 5;
+            Height = Screen.PrimaryScreen.WorkingArea.Height / 5;
+
+            workingHeight = ClientRectangle.Height;
+            workingWidth = ClientRectangle.Width;   
             
-            username = new TextBox();
-            username.Location = new Point(workingWidth / 20, workingHeight / 4 + 5);
-            
-            password = new TextBox();
-            password.Location = new Point(workingWidth / 20, workingHeight / 4 + 15);
-            //password.PasswordChar = '*';
+            usernameInput = new TextBox();
+            usernameInput.Location = new Point(workingWidth / 20, workingHeight / 4 + 5);
+            usernameInput.Size = new Size(workingWidth - 2*(workingWidth / 20), 25);
+            Label l1 = new Label();
+            l1.Location = new Point(usernameInput.Location.X, usernameInput.Location.Y - 15);
+            l1.Text = "username:";
+            l1.ForeColor = Color.White;
+            Controls.Add(usernameInput);
+            Controls.Add(l1);
+
+
+            passwordInput = new TextBox();
+            passwordInput.Location = new Point(workingWidth / 20, workingHeight / 4 + 50);
+            //passwordInput.passwordChar = '*';
+            passwordInput.Size = new Size(workingWidth - 2*(workingWidth / 20), 25);
+            Label l2 = new Label();
+            l2.Location = new Point(passwordInput.Location.X, passwordInput.Location.Y - 15);
+            l2.Text = "password:";
+            l2.ForeColor = Color.White;
+            Controls.Add(passwordInput);
+            Controls.Add(l2);
 
             loginButton = new Button();
-            loginButton.Size = new Size(20, 5);
-            loginButton.Location = new Point(workingWidth - 2*loginButton.Width - 2, workingHeight - 2);
+            loginButton.Size = new Size(60, 25);
+            loginButton.Location = new Point(workingWidth - 2*loginButton.Width - 5, workingHeight - loginButton.Height - 5);
             loginButton.Text = "log in";
+            loginButton.BackColor = Color.White;
             Controls.Add(loginButton);
             loginButton.Click += Login;
 
             cancelButton = new Button();
-            cancelButton.Size = new Size(20, 5);
-            cancelButton.Location = new Point(workingWidth - cancelButton.Width - 2, workingHeight -2);
+            cancelButton.Size = new Size(60, 25);
+            cancelButton.Location = new Point(workingWidth - cancelButton.Width - 5, workingHeight - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
+            cancelButton.BackColor = Color.White;
             Controls.Add(cancelButton);
             cancelButton.Click += Cancel;
 
             signUpButton = new Button();
-            signUpButton.Size = new Size(30, 5);
+            signUpButton.Size = new Size(90, 25);
             signUpButton.Location = new Point(5, workingHeight - signUpButton.Height - 5);
             signUpButton.Text = "create account";
+            signUpButton.BackColor = Color.White;
             Controls.Add(signUpButton);
             signUpButton.Click += SignUp;
 
@@ -64,7 +89,6 @@ namespace planimals
         {
             //login logic
             //pass username to form1 at the end
-
 
 
         }
