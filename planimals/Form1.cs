@@ -247,7 +247,7 @@ namespace planimals
             Resize += new EventHandler(OnResize);
 
             gameControls = new List<Control>() { drawCardButton, chainButton};
-            menuControls = new List<Control>() { loginButton, playButton, retryButton };
+            menuControls = new List<Control>() { loginButton, playButton };
             endControls = new List<Control>() { retryButton, exitButton};
 
             foreach (Control control in gameControls)
@@ -293,7 +293,7 @@ namespace planimals
                 subchain.Clear();
             }
             imageIndex = 3;
-            timeLeft = 20;
+            timeLeft = 1;
             labelTimer.Text = "";
             overallScore = 0;
             label.Text = "";
@@ -346,6 +346,11 @@ namespace planimals
         private void retryButton_Click(object sender, EventArgs e)
         {
             foreach (Control control in menuControls)
+            {
+                control.Enabled = false;
+                control.Hide();
+            }
+            foreach (Control control in endControls)
             {
                 control.Enabled = false;
                 control.Hide();
