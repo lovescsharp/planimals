@@ -23,6 +23,7 @@ namespace planimals
         //push and pull changes to Cards.mdf
         private Button playButton;
         private Button loginButton;
+        private Button exitButton;
 
         private bool loggedIn;
 
@@ -54,7 +55,11 @@ namespace planimals
         public static Rectangle cardRectangle;
 
         private PictureBox retryButton;
-        private PictureBox exitButton;
+        private PictureBox goToMenuButton;
+        private PictureBox goToMenuInGameButton;
+
+        private Button yesButton;
+        private Button noButton;
 
         private PictureBox drawCardButton;
         private Image drawCardButtonBack;
@@ -67,6 +72,7 @@ namespace planimals
         private List<Control> gameControls;
         private List<Control> menuControls;
         private List<Control> endControls;
+        private List<Control> youSureWannaQuitControls;
 
         private System.Windows.Forms.Label label;
 
@@ -128,7 +134,7 @@ namespace planimals
             playButton.Text = "play";
             playButton.BackColor = Color.White;
             playButton.Size = new Size(50, 30);
-            playButton.Location = new Point(workingWidth / 2 - playButton.Width, workingHeight / 2 - playButton.Height - 10);
+            playButton.Location = new Point(workingWidth / 2 - playButton.Width / 2, workingHeight / 2 - playButton.Height / 2 - 30);
             Controls.Add(playButton);
             playButton.Click += PlayButton_Click;
 
@@ -136,9 +142,17 @@ namespace planimals
             loginButton.Text = "login";
             loginButton.BackColor = Color.White;
             loginButton.Size = new Size(50, 30);
-            loginButton.Location = new Point((workingWidth / 2 - loginButton.Width), workingHeight / 2 + 10);
+            loginButton.Location = new Point(workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - loginButton.Height / 2);
             Controls.Add(loginButton);
             loginButton.Click += Login;
+
+            exitButton = new Button();
+            exitButton.Text = "exit";
+            exitButton.BackColor = Color.White;
+            exitButton.Size = new Size(50, 30);
+            exitButton.Location = new Point(workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - exitButton.Height / 2 + 30);
+            Controls.Add(exitButton);
+            exitButton.Click += Exit;
 
             retryButton = new PictureBox();
             retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
@@ -148,13 +162,37 @@ namespace planimals
             retryButton.Click += retryButton_Click;
             Controls.Add(retryButton);
 
-            exitButton = new PictureBox();
-            exitButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
-            exitButton.SizeMode = PictureBoxSizeMode.StretchImage;
-            exitButton.Size = new Size(workingWidth / 10, workingWidth / 8);
-            exitButton.Location = new Point(workingWidth / 2 + exitButton.Width, workingHeight / 2 - exitButton.Height / 2);
-            exitButton.Click += exitButton_Click;
-            Controls.Add(exitButton);
+            goToMenuButton = new PictureBox();
+            goToMenuButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
+            goToMenuButton.SizeMode = PictureBoxSizeMode.StretchImage;
+            goToMenuButton.Size = new Size(workingWidth / 10, workingWidth / 8);
+            goToMenuButton.Location = new Point(workingWidth / 2 + goToMenuButton.Width, workingHeight / 2 - goToMenuButton.Height / 2);
+            goToMenuButton.Click += goToMenuButton_Click;
+            Controls.Add(goToMenuButton);
+
+            goToMenuInGameButton = new PictureBox();
+            goToMenuInGameButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
+            goToMenuInGameButton.SizeMode = PictureBoxSizeMode.StretchImage;
+            goToMenuInGameButton.Size = new Size(workingWidth / 20, workingWidth / 16);
+            goToMenuInGameButton.Location = new Point(5, 5);
+            goToMenuInGameButton.Click += goToMenuInGameButton_Click;
+            Controls.Add(goToMenuInGameButton);
+
+            yesButton = new Button();
+            yesButton.Text = "yes";
+            yesButton.BackColor = Color.White;
+            yesButton.Size = new Size(50, 30);
+            yesButton.Location = new Point(workingWidth / 2 + yesButton.Width / 2, workingHeight/2 - yesButton.Height);
+            yesButton.Click += yesButton_Click;
+            Controls.Add(yesButton);
+
+            noButton = new Button();
+            noButton.Text = "no";
+            noButton.BackColor = Color.White;
+            noButton.Size = new Size(50, 30);
+            noButton.Location = new Point(workingWidth / 2  - noButton.Width - noButton.Width / 2, workingHeight/2 - noButton.Height);
+            noButton.Click += noButton_Click;
+            Controls.Add(noButton);
 
             drawCardButton = new PictureBox();
             drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
@@ -233,7 +271,6 @@ namespace planimals
 
             countDownTimer = new System.Windows.Forms.Timer();
             countDownTimer.Interval = 1000;
-            timeLeft = 10; //duration of one game, could be set by the user in settings
             countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
             rnd = new Random();
@@ -245,9 +282,10 @@ namespace planimals
             Paint += new PaintEventHandler(DrawFieldBorders);
             Resize += new EventHandler(OnResize);
 
-            gameControls = new List<Control>() { drawCardButton, chainButton};
-            menuControls = new List<Control>() { loginButton, playButton };
-            endControls = new List<Control>() { retryButton, exitButton};
+            gameControls = new List<Control>() { drawCardButton, chainButton, goToMenuInGameButton };
+            menuControls = new List<Control>() { loginButton, playButton, exitButton };
+            endControls = new List<Control>() { retryButton, goToMenuButton};
+            youSureWannaQuitControls = new List<Control>() { yesButton, noButton };
 
             foreach (Control control in gameControls)
             {
@@ -258,6 +296,11 @@ namespace planimals
             {
                 control.Enabled = false;
                 control.Hide();
+            }
+            foreach (Control control in youSureWannaQuitControls)
+            {
+                control.Hide();
+                control.Enabled = false;
             }
         }
         #region flow
@@ -291,15 +334,23 @@ namespace planimals
                 subchain.Clear();
             }
             imageIndex = 3;
-            timeLeft = 1;
+            timeLeft = 40;
+            labelTimer.Show();
             labelTimer.Text = "";
             overallScore = 0;
+            label.Show();
             label.Text = "";
             label.Location = new Point(workingWidth / 10, workingHeight / 20);
 
             readySteadyGo.Show();
-            readySteadyGo.Enabled = true;
-            readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+            readySteadyGo.Enabled = true; try
+            {
+                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to load image: " + ex.Message);
+            }
 
             timer1.Start();
             sw1.Start();
@@ -308,12 +359,12 @@ namespace planimals
         private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
             imageIndex--;
+
             if (imageIndex > 0) readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
             else
             {
                 readySteadyGoTimer.Stop();
                 Controls.Remove(readySteadyGo);
-                
                 foreach (Control control in gameControls) { control.Enabled = true; control.Show(); }
                 foreach (Control control in endControls) { control.Enabled= false; control.Hide(); }
                 countDownTimer.Start();
@@ -328,8 +379,8 @@ namespace planimals
             else
             {
                 countDownTimer.Stop();
+                labelTimer.Hide();
 
-                
                 label.Location = new Point(workingWidth / 2 - label.Width, 100);
                 label.Font = largeFont;
                 label.Text = "Score: " + overallScore.ToString();
@@ -375,11 +426,52 @@ namespace planimals
             }
             Start();
         }
-        private void exitButton_Click(object sender, EventArgs e)
+        private void goToMenuButton_Click(object sender, EventArgs e)
         {
-            //store everything on db and then..
-            Application.Exit();
+            label.Hide();
+            labelTimer.Hide();
+            foreach (Control control in gameControls) { control.Enabled = false; control.Hide(); }
+            foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
+            foreach (Control control in menuControls) { control.Enabled = true; control.Show(); }
+            foreach (Card c in playerHand)
+            {
+                c.Hide();
+                c.Image.Dispose();
+                c.Dispose();
+            }
+            playerHand.Clear();
+            foreach (List<Card> subchain in playerChain)
+            {
+                foreach (Card c in subchain)
+                {
+                    c.Hide();
+                    c.Image.Dispose();
+                    c.Dispose();
+                }
+                subchain.Clear();
+            }
+            foreach (Control control in youSureWannaQuitControls){ control.Hide(); control.Enabled = false; }
         }
+        private void goToMenuInGameButton_Click(object sender, EventArgs e) 
+        {
+            countDownTimer.Stop();
+            foreach (Control control in youSureWannaQuitControls)
+            {
+                control.Show();
+                control.Enabled = true;
+            }
+        }
+        private void yesButton_Click(object sender, EventArgs e) { goToMenuButton_Click(sender, e); }
+        private void noButton_Click(object sender, EventArgs e)
+        {
+            foreach (Control control in youSureWannaQuitControls)
+            {
+                control.Hide();
+                control.Enabled = false;
+            }
+            countDownTimer.Start();
+        }
+        private void Exit(object sender, EventArgs e) { Close(); }
         #endregion
         #region ux/ui
         private void OnResize(object sender, EventArgs e)

@@ -30,8 +30,8 @@ namespace planimals
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Width = Screen.PrimaryScreen.WorkingArea.Width / 5;
-            Height = Screen.PrimaryScreen.WorkingArea.Height / 5;
+            Width = 400;
+            Height = 200;
 
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;   
@@ -60,7 +60,7 @@ namespace planimals
 
             loginButton = new Button();
             loginButton.Size = new Size(60, 25);
-            loginButton.Location = new Point(workingWidth - 2*loginButton.Width - 5, workingHeight - loginButton.Height - 5);
+            loginButton.Location = new Point(workingWidth - loginButton.Width - 5, workingHeight - loginButton.Height - 5);
             loginButton.Text = "log in";
             loginButton.BackColor = Color.White;
             Controls.Add(loginButton);
@@ -68,7 +68,7 @@ namespace planimals
 
             cancelButton = new Button();
             cancelButton.Size = new Size(60, 25);
-            cancelButton.Location = new Point(workingWidth - cancelButton.Width - 5, workingHeight - cancelButton.Height - 5);
+            cancelButton.Location = new Point(5, workingHeight - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
             cancelButton.BackColor = Color.White;
             Controls.Add(cancelButton);
@@ -76,7 +76,7 @@ namespace planimals
 
             signUpButton = new Button();
             signUpButton.Size = new Size(90, 25);
-            signUpButton.Location = new Point(5, workingHeight - signUpButton.Height - 5);
+            signUpButton.Location = new Point(workingWidth - 2 * signUpButton.Width - 5, workingHeight - signUpButton.Height - 5);
             signUpButton.Text = "create account";
             signUpButton.BackColor = Color.White;
             Controls.Add(signUpButton);
@@ -84,22 +84,16 @@ namespace planimals
 
             BackColor = Color.Black;
         }
-
         private void Login(object sender, EventArgs e)
         {
-            //login logic
-            //pass username to form1 at the end
-
-
+            
         }
-        private void Cancel(object sender, EventArgs e) 
-        { 
-            this.Close();
-        }
-
+        private void Cancel(object sender, EventArgs e) { Close(); }
         private void SignUp(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            this.Close();
+            Form3 form3 = new Form3();
+            form3.ShowDialog();
         }
     }
 }
