@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -86,7 +87,10 @@ namespace planimals
         }
         private void Login(object sender, EventArgs e)
         {
-            
+            using (SqlConnection sqlConnection = new SqlConnection(Form1.connectionString))
+            {
+
+            }
         }
         private void Cancel(object sender, EventArgs e) { Close(); }
         private void SignUp(object sender, EventArgs e)
