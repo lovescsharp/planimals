@@ -26,7 +26,7 @@ namespace planimals
         private Button exitButton;
 
         private bool loggedIn;
-
+        public string username;
 
         public static List<(Card, Point, Point, long, long)> MoveList;
         private static Random rnd;
@@ -262,6 +262,7 @@ namespace planimals
             #endregion
 
             loggedIn = false;
+            username = String.Empty;
 
             MoveList = new List<(Card, Point, Point, long, long)>();
             timer1 = new System.Windows.Forms.Timer();

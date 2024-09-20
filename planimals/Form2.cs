@@ -89,7 +89,23 @@ namespace planimals
         {
             using (SqlConnection sqlConnection = new SqlConnection(Form1.connectionString))
             {
+                SqlCommand cmd = new SqlCommand("SELECT Count(*) FROM Users WHERE Username='@username' AND Password='@password'", sqlConnection);
+    
+                SqlParameter paramUser = new SqlParameter();
+                paramUser.ParameterName = "@user";
+                paramUser.Value = usernameInput.Text;
+                cmd.Parameters.Add(paramUser);
 
+                SqlParameter paramPasswd = new SqlParameter();
+                paramPasswd.ParameterName = "@password";
+                paramPasswd.Value = Hash(passwordInput.Text);
+                cmd.Parameters.Add(paramPasswd);
+
+                int b = (int) cmd.ExecuteScalar();
+                if (b == 1)
+                {
+                    //log in, and assign username in form1
+                }
             }
         }
         private void Cancel(object sender, EventArgs e) { Close(); }
@@ -98,6 +114,10 @@ namespace planimals
             this.Close();
             Form3 form3 = new Form3();
             form3.ShowDialog();
+        }
+        public Hash(string password)
+        {
+            return password.Length.ToString();
         }
     }
 }
