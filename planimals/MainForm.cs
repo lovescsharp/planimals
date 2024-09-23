@@ -341,7 +341,7 @@ namespace planimals
                 subchain.Clear();
             }
             imageIndex = 3;
-            timeLeft = 10;
+            timeLeft = 40;
             labelTimer.Show();
             labelTimer.Text = "";
             overallScore = 0;
@@ -556,13 +556,11 @@ namespace planimals
             else
             {
                 username = "";
+                stats.Text = "";
                 loginButton.Text = "log in";
             }
         }
-        private void UpdateStatsLabel()
-        {
-            stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
-        }
+        private void UpdateStatsLabel() => stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
         #endregion
         #region logic
         private void FixChainIndices(List<Card> chain)
@@ -675,7 +673,16 @@ namespace planimals
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd = new SqlCommand("WITH NumberedRows AS( SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms ) SELECT Scientific_name FROM NumberedRows WHERE RowNum = 5;");
+                SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS( SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms ) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {deck.Pop()};", sqlConnection);
+                sqlConnection.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        return reader["Scientific_name"].ToString();
+                    }
+                }
+                sqlConnection.Close();
             }
             return null;
         }
@@ -710,6 +717,7 @@ namespace planimals
                 string sciname = GetScientificNameFromDeck();
                 using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
+                    SqlCommand updateDeck = new SqlCommand("UPDATE P")
                     SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
                     sqlConnection.Open();
                     using (SqlDataReader reader = sqlCommand.ExecuteReader())
