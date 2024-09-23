@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Windows;
-using System.Windows.Documents;
+using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 namespace planimals
@@ -25,19 +17,19 @@ namespace planimals
         private Button loginButton;
         private Button exitButton;
 
-        private bool loggedIn;
-        public string username;
+        public static string username;
+        public static int totalPoints;
+        public static Label stats;
 
         public static List<(Card, Point, Point, long, long)> MoveList;
-        private static Random rnd;
-        private System.Windows.Forms.Timer timer1;
+        private static Random rnd;Timer timer1;
         private Stopwatch sw1;
 
-        private System.Windows.Forms.Timer countDownTimer;
+        private Timer countDownTimer;
         private int timeLeft;
-        private System.Windows.Forms.Label labelTimer;
+        private Label labelTimer;
 
-        private System.Windows.Forms.Timer readySteadyGoTimer;
+        private Timer readySteadyGoTimer;
         private static PictureBox readySteadyGo;
         private int imageIndex = 3;
 
@@ -74,7 +66,7 @@ namespace planimals
         private List<Control> endControls;
         private List<Control> youSureWannaQuitControls;
 
-        private System.Windows.Forms.Label label;
+        private Label label;
 
         private Font largeFont;
         private Font smallFont; 
@@ -130,6 +122,13 @@ namespace planimals
 
             BackColor = Color.Black;
 
+            username = "";
+            stats = new Label();
+            stats.Size = new Size(250, 100);
+            stats.Location = new Point(workingWidth - 300, 10);
+            stats.ForeColor = Color.White;
+            Controls.Add(stats);
+
             playButton = new Button();
             playButton.Text = "play";
             playButton.BackColor = Color.White;
@@ -157,8 +156,8 @@ namespace planimals
             retryButton = new PictureBox();
             retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
             retryButton.SizeMode = PictureBoxSizeMode.StretchImage;
-            retryButton.Size = new Size(workingWidth  / 10, workingWidth / 10);
-            retryButton.Location = new Point(workingWidth / 2 - retryButton.Width / 2, workingHeight / 2 - retryButton.Height/2);
+            retryButton.Size = new Size(workingWidth / 10, workingWidth / 10);
+            retryButton.Location = new Point(workingWidth / 2 - retryButton.Width / 2, workingHeight / 2 - retryButton.Height / 2);
             retryButton.Click += retryButton_Click;
             Controls.Add(retryButton);
 
@@ -182,7 +181,7 @@ namespace planimals
             yesButton.Text = "yes";
             yesButton.BackColor = Color.White;
             yesButton.Size = new Size(50, 30);
-            yesButton.Location = new Point(workingWidth / 2 + yesButton.Width / 2, workingHeight/2 - yesButton.Height);
+            yesButton.Location = new Point(workingWidth / 2 + yesButton.Width / 2, workingHeight / 2 - yesButton.Height);
             yesButton.Click += yesButton_Click;
             Controls.Add(yesButton);
 
@@ -190,7 +189,7 @@ namespace planimals
             noButton.Text = "no";
             noButton.BackColor = Color.White;
             noButton.Size = new Size(50, 30);
-            noButton.Location = new Point(workingWidth / 2  - noButton.Width - noButton.Width / 2, workingHeight/2 - noButton.Height);
+            noButton.Location = new Point(workingWidth / 2 - noButton.Width - noButton.Width / 2, workingHeight / 2 - noButton.Height);
             noButton.Click += noButton_Click;
             Controls.Add(noButton);
 
@@ -260,17 +259,14 @@ namespace planimals
             readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
 
             #endregion
-
-            loggedIn = false;
-            username = String.Empty;
-
+            #region backs
             MoveList = new List<(Card, Point, Point, long, long)>();
-            timer1 = new System.Windows.Forms.Timer();
+            timer1 = new Timer();
             timer1.Tick += new EventHandler(MoveCards);
             timer1.Interval = 10;
             sw1 = new Stopwatch();
 
-            countDownTimer = new System.Windows.Forms.Timer();
+            countDownTimer = new Timer();
             countDownTimer.Interval = 1000;
             countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
@@ -284,7 +280,7 @@ namespace planimals
             Resize += new EventHandler(OnResize);
 
             gameControls = new List<Control>() { drawCardButton, chainButton, goToMenuInGameButton };
-            menuControls = new List<Control>() { loginButton, playButton, exitButton };
+            menuControls = new List<Control>() { loginButton, playButton, exitButton, stats };
             endControls = new List<Control>() { retryButton, goToMenuButton};
             youSureWannaQuitControls = new List<Control>() { yesButton, noButton };
 
@@ -303,6 +299,7 @@ namespace planimals
                 control.Hide();
                 control.Enabled = false;
             }
+            #endregion
         }
         #region flow
         private void PlayButton_Click(object sender, EventArgs e) 
@@ -381,6 +378,7 @@ namespace planimals
             {
                 countDownTimer.Stop();
                 labelTimer.Hide();
+                if (username != "") UpdateStatsLabel();
 
                 label.Location = new Point(workingWidth / 2 - label.Width, 100);
                 label.Font = largeFont;
@@ -451,7 +449,7 @@ namespace planimals
                 }
                 subchain.Clear();
             }
-            foreach (Control control in youSureWannaQuitControls){ control.Hide(); control.Enabled = false; }
+            foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
         }
         private void goToMenuInGameButton_Click(object sender, EventArgs e) 
         {
@@ -544,6 +542,10 @@ namespace planimals
             Form2 form2 = new Form2();
             form2.ShowDialog();
         }
+        private void UpdateStatsLabel()
+        {
+            stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
+        }
         #endregion
         #region logic
         private void FixChainIndices(List<Card> chain)
@@ -621,6 +623,11 @@ namespace planimals
                     {
                         Display($"+{CalcScore(chain.Count)} points\n");
                         overallScore += CalcScore(chain.Count);
+                        if (username != "")
+                        {
+                            totalPoints += CalcScore(chain.Count);
+                            SqlCommand cmd = new SqlCommand($"UPDATE Player SET Points={totalPoints} WHERE Username='{username}'", sqlConnection);
+                        }
                         foreach (Card c in chain)
                         {
                             Controls.Remove(c);
