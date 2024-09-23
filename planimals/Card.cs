@@ -18,8 +18,8 @@ namespace planimals
         public int hierarchy;
         private string habitat;
 
-        public static int pictureBoxWidth = Form1.workingHeight / 8;
-        public static int pictureBoxHeight = Form1.workingWidth / 10;
+        public static int pictureBoxWidth = MainForm.workingHeight / 8;
+        public static int pictureBoxHeight = MainForm.workingWidth / 10;
 
         public static MouseButtons lastMouseButtonUp = MouseButtons.None;
 
@@ -81,7 +81,7 @@ namespace planimals
         {
             if (!Picked)
             {
-                foreach (Card cardCurrentlyHeld in Form1.playerHand)
+                foreach (Card cardCurrentlyHeld in MainForm.playerHand)
                 {
                     if (cardCurrentlyHeld.Picked)
                     {
@@ -90,7 +90,7 @@ namespace planimals
                     }
                     else Pick(this);
                 }
-                foreach (List<Card> ch in Form1.playerChain)
+                foreach (List<Card> ch in MainForm.playerChain)
                 {
                     foreach (Card cardCurrentlyHeld in ch)
                     {
@@ -125,7 +125,7 @@ namespace planimals
         }
 
         public static bool InRectangle(Point p) {
-            return p.X < Form1.fieldRectangle.Right && p.X > Form1.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > Form1.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < Form1.fieldRectangle.Bottom;
+            return p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
         }
     }
 
