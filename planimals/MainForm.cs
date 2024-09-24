@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Windows.Forms;
 
 namespace planimals
@@ -20,6 +21,7 @@ namespace planimals
         //      ( ) : chain(s)
         //      ( ) : hand
         private Button playButton;
+        public static Button continueButton;
         public static Button loginButton;
         private Button exitButton;
 
@@ -28,7 +30,7 @@ namespace planimals
         public static Label stats;
 
         public static List<(Card, Point, Point, long, long)> MoveList;
-        private static Random rnd;Timer timer1;
+        private static Random rnd; Timer timer1;
         private Stopwatch sw1;
 
         private Timer countDownTimer;
@@ -48,6 +50,7 @@ namespace planimals
         public static int workingWidth;
 
         public static Stack<int> deck;
+        private StringBuilder sb;
         public static List<Card> playerHand;
         public static List<List<Card>> playerChain;
         public static Rectangle fieldRectangle;
@@ -59,6 +62,7 @@ namespace planimals
 
         private Button yesButton;
         private Button noButton;
+        private Label youSureWannaQuitLabel;
 
         private PictureBox drawCardButton;
         private Image drawCardButtonBack;
@@ -76,7 +80,7 @@ namespace planimals
         private Label label;
 
         private Font largeFont;
-        private Font smallFont; 
+        private Font smallFont;
 
         private int overallScore;
 
@@ -101,7 +105,6 @@ namespace planimals
             */
             #endregion
             #region UI
-
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MinimumSize = new Size(1120, 620);
             Text = "planimals";
@@ -140,9 +143,17 @@ namespace planimals
             playButton.Text = "play";
             playButton.BackColor = Color.White;
             playButton.Size = new Size(50, 30);
-            playButton.Location = new Point(workingWidth / 2 - playButton.Width / 2, workingHeight / 2 - playButton.Height / 2 - 30);
+            playButton.Location = new Point(workingWidth / 2 - playButton.Width / 2, workingHeight / 2 - playButton.Height / 2 - 60);
             Controls.Add(playButton);
             playButton.Click += PlayButton_Click;
+
+            continueButton = new Button();
+            continueButton.Text = "load game";
+            continueButton.BackColor = Color.White;
+            continueButton.Size = new Size(50, 30);
+            continueButton.Location = new Point(workingWidth / 2 - playButton.Width / 2, workingHeight / 2 - playButton.Height / 2 - 30);
+            Controls.Add(continueButton);
+            continueButton.Click += continueButton_Click;
 
             loginButton = new Button();
             loginButton.Text = "log in";
@@ -200,6 +211,13 @@ namespace planimals
             noButton.Click += noButton_Click;
             Controls.Add(noButton);
 
+            youSureWannaQuitLabel = new Label();
+            youSureWannaQuitLabel.Size = new Size(400, 45);
+            youSureWannaQuitLabel.Location = new Point(workingWidth / 20 - 200, workingHeight / 3);
+            youSureWannaQuitLabel.Text = "Are you sure you want to quit?";
+            youSureWannaQuitLabel.ForeColor = Color.White;
+            Controls.Add(youSureWannaQuitLabel);
+
             drawCardButton = new PictureBox();
             drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
             drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -240,7 +258,7 @@ namespace planimals
             label.AutoSize = true;
             Controls.Add(label);
 
-            labelTimer = new System.Windows.Forms.Label();
+            labelTimer = new Label();
             labelTimer.ForeColor = Color.White;
             labelTimer.Font = new Font(label.Font.FontFamily, 25);
             labelTimer.Location = new Point((int)((double)workingWidth * 0.9), (int)((double)workingHeight / 10));
@@ -249,7 +267,7 @@ namespace planimals
 
             foreach (Control control in Controls)
             {
-                if (control.GetType() == typeof(System.Windows.Forms.Label))
+                if (control.GetType() == typeof(Label))
                 {
                     if (Width < 1920 || Height < 1080) control.Font = smallFont;
                     else control.Font = largeFont;
@@ -261,7 +279,7 @@ namespace planimals
             readySteadyGo.Location = new Point(workingWidth / 2 - readySteadyGo.Width / 2, workingHeight / 2 - readySteadyGo.Height / 2);
             Controls.Add(readySteadyGo);
 
-            readySteadyGoTimer = new System.Windows.Forms.Timer();
+            readySteadyGoTimer = new Timer();
             readySteadyGoTimer.Interval = 1000;
             readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
 
@@ -279,7 +297,7 @@ namespace planimals
 
             rnd = new Random();
             deck = new Stack<int>();
-            for (int i = 0; i < 40; i++) deck.Push(rnd.Next(1, GetNumberOfOrganisms() + 1));
+            sb = new StringBuilder();
             playerHand = new List<Card>();
             playerChain = new List<List<Card>>() { new List<Card>() { } };
 
@@ -289,9 +307,9 @@ namespace planimals
             Resize += new EventHandler(OnResize);
 
             gameControls = new List<Control>() { drawCardButton, chainButton, goToMenuInGameButton };
-            menuControls = new List<Control>() { loginButton, playButton, exitButton, stats };
-            endControls = new List<Control>() { retryButton, goToMenuButton};
-            youSureWannaQuitControls = new List<Control>() { yesButton, noButton };
+            menuControls = new List<Control>() { loginButton, playButton, continueButton, exitButton, stats };
+            endControls = new List<Control>() { retryButton, goToMenuButton };
+            youSureWannaQuitControls = new List<Control>() { yesButton, noButton, youSureWannaQuitLabel };
 
             foreach (Control control in gameControls)
             {
@@ -311,14 +329,37 @@ namespace planimals
             #endregion
         }
         #region flow
-        private void PlayButton_Click(object sender, EventArgs e) 
-        { 
+        private void PlayButton_Click(object sender, EventArgs e)
+        {
             foreach (Control control in menuControls)
             {
                 control.Enabled = false;
                 control.Hide();
             }
-            Start(); 
+            Start();
+        }
+        private void continueButton_Click(object sender, EventArgs e)
+        {
+            if (username != "")
+            {
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
+                    sqlConnection.Open();
+                    int b = (int)cmd.ExecuteScalar();
+                    MessageBox.Show(b.ToString());
+                    if (b == 1)
+                    {
+                        Continue();
+                    }
+                    else
+                    {
+                        MessageBox.Show("there is no saved game");
+                    }
+                    sqlConnection.Close();
+                }
+            }
+            else MessageBox.Show("you are not logged in.");
         }
         private void Start()
         {
@@ -340,6 +381,8 @@ namespace planimals
                 }
                 subchain.Clear();
             }
+
+            GenerateDeck();
             imageIndex = 3;
             timeLeft = 40;
             labelTimer.Show();
@@ -349,8 +392,21 @@ namespace planimals
             label.Text = "";
             label.Location = new Point(workingWidth / 10, workingHeight / 20);
 
+            if (username != "")
+            {
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    CleanDb();
+                    SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', 40, '{sb.ToString()}')", sqlConnection);
+                    sqlConnection.Open();
+                    createGame.ExecuteNonQuery();
+                    sqlConnection.Close();
+                }
+            }
+
             readySteadyGo.Show();
-            readySteadyGo.Enabled = true; try
+            readySteadyGo.Enabled = true; 
+            try
             {
                 readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
             }
@@ -363,6 +419,79 @@ namespace planimals
             sw1.Start();
             readySteadyGoTimer.Start();
         }
+        private void Continue()
+        {
+            string strArr = "";
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                SqlCommand pullGame = new SqlCommand($"SELECT * FROM Games WHERE Username='{username}'", sqlConnection);
+                sqlConnection.Open();
+                using (SqlDataReader reader = pullGame.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        timeLeft = int.Parse(reader["Time"].ToString());
+                        strArr = reader["Deck"].ToString();
+                    }
+                }
+                foreach (Char c in strArr)
+                {
+                    if (c == ',') continue;
+                    deck.Push(int.Parse(c.ToString()));
+                }
+                SqlCommand pullHand = new SqlCommand($"SELECT * FROM Hand WHERE Username='{username}'", sqlConnection);
+                List<string> cardsBuffer = new List<string>();
+                using (SqlDataReader reader = pullHand.ExecuteReader())
+                {
+                    while (reader.Read()) cardsBuffer.Add(reader["Scientific_name"].ToString());
+                }
+                foreach (string sciname in cardsBuffer)
+                {
+                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var cname = reader["Common_name"].ToString();
+                            var desc = reader["Description"].ToString();
+                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
+                            int hierarchy = (int)reader["Hierarchy"];
+                            var habitat = reader["Habitat"].ToString();
+                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
+                            playerHand.Add(c);
+                            Controls.Add(c);
+                        }
+                    }
+                }
+                sqlConnection.Close();
+
+                readySteadyGo.Show();
+                readySteadyGo.Enabled = true;
+                try
+                {
+                    readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to load image: " + ex.Message);
+                }
+
+                timer1.Start();
+                sw1.Start();
+                readySteadyGoTimer.Start();
+            }
+        }
+        private void GenerateDeck()
+        {
+            int randIdx;
+            for (int i = 0; i < 40; i++)
+            {
+                randIdx = rnd.Next(1, GetNumberOfOrganisms() + 1);
+                deck.Push(randIdx);
+                if (i != 39) sb.Append(randIdx + ",");
+                else sb.Append(randIdx);
+            }
+        }
         private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
             imageIndex--;
@@ -373,7 +502,7 @@ namespace planimals
                 readySteadyGoTimer.Stop();
                 Controls.Remove(readySteadyGo);
                 foreach (Control control in gameControls) { control.Enabled = true; control.Show(); }
-                foreach (Control control in endControls) { control.Enabled= false; control.Hide(); }
+                foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
                 countDownTimer.Start();
             }
         }
@@ -394,12 +523,12 @@ namespace planimals
                 label.Text = "Score: " + overallScore.ToString();
                 foreach (Control control in endControls)
                 {
-                    control.Enabled = true; 
+                    control.Enabled = true;
                     control.Show();
                 }
-                foreach(Control control in gameControls)
+                foreach (Control control in gameControls)
                 {
-                    control.Enabled= false;
+                    control.Enabled = false;
                 }
                 foreach (Card c in playerHand)
                 {
@@ -427,9 +556,9 @@ namespace planimals
                 control.Enabled = false;
                 control.Hide();
             }
-            foreach(Control control in gameControls)
+            foreach (Control control in gameControls)
             {
-                control.Enabled= false;
+                control.Enabled = false;
                 control.Hide();
             }
             Start();
@@ -460,9 +589,10 @@ namespace planimals
             }
             foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
         }
-        private void goToMenuInGameButton_Click(object sender, EventArgs e) 
+        private void goToMenuInGameButton_Click(object sender, EventArgs e)
         {
             countDownTimer.Stop();
+            UpdateStatsLabel();
             foreach (Control control in youSureWannaQuitControls)
             {
                 control.Show();
@@ -484,7 +614,7 @@ namespace planimals
         #region ux/ui
         private void OnResize(object sender, EventArgs e)
         {
-            Height = (int)(Width*0.5625);
+            Height = (int)(Width * 0.5625);
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;
 
@@ -506,14 +636,14 @@ namespace planimals
             chainButton.Location = new Point(
                 workingWidth - drawCardButton.Width - workingHeight / 10,
                 workingHeight / 2 - drawCardButton.Height / 2);
-            
+
             Card.pictureBoxWidth = workingHeight / 8;
             Card.pictureBoxHeight = workingWidth / 10;
             for (int i = 0; i < playerHand.Count; i++)
             {
                 playerHand[i].Width = workingHeight / 8;
                 playerHand[i].Height = workingWidth / 10;
-                playerHand[i].Location = playerHand[i].prevLocation = new Point(Card.pictureBoxWidth*i, workingHeight-Card.pictureBoxHeight);
+                playerHand[i].Location = playerHand[i].prevLocation = new Point(Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
             }
             foreach (List<Card> chain in playerChain)
             {
@@ -531,7 +661,7 @@ namespace planimals
                 playerHand[i].Height = workingWidth / 10;
                 playerHand[i].Location = new Point(Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
             }
-            label.Location = new Point(workingWidth/10, workingHeight/8);
+            label.Location = new Point(workingWidth / 10, workingHeight / 8);
             Invalidate();
         }
         public void DrawFieldBorders(object sender, PaintEventArgs e)
@@ -560,8 +690,22 @@ namespace planimals
                 loginButton.Text = "log in";
             }
         }
-        private void UpdateStatsLabel() => stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
-        #endregion
+        private void CleanDb() 
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                SqlCommand clearGame = new SqlCommand($"DELETE FROM Games WHERE Username='{username}'", sqlConnection);
+                SqlCommand clearHand = new SqlCommand($"DELETE FROM Hand WHERE Username='{username}'", sqlConnection);
+                SqlCommand clearChain = new SqlCommand($"DELETE FROM FoodChainCard WHERE Username='{username}'", sqlConnection);
+                sqlConnection.Open();
+                clearGame.ExecuteNonQuery();
+                clearHand.ExecuteNonQuery();
+                clearChain.ExecuteNonQuery();
+                sqlConnection.Close();
+            }
+        }
+        private void UpdateStatsLabel(){ if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}"; }
+            #endregion
         #region logic
         private void FixChainIndices(List<Card> chain)
         {
@@ -576,13 +720,11 @@ namespace planimals
                 }
             }
         }
-        private int CalcScore(int noOfCards) {
+        private int CalcScore(int noOfCards) 
+        {
             int score = 0;
-            for (int i = 0; i < noOfCards; i++)
-            {
-                //gonna make a better calculation of the score some day
-                score += i + 1;
-            }
+            for (int i = 0; i < noOfCards; i++) score += i + 1;
+            //gonna make a better calculation of the score some day
             return score;
         }
         public void chainButton_Click(object sender, EventArgs e) { foreach (List<Card> chain in playerChain) Chain(chain); }
@@ -717,7 +859,7 @@ namespace planimals
                 string sciname = GetScientificNameFromDeck();
                 using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    SqlCommand updateDeck = new SqlCommand("UPDATE P")
+                    //SqlCommand updateDeck = new SqlCommand("UPDATE P");
                     SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
                     sqlConnection.Open();
                     using (SqlDataReader reader = sqlCommand.ExecuteReader())
@@ -734,13 +876,14 @@ namespace planimals
                             Controls.Add(c);
                         }
                     }
+                    SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{username}'", sqlConnection);
+                    removeCard.ExecuteNonQuery();
+                    SqlCommand addToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{username}', '{sciname}')");
+                    addToHand.ExecuteNonQuery();
                     sqlConnection.Close();
                 }
             }
-            else
-            {
-                Display("cannot hold more than 15 cards");
-            }
+            else Display("cannot hold more than 15 cards");
         }
         #endregion
         #region fancy card moving
@@ -778,42 +921,48 @@ namespace planimals
         }
         public void EaseInOut(Card c, Point endPosition, long length, List<Card> chain)
         {
-            if (InRectangle(endPosition) && !InRectangle(c.Location)) //check whether user wants to move card onto the table or just messing with them          
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
-                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
-                MoveList.Add(data);
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-                chain.Add(c);
-                playerHand.Remove(c);
-                return;
-            }
-            else if (InRectangle(endPosition) && InRectangle(c.Location)) 
-            {
-                Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
-                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
-                MoveList.Add(data);
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-                return;
-            }
-            else if (Card.InRectangle(c.Location) && !InRectangle(endPosition))
-            {
-                Point location = c.prevLocation;
-                Point offset = new Point(location.X - c.Location.X, location.Y - c.Location.Y);
-                (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
-                MoveList.Add(data);
-                c.Picked = false;
-                c.BackColor = Color.Gray;
-                playerHand.Add(c);
-                chain.Remove(c);
-                return;
-            }
-            else
-            {
-                c.Picked = false;
-                c.BackColor = Color.Gray;
+                sqlConnection.Open();
+                //SqlCommand removeFromHand = new SqlCommand($"DELETE FROM Hand WHERE ");
+                if (InRectangle(endPosition) && !InRectangle(c.Location)) //check whether user wants to move card onto the table or just messing with them          
+                {
+                    Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
+                    (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                    MoveList.Add(data);
+                    c.Picked = false;
+                    c.BackColor = Color.Gray;
+                    chain.Add(c);
+                    playerHand.Remove(c);
+                    return;
+                }
+                else if (InRectangle(endPosition) && InRectangle(c.Location))
+                {
+                    Point offset = new Point(endPosition.X - c.Location.X - c.Width / 2, endPosition.Y - c.Location.Y - c.Height / 2);
+                    (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                    MoveList.Add(data);
+                    c.Picked = false;
+                    c.BackColor = Color.Gray;
+                    return;
+                }
+                else if (Card.InRectangle(c.Location) && !InRectangle(endPosition))
+                {
+                    Point location = c.prevLocation;
+                    Point offset = new Point(location.X - c.Location.X, location.Y - c.Location.Y);
+                    (Card, Point, Point, long, long) data = (c, c.Location, offset, length, sw1.ElapsedMilliseconds);
+                    MoveList.Add(data);
+                    c.Picked = false;
+                    c.BackColor = Color.Gray;
+                    playerHand.Add(c);
+                    chain.Remove(c);
+                    return;
+                }
+                else
+                {
+                    c.Picked = false;
+                    c.BackColor = Color.Gray;
+                }
+                sqlConnection.Close();
             }
         }
         private void MouseLeftClick(object sender, MouseEventArgs e)
