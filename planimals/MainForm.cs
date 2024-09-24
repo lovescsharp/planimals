@@ -332,6 +332,10 @@ namespace planimals
             #endregion
         }
 
+
+
+
+
         /*
 delete from FoodChainCards where Username='player1'
 delete from Games where Username='player1'
@@ -356,7 +360,7 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\n\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1, 1, 1, 1, 1, 1, 1, 1')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Black Rat Snake', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
+                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
                 sqlConnection.Open(); test.ExecuteNonQuery(); sqlConnection.Close();
             }
         }
@@ -554,7 +558,7 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
             int randIdx;
             deck = new Stack<int>();
             sb.Append(',');
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 40; i++)
             {
                 randIdx = rnd.Next(1, GetNumberOfOrganisms() + 1);
                 deck.Push(randIdx);
@@ -977,7 +981,6 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
                             Controls.Add(c);
                         }
                     }
-                    MessageBox.Show(deck.Count.ToString());
                     if (deck.Count > 0)
                     {
                         SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{username}'", sqlConnection);
