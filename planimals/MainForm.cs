@@ -20,7 +20,7 @@ namespace planimals
         //      (*) : time left
         //      (*) : deck
         //      ( ) : chain(s)
-        //      ( ) : hand
+        //      (*) : hand
 
         #region attributes
         private Button playButton;
@@ -332,28 +332,25 @@ namespace planimals
             #endregion
         }
 
-
-
-
-
+        //basically this query creates a real example of a saved game, so that you can test stuff pulling and pushing 
         /*
-delete from FoodChainCards where Username='player1'
-delete from Games where Username='player1'
-delete from Hand where Username='player1'
-insert into Games(Username, Time, Deck) values
-('player1', 36, ',1, 1, 1, 1, 1, 1, 1, 1')
-insert into Hand(Username, CardID) values
-('player1', 'Omocestus viridulus'),
-('player1', 'Omocestus viridulus'),
-('player1', 'Omocestus viridulus');
-Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
-('player1', 'Poa pratensis', 0, 0),
-('player1', 'Omocestus viridulus', 0, 1),
-('player1', 'Turdus merula', 0, 2),
-('player1', 'Black Rat Snake', 0, 3),
-('player1', 'Tyto alba', 0, 4),
-('player1', 'Poa pratensis', 1, 0),
-('player1', 'Microtus arvalis', 1, 1);
+        delete from FoodChainCards where Username='player1'
+        delete from Games where Username='player1'
+        delete from Hand where Username='player1'
+        insert into Games(Username, Time, Deck) values
+        ('player1', 36, ',1, 1, 1, 1, 1, 1, 1, 1')
+        insert into Hand(Username, CardID) values
+        ('player1', 'Omocestus viridulus'),
+        ('player1', 'Omocestus viridulus'),
+        ('player1', 'Omocestus viridulus');
+        Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
+        ('player1', 'Poa pratensis', 0, 0),
+        ('player1', 'Omocestus viridulus', 0, 1),
+        ('player1', 'Turdus merula', 0, 2),
+        ('player1', 'Black Rat Snake', 0, 3),
+        ('player1', 'Tyto alba', 0, 4),
+        ('player1', 'Poa pratensis', 1, 0),
+        ('player1', 'Microtus arvalis', 1, 1);
          */
 
         private void dbTesting()
@@ -364,7 +361,6 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
                 sqlConnection.Open(); test.ExecuteNonQuery(); sqlConnection.Close();
             }
         }
-
         #region flow
         private void PlayButton_Click(object sender, EventArgs e)
         {
@@ -521,7 +517,23 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
                         }
                     }
                 }
-                SqlCommand countChains = new SqlCommand($"SELECT COUNT(*) FROM FoodChainCards WHERE ", sqlConnection);
+                SqlCommand countCards = new SqlCommand($"SELECT COUNT(*) FROM FoodChainCards WHERE Username='{username}'", sqlConnection);
+                int count = countCards.ExecuteScalar();
+                SqlCommand getCard = new SqlCommand(
+                    $"SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, PositionNo"
+                    , sqlConnection);
+                string sciname = "";
+                for (int n = 1; n <= count; i++)
+                {
+                    using (SqlDataReader reader = getCard.ExecuteReader())
+                    {
+                        sciname = 
+
+                        Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
+                        playerChain[reader["RowNo"]][reader["PositionNo"]] = c;
+                        Controls.Add(c);
+                    }
+                }
                 sqlConnection.Close();
 
                 foreach (Control control in menuControls)
@@ -849,6 +861,7 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{username}' AND RowNo={chainIndex}", sqlConnection);
+                StringBuilder sb = new StringBuilder();
                 if (chain.Count < 2) { Display("the chain must consist of at least two organisms."); return; }
                 else
                 {
@@ -869,9 +882,12 @@ Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
                                 MoveList.Add(data);
                                 chain[j].Picked = false;
                                 chain[j].BackColor = Color.Gray;
-                                SqlCommand returnToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{username}', '{chain[i].scientific_name}')", sqlConnection);
-                                if (username != "") returnToHand.ExecuteNonQuery();
                                 playerHand.Add(chain[j]);
+                            }
+                            if (username != "")
+                            {
+                                SqlCommand returnToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES {values}");
+                                returnToHand.ExecuteNonQuery();
                             }
                             chain.Clear();
                             return;
