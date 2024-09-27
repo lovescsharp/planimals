@@ -462,7 +462,6 @@ namespace planimals
              \__\___|___/\__|_|_| |_|\__, |
                                       |__/
              */
-
             dbTesting();
 
             /*
@@ -476,6 +475,8 @@ namespace planimals
 
 
             string strArr = "";
+            playerChain.Add(new List<Card> { });
+            playerChain.Add(new List<Card> { });
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 SqlCommand pullGame = new SqlCommand($"SELECT * FROM Games WHERE Username='{username}'", sqlConnection);
@@ -493,45 +494,49 @@ namespace planimals
                     if (c == ',') continue;
                     deck.Push(int.Parse(c.ToString()));
                 }
-                SqlCommand pullHand = new SqlCommand($"SELECT * FROM Hand WHERE Username='{username}'", sqlConnection);
-                List<string> cardsBuffer = new List<string>();
+                SqlCommand pullHand = new SqlCommand(
+                    $"SELECT Hand.CardID, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description " +
+                    $"FROM Hand " +
+                    $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
+                    $"WHERE Username='{username}'", sqlConnection);
                 using (SqlDataReader reader = pullHand.ExecuteReader())
                 {
-                    while (reader.Read()) cardsBuffer.Add(reader["CardID"].ToString());
-                }
-                foreach (string sciname in cardsBuffer)
-                {
-                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
-                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            var cname = reader["Common_name"].ToString();
-                            var desc = reader["Description"].ToString();
-                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
-                            int hierarchy = (int)reader["Hierarchy"];
-                            var habitat = reader["Habitat"].ToString();
-                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
-                            playerHand.Add(c);
-                            Controls.Add(c);
-                        }
+                        Card c = new Card(
+                            reader["CardID"].ToString(),
+                            reader["Common_name"].ToString(),
+                            reader["Description"].ToString(),
+                            currentDir + "\\assets\\photos\\" + reader["CardID"].ToString() + ".jpg",
+                            (int)reader["Hierarchy"],
+                            reader["Habitat"].ToString(),
+                            new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                            );
+                        playerHand.Add(c);
+                        Controls.Add(c);
                     }
                 }
-                SqlCommand countCards = new SqlCommand($"SELECT COUNT(*) FROM FoodChainCards WHERE Username='{username}'", sqlConnection);
-                int count = countCards.ExecuteScalar();
-                SqlCommand getCard = new SqlCommand(
-                    $"SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, PositionNo"
+                SqlCommand loadChain = new SqlCommand(
+                    $"SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, PositionNo " +
+                    $"FROM FoodChainCards " +
+                    $"JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
+                    $"WHERE Username='{username}' " +
+                    $"ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo"
                     , sqlConnection);
-                string sciname = "";
-                for (int n = 1; n <= count; i++)
+                using (SqlDataReader reader = loadChain.ExecuteReader())
                 {
-                    using (SqlDataReader reader = getCard.ExecuteReader())
-                    {
-                        sciname = 
-
-                        Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
-                        playerChain[reader["RowNo"]][reader["PositionNo"]] = c;
+                    while (reader.Read()) {
+                        Card c = new Card(
+                            reader["Scientific_name"].ToString(),
+                            reader["Common_name"].ToString(),
+                            reader["Description"].ToString(),
+                            currentDir + "\\assets\\photos\\" + reader["Scientific_name"].ToString() + ".jpg",
+                            int.Parse(reader["Hierarchy"].ToString()),
+                            reader["Habitat"].ToString(),
+                            new Point(Card.pictureBoxWidth * playerChain[int.Parse(reader["RowNo"].ToString())].Count + fieldRectangle.Left + 5, workingHeight - Card.pictureBoxHeight * (int.Parse(reader["RowNo"].ToString()) + 1) - fieldRectangle.Top)
+                            );
                         Controls.Add(c);
+                        playerChain[int.Parse(reader["RowNo"].ToString())].Add(c);
                     }
                 }
                 sqlConnection.Close();
@@ -810,7 +815,7 @@ namespace planimals
                 sqlConnection.Close();
             }
         }
-        private void UpdateStatsLabel(){ if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}"; }
+        private void UpdateStatsLabel() { if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}"; }
             #endregion
         #region logic
         private void FixChainIndices(List<Card> chain)
@@ -886,8 +891,10 @@ namespace planimals
                             }
                             if (username != "")
                             {
+                                /*
                                 SqlCommand returnToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES {values}");
                                 returnToHand.ExecuteNonQuery();
+                            */
                             }
                             chain.Clear();
                             return;
@@ -987,12 +994,15 @@ namespace planimals
                     {
                         while (reader.Read())
                         {
-                            var cname = reader["Common_name"].ToString();
-                            var desc = reader["Description"].ToString();
-                            var path = currentDir + "\\assets\\photos\\" + $"{sciname}.jpg";
-                            int hierarchy = (int)reader["Hierarchy"];
-                            var habitat = reader["Habitat"].ToString();
-                            Card c = new Card(sciname, cname, desc, path, hierarchy, habitat, new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight));
+                            Card c = new Card (
+                                sciname,
+                                reader["Common_name"].ToString(),
+                                reader["Description"].ToString(),
+                                currentDir + "\\assets\\photos\\" + $"{sciname}.jpg",
+                                (int)reader["Hierarchy"],
+                                reader["Habitat"].ToString(),
+                                new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                                );
                             playerHand.Add(c);
                             Controls.Add(c);
                         }
