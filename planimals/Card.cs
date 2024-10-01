@@ -46,7 +46,7 @@ namespace planimals
             SizeMode = PictureBoxSizeMode.Zoom;
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
-            prevLocation = Location;
+            prevLocation = new Point(Card.pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Card.pictureBoxHeight + 10);
             BackColor = Color.Gray;
             Picked = false;
 
