@@ -58,6 +58,7 @@ namespace planimals
         public static List<List<Card>> playerChain;
         public static Rectangle fieldRectangle;
         public static Rectangle cardRectangle;
+        private List<List<Rectangle>> locationIndicators;
 
         private PictureBox retryButton;
         private PictureBox goToMenuButton;
@@ -329,6 +330,27 @@ namespace planimals
                 control.Hide();
                 control.Enabled = false;
             }
+
+            Size = new Size(1920, 1080);
+            BackColor = Color.Black;
+            locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>(), new List<Rectangle>() };
+            Rectangle r = new Rectangle(
+                10,
+                10,
+                90,
+                120
+                );
+            Rectangle r1 = new Rectangle
+            (
+                10,
+                r.Height + 10,
+                90,
+                120
+                );
+            locationIndicators[0].Add(r);
+            locationIndicators[1].Add(r1);
+            Paint += new PaintEventHandler(Draw);
+            MouseClick += new MouseEventHandler(LeftClick);
             #endregion
         }
 
@@ -352,7 +374,37 @@ namespace planimals
         ('player1', 'Poa pratensis', 1, 0),
         ('player1', 'Microtus arvalis', 1, 1);
          */
-
+        private void Draw(object sender, PaintEventArgs e)
+        {
+            using (Pen pen = new Pen(Color.White, 10.0f))
+            {
+                foreach (List<Rectangle> chain in locationIndicators)
+                {
+                    Rectangle last = chain.Last();
+                    foreach (Rectangle r in chain)
+                    {
+                        if (r == last) e.Graphics.DrawRectangle(pen, r);
+                    }
+                }
+            }
+        }
+        private void LeftClick(object sender, MouseEventArgs e)
+        {
+            foreach (List<Rectangle> chain in locationIndicators)
+            {
+                foreach (Rectangle r in chain)
+                {
+                    if (r.Contains(e.Location))
+                    {
+                        Rectangle rectangle = r;
+                        rectangle.X += rectangle.Width + 10;
+                        chain.Add(rectangle);
+                        Invalidate();
+                        return;
+                    }
+                }
+            }
+        }
         private void dbTesting()
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
