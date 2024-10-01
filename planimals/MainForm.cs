@@ -331,7 +331,6 @@ namespace planimals
             }
             #endregion
         }
-
         //basically this query creates a real example of a saved game, so that you can test stuff pulling and pushing 
         /*
         delete from FoodChainCards where Username='player1'
@@ -350,9 +349,11 @@ namespace planimals
         ('player1', 'Black Rat Snake', 0, 3),
         ('player1', 'Tyto alba', 0, 4),
         ('player1', 'Poa pratensis', 1, 0),
-        ('player1', 'Microtus arvalis', 1, 1);
+        ('player1', 'Microtus arvalis', 1, 1); 
          */
 
+
+        //jhjhghgjhgk
         private void dbTesting()
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -453,9 +454,7 @@ namespace planimals
         }
         private void Continue()
         {
-
-            /*
-             _           _   _
+            /*    _           _   _
             | |_ ___ ___| |_(_)_ __   __ _
             | __/ _ / __| __| | '_ \ / _` |
             | ||  __\__ | |_| | | | | (_| |
@@ -463,7 +462,6 @@ namespace planimals
                                       |__/
              */
             dbTesting();
-
             /*
              _           _   _
             | |_ ___ ___| |_(_)_ __   __ _
@@ -472,8 +470,6 @@ namespace planimals
              \__\___|___/\__|_|_| |_|\__, |
                                       |__/
              */
-
-
             string strArr = "";
             playerChain.Add(new List<Card> { });
             playerChain.Add(new List<Card> { });
@@ -537,23 +533,21 @@ namespace planimals
                             );
                         Controls.Add(c);
                         playerChain[int.Parse(reader["RowNo"].ToString())].Add(c);
+                        MessageBox.Show($"{playerChain[int.Parse(reader["RowNo"].ToString())][int.Parse(reader["PositionNo"].ToString())].common_name} in playerChain[{int.Parse(reader["RowNo"].ToString())}][{int.Parse(reader["PositionNo"].ToString())}]");
                     }
                 }
                 sqlConnection.Close();
-
                 foreach (Control control in menuControls)
                 {
                     control.Hide();
                     control.Enabled = false;
                 }
-
                 imageIndex = 3;
                 labelTimer.Show();
                 labelTimer.Text = "";
                 label.Show();
                 label.Text = "";
                 label.Location = new Point(workingWidth / 10, workingHeight / 20);
-
                 readySteadyGo.Show();
                 readySteadyGo.Enabled = true;
                 try
@@ -564,7 +558,6 @@ namespace planimals
                 {
                     MessageBox.Show("Failed to load image: " + ex.Message);
                 }
-
                 timer1.Start();
                 sw1.Start();
                 readySteadyGoTimer.Start();
@@ -1118,7 +1111,9 @@ namespace planimals
                 if (c.Picked == true)
                 {
                     MoveList.Clear();
-                    EaseInOut(c, e.Location, 400, playerChain[0]);
+                    //
+                    EaseInOut(c, e.Location, 400, playerChain[0]); //the location of card in chain must be dynamic so make function that will add a card into particular chain depending on what the user chose
+                    //
                     return;
                 }
             }
