@@ -449,7 +449,7 @@ namespace planimals
             | ||  __\__ | |_| | | | | (_| |
              \__\___|___/\__|_|_| |_|\__, |
                                       |__/
-             */
+            */
             dbTesting();
             /*
              _           _   _
@@ -1039,9 +1039,6 @@ namespace planimals
             else Display("cannot hold more than 15 cards");
         }
         #endregion
-        #region dragdrop cards
         Func<Point, bool> InRectangle = p => p.X < fieldRectangle.Right && p.X > fieldRectangle.Left && p.Y > fieldRectangle.Top && p.Y < fieldRectangle.Bottom;
-
-        #endregion
     }
 }
