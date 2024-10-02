@@ -84,6 +84,7 @@ namespace planimals
         private Font smallFont;
 
         private int overallScore;
+        private int earned;
         #endregion
         public MainForm()
         {
@@ -321,15 +322,6 @@ namespace planimals
                 control.Hide();
                 control.Enabled = false;
             }
-
-            locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
-            Rectangle r = new Rectangle(
-                fieldRectangle.Left + 10,
-                fieldRectangle.Top + 10,
-                MainForm.workingHeight / 8 + 10,
-                MainForm.workingWidth / 10 + 10
-                );
-            locationIndicators[0].Add(r);
             #endregion
         }
         //basically this query creates an example of a saved game, so that you can test pulling and pushing 
@@ -339,10 +331,12 @@ namespace planimals
         delete from Hand where Username='player1'
         insert into Games(Username, Time, Deck) values
         ('player1', 36, ',1, 1, 1, 1, 1, 1, 1, 1')
+
         insert into Hand(Username, CardID) values
         ('player1', 'Omocestus viridulus'),
         ('player1', 'Omocestus viridulus'),
         ('player1', 'Omocestus viridulus');
+
         Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
         ('player1', 'Poa pratensis', 0, 0),
         ('player1', 'Omocestus viridulus', 0, 1),
@@ -588,6 +582,14 @@ namespace planimals
                     drawCardButton.Enabled = false;
                     drawCardButton.Hide();
                 }
+                locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
+                Rectangle r = new Rectangle(
+                    fieldRectangle.Left + 10,
+                    fieldRectangle.Top + 10,
+                    MainForm.workingHeight / 8 + 10,
+                    MainForm.workingWidth / 10 + 10
+                    );
+                locationIndicators[0].Add(r);
                 foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
                 countDownTimer.Start();
                 Invalidate();
@@ -677,28 +679,37 @@ namespace planimals
                 subchain.Clear();
             }
             foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
+            Invalidate();
         }
         private void goToMenuInGameButton_Click(object sender, EventArgs e)
         {
             countDownTimer.Stop();
             UpdateStatsLabel();
+            foreach (Control control in gameControls) control.Hide();
+            foreach (Card c in playerHand) c.Hide();
+            foreach (List<Card> subchain in playerChain)
+            {
+                foreach (Card c in subchain) c.Hide();
+            }
             foreach (Control control in youSureWannaQuitControls)
             {
                 control.Show();
                 control.Enabled = true;
             }
         }
-        private void yesButton_Click(object sender, EventArgs e) { goToMenuButton_Click(sender, e); }
+        private void yesButton_Click(object sender, EventArgs e) => goToMenuButton_Click(sender, e);
         private void noButton_Click(object sender, EventArgs e)
         {
-            foreach (Control control in youSureWannaQuitControls)
+            foreach (Control control in youSureWannaQuitControls) control.Hide();
+            foreach (Control control in gameControls) control.Hide();
+            foreach (Card c in playerHand) c.Show();
+            foreach (List<Card> subchain in playerChain)
             {
-                control.Hide();
-                control.Enabled = false;
+                foreach (Card c in subchain) c.Show();
             }
             countDownTimer.Start();
         }
-        private void Exit(object sender, EventArgs e) { Close(); }
+        private void Exit(object sender, EventArgs e) => Close();
         #endregion
         #region ux/ui
         private void OnResize(object sender, EventArgs e)
@@ -819,7 +830,7 @@ namespace planimals
                 }
             }
         }
-        private int CalcScore(int noOfCards) 
+        private int CalcScore(int noOfCards)
         {
             int score = 0;
             for (int i = 0; i < noOfCards; i++) score += i + 1;
@@ -827,7 +838,8 @@ namespace planimals
             return score;
         }
         public void chainButton_Click(object sender, EventArgs e)
-        {   int i = 0;
+        {   
+            int i = 0;
             foreach (List<Card> chain in playerChain)
             {
                 Chain(chain, i);
@@ -879,9 +891,17 @@ namespace planimals
                                 /*
                                 SqlCommand returnToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES {values}");
                                 returnToHand.ExecuteNonQuery();
-                            */
+                                */
                             }
                             chain.Clear();
+                            locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
+                            Rectangle r = new Rectangle(
+                                fieldRectangle.Left + 10,
+                                fieldRectangle.Top + 10,
+                                MainForm.workingHeight / 8 + 10,
+                                MainForm.workingWidth / 10 + 10
+                                );
+                            locationIndicators[0].Add(r);
                             return;
                         }
                     }
@@ -903,8 +923,16 @@ namespace planimals
                         }
                         sqlConnection.Close();
                         chain.Clear();
+                        Rectangle r = new Rectangle(
+                                fieldRectangle.Left + 10,
+                                fieldRectangle.Top + 10,
+                                MainForm.workingHeight / 8 + 10,
+                                MainForm.workingWidth / 10 + 10
+                                );
+                        locationIndicators[0].Add(r);
                         for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
                     }
+                    Invalidate();
                 }
             }
         }

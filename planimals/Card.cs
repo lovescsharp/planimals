@@ -36,7 +36,6 @@ namespace planimals
 
             Height = pictureBoxHeight;
             Width = pictureBoxWidth;
-
             try
             {
                 Image = System.Drawing.Image.FromFile(path);
@@ -74,7 +73,6 @@ namespace planimals
                 Point newPosition = this.FindForm().PointToClient(Cursor.Position);
                 newPosition.Offset(-offset.X, -offset.Y);
                 Location = newPosition;
-                Invalidate();
             }
         }
         private void card_MouseDown(object sender, MouseEventArgs e)
@@ -91,30 +89,45 @@ namespace planimals
             {
                 foreach(Rectangle r in row)
                 {
-
                     //FIXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    //MessageBox.Show($"Mouse location: {this.FindForm().PointToClient(Cursor.Position)}\nRectangle location{r.Location}");
                     if (r.Contains(this.FindForm().PointToClient(Cursor.Position)))
                     {
+                        if (MainForm.locationIndicators.Count == 1 && row.Count == 1)
+                        {
+                            MainForm.locationIndicators.Add(new List<Rectangle>());
+                            MainForm.locationIndicators[MainForm.locationIndicators.Count - 1].Add(
+                                new Rectangle(
+                                r.X,
+                                r.Y + r.Height + 5,
+                                MainForm.workingHeight / 8 + 10,
+                                MainForm.workingWidth / 10 + 10
+                                )
+                                );
+                        }
                         row.Add(
                             new Rectangle(
-                                r.X + r.Width + 10,
-                                MainForm.locationIndicators.Count * (MainForm.workingWidth / 10 + 10),
+                                r.X + r.Width + 5,
+                                r.Y,
                                 MainForm.workingHeight / 8 + 10,
                                 MainForm.workingWidth / 10 + 10
                             )
                         );
                         //Add new row to locationIndicators
-                        MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
-                        //
+                        try
+                        {
+                            MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
+                        }
+                        catch
+                        {
+                            MainForm.playerChain.Add(new List<Card>());
+                            MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
+                        }
                         MainForm.playerHand.Remove(this);
                         Location = r.Location;
                         Drop(this);
-                        Invalidate();
                         return;
                     }
                 }
-                Invalidate();
             }
             Location = prevLocation;
             Drop(this);
@@ -122,10 +135,12 @@ namespace planimals
         private void Drop(Card c) {
             c.Picked = false;
             c.BackColor = System.Drawing.Color.Gray;
+            this.FindForm().Invalidate();
         }
         private void Pick(Card c) {
             c.Picked = true;
             c.BackColor = System.Drawing.Color.White;
+            this.FindForm().Invalidate();
             BringToFront();
         }
         private void card_LeftClick() => Location = prevLocation;
