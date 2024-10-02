@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Windows.Media;
 
 namespace planimals
 {
@@ -11,6 +13,7 @@ namespace planimals
     {
         public bool Picked;
         public Point prevLocation;
+        public Point offset;
 
         public string scientific_name;
         public string common_name;
@@ -36,7 +39,7 @@ namespace planimals
 
             try
             {
-                Image = Image.FromFile(path);
+                Image = System.Drawing.Image.FromFile(path);
             }
             catch
             {
@@ -46,67 +49,89 @@ namespace planimals
             SizeMode = PictureBoxSizeMode.Zoom;
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
-            prevLocation = new Point(Card.pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Card.pictureBoxHeight + 10);
-            BackColor = Color.Gray;
+            prevLocation = new Point(Card.pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Card.pictureBoxHeight);
+            BackColor = System.Drawing.Color.Gray;
             Picked = false;
 
             ContextMenu cm = new ContextMenu();
-            cm.MenuItems.Add("Show Info", new EventHandler(cardRightClick));
+            cm.MenuItems.Add("Show Info", new EventHandler(card_RightClick));
             ContextMenu = cm;
 
-            MouseClick += new MouseEventHandler(cardLeftClick);
+            MouseDown += card_MouseDown;
+            MouseUp += card_Mouseup;
+            MouseMove += card_MouseMove;
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            //ControlPaint.DrawBorder(e.Graphics, e.ClipRectangle, Color.Black, ButtonBorderStyle.Solid);
-            using (Font myFont = new Font("Arial", 10))
+            using (Font myFont = new Font("Arial", 10)) e.Graphics.DrawString(common_name, myFont, System.Drawing.Brushes.Yellow, new Point(Width/10, Height/20));
+        }
+        private void card_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (Picked)
             {
-                e.Graphics.DrawString(common_name, myFont, Brushes.Yellow, new Point(Width/10, Height/20));
+                Point newPosition = this.FindForm().PointToClient(Cursor.Position);
+                newPosition.Offset(-offset.X, -offset.Y);
+                Location = newPosition;
+                Invalidate();
             }
         }
+        private void card_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                offset = new Point(e.X, e.Y);
+                Pick(this);
+            }
+        }
+        private void card_Mouseup(object sender, MouseEventArgs e)
+        {
+            foreach(List<Rectangle> row in MainForm.locationIndicators) 
+            {
+                foreach(Rectangle r in row)
+                {
 
+                    //FIXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                    //MessageBox.Show($"Mouse location: {this.FindForm().PointToClient(Cursor.Position)}\nRectangle location{r.Location}");
+                    if (r.Contains(this.FindForm().PointToClient(Cursor.Position)))
+                    {
+                        row.Add(
+                            new Rectangle(
+                                r.X + r.Width + 10,
+                                MainForm.locationIndicators.Count * (MainForm.workingWidth / 10 + 10),
+                                MainForm.workingHeight / 8 + 10,
+                                MainForm.workingWidth / 10 + 10
+                            )
+                        );
+                        //Add new row to locationIndicators
+                        MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
+                        //
+                        MainForm.playerHand.Remove(this);
+                        Location = r.Location;
+                        Drop(this);
+                        Invalidate();
+                        return;
+                    }
+                }
+                Invalidate();
+            }
+            Location = prevLocation;
+            Drop(this);
+        }
         private void Drop(Card c) {
             c.Picked = false;
-            c.BackColor = Color.Gray;
+            c.BackColor = System.Drawing.Color.Gray;
         }
         private void Pick(Card c) {
             c.Picked = true;
-            c.BackColor = Color.White;
+            c.BackColor = System.Drawing.Color.White;
             BringToFront();
         }
-
-        public void cardLeftClick(object sender, EventArgs e)
+        private void card_LeftClick() => Location = prevLocation;
+        public void card_RightClick(object sender, EventArgs e)
         {
-            if (!Picked)
-            {
-                foreach (Card cardCurrentlyHeld in MainForm.playerHand)
-                {
-                    if (cardCurrentlyHeld.Picked)
-                    {
-                        Drop(cardCurrentlyHeld);
-                        Pick(this);
-                    }
-                    else Pick(this);
-                }
-                foreach (List<Card> ch in MainForm.playerChain)
-                {
-                    foreach (Card cardCurrentlyHeld in ch)
-                    {
-                        if (cardCurrentlyHeld.Picked)
-                        {
-                            Drop(cardCurrentlyHeld);
-                            Pick(this);
-                        }
-                        else Pick(this);
-                    }
-                }
-            }
-            else Drop(this);
-        }
-        public void cardRightClick(object sender, EventArgs e)
-        {
+            MainForm.countDownTimer.Stop();
             switch (hierarchy)
             {
                 case (1):
@@ -123,10 +148,6 @@ namespace planimals
                     break;
             }
         }
-
-        public static bool InRectangle(Point p) {
-            return p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
-        }
+        public static bool InRectangle(Point p) => p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
     }
-
 }
