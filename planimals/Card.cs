@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -13,18 +14,17 @@ namespace planimals
     {
         public bool Picked;
         public Point prevLocation;
-        public Point offset;
+        private Point offset;
+        private bool inChain;
 
         public string scientific_name;
         public string common_name;
         private string description;
-        public int hierarchy;
+        private int hierarchy;
         private string habitat;
 
         public static int pictureBoxWidth = MainForm.workingHeight / 8;
         public static int pictureBoxHeight = MainForm.workingWidth / 10;
-
-        public static MouseButtons lastMouseButtonUp = MouseButtons.None;
 
         public Card(string sname, string cname, string desc, string path, int hier, string habt, Point position)
         {
@@ -51,6 +51,7 @@ namespace planimals
             prevLocation = new Point(Card.pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Card.pictureBoxHeight);
             BackColor = System.Drawing.Color.Gray;
             Picked = false;
+            inChain = false;
 
             ContextMenu cm = new ContextMenu();
             cm.MenuItems.Add("Show Info", new EventHandler(card_RightClick));
@@ -60,7 +61,6 @@ namespace planimals
             MouseUp += card_Mouseup;
             MouseMove += card_MouseMove;
         }
-
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -85,29 +85,33 @@ namespace planimals
         }
         private void card_Mouseup(object sender, MouseEventArgs e)
         {
-            foreach(List<Rectangle> row in MainForm.locationIndicators) 
+            putCard(this);
+        }
+        //fix
+        private void putCard(Card card)
+        {
+            for (int i = 0; i < MainForm.locationIndicators.Count; i++)
             {
-                foreach(Rectangle r in row)
+                for (int j = 0; j < MainForm.locationIndicators[i].Count - 1; i++)
                 {
-                    //FIXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    if (r.Contains(this.FindForm().PointToClient(Cursor.Position)))
+                    if (MainForm.locationIndicators[i][j].Contains(this.FindForm().PointToClient(Cursor.Position)))
                     {
-                        if (MainForm.locationIndicators.Count == 1 && row.Count == 1)
+                        if (MainForm.locationIndicators.Count == 1 && MainForm.locationIndicators[i].Count == 1)
                         {
                             MainForm.locationIndicators.Add(new List<Rectangle>());
                             MainForm.locationIndicators[MainForm.locationIndicators.Count - 1].Add(
                                 new Rectangle(
-                                r.X,
-                                r.Y + r.Height + 5,
+                                MainForm.locationIndicators[i][j].X,
+                                MainForm.locationIndicators[i][j].Y + MainForm.locationIndicators[i][j].Height + 5,
                                 MainForm.workingHeight / 8 + 10,
                                 MainForm.workingWidth / 10 + 10
                                 )
                                 );
                         }
-                        row.Add(
+                        MainForm.locationIndicators[i].Add(
                             new Rectangle(
-                                r.X + r.Width + 5,
-                                r.Y,
+                                MainForm.locationIndicators[i][j].X + MainForm.locationIndicators[i][j].Width + 5,
+                                MainForm.locationIndicators[i][j].Y,
                                 MainForm.workingHeight / 8 + 10,
                                 MainForm.workingWidth / 10 + 10
                             )
@@ -115,22 +119,34 @@ namespace planimals
                         //Add new row to locationIndicators
                         try
                         {
-                            MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
+                            MainForm.playerChain[i].Add(this);
                         }
                         catch
                         {
                             MainForm.playerChain.Add(new List<Card>());
-                            MainForm.playerChain[MainForm.locationIndicators.IndexOf(row)].Add(this);
+                            MainForm.playerChain[i+1].Add(this);
+                        }
+                        if (MainForm.username != "")
+                        {
+                            MainForm.PushToChain(this.scientific_name, i, j);
                         }
                         MainForm.playerHand.Remove(this);
-                        Location = r.Location;
+                        Location = MainForm.locationIndicators[i][j].Location;
                         Drop(this);
                         return;
                     }
                 }
             }
+            if (inChain)
+            {
+                MainForm.PushToHand(new List<string>() { this.scientific_name });
+            }
             Location = prevLocation;
             Drop(this);
+        }
+        private void putToChain(Card c, int row, int col)
+        {
+
         }
         private void Drop(Card c) {
             c.Picked = false;
