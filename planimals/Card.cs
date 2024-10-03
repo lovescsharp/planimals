@@ -90,60 +90,82 @@ namespace planimals
         //fix
         private void putCard(Card card)
         {
+            bool cardPlaced = false; // Track whether the card was placed successfully
+
+            // Iterate through location indicators
             for (int i = 0; i < MainForm.locationIndicators.Count; i++)
             {
-                for (int j = 0; j < MainForm.locationIndicators[i].Count - 1; i++)
+                for (int j = 0; j < MainForm.locationIndicators[i].Count; j++)
                 {
+                    // Check if the cursor position is within the current rectangle
                     if (MainForm.locationIndicators[i][j].Contains(this.FindForm().PointToClient(Cursor.Position)))
                     {
+                        // Add a new rectangle if necessary
                         if (MainForm.locationIndicators.Count == 1 && MainForm.locationIndicators[i].Count == 1)
                         {
                             MainForm.locationIndicators.Add(new List<Rectangle>());
-                            MainForm.locationIndicators[MainForm.locationIndicators.Count - 1].Add(
-                                new Rectangle(
-                                MainForm.locationIndicators[i][j].X,
-                                MainForm.locationIndicators[i][j].Y + MainForm.locationIndicators[i][j].Height + 5,
-                                MainForm.workingHeight / 8 + 10,
-                                MainForm.workingWidth / 10 + 10
-                                )
-                                );
                         }
-                        MainForm.locationIndicators[i].Add(
-                            new Rectangle(
-                                MainForm.locationIndicators[i][j].X + MainForm.locationIndicators[i][j].Width + 5,
-                                MainForm.locationIndicators[i][j].Y,
-                                MainForm.workingHeight / 8 + 10,
-                                MainForm.workingWidth / 10 + 10
-                            )
-                        );
-                        //Add new row to locationIndicators
-                        try
-                        {
-                            MainForm.playerChain[i].Add(this);
-                        }
-                        catch
+
+                        // Add a new rectangle for the card
+                        MainForm.locationIndicators[i].Add(new Rectangle(
+                            MainForm.locationIndicators[i][j].X + MainForm.locationIndicators[i][j].Width + 5,
+                            MainForm.locationIndicators[i][j].Y,
+                            MainForm.workingHeight / 8 + 10,
+                            MainForm.workingWidth / 10 + 10
+                        ));
+
+                        // Ensure playerChain is initialized correctly
+                        if (MainForm.playerChain.Count <= i)
                         {
                             MainForm.playerChain.Add(new List<Card>());
-                            MainForm.playerChain[i+1].Add(this);
                         }
-                        if (MainForm.username != "")
+
+                        // If the card is already in the chain, update its position
+                        if (MainForm.playerChain[i].Contains(this))
+                        {
+                            MainForm.playerChain[i][MainForm.playerChain[i].IndexOf(this)] = this; // Just refresh its reference
+                        }
+                        else
+                        {
+                            MainForm.playerChain[i].Add(this); // Add the card to the chain
+                        }
+
+                        // Push to chain if username is available
+                        if (!string.IsNullOrEmpty(MainForm.username))
                         {
                             MainForm.PushToChain(this.scientific_name, i, j);
                         }
+
+                        // Remove the card from the hand
                         MainForm.playerHand.Remove(this);
-                        Location = MainForm.locationIndicators[i][j].Location;
+                        Location = MainForm.locationIndicators[i][j].Location; // Set the location of the card
+                        inChain = true; // Indicate that the card is now in the chain
                         Drop(this);
-                        return;
+                        Invalidate(); // Redraw the UI if necessary
+                        cardPlaced = true; // Mark that the card has been placed
+                        break; // Exit the inner loop
                     }
                 }
+                if (cardPlaced) break; // Exit the outer loop if the card was placed
             }
-            if (inChain)
+
+            // Handle the case when the card was not placed
+            if (!cardPlaced)
             {
-                MainForm.PushToHand(new List<string>() { this.scientific_name });
+                if (inChain)
+                {
+                    if (!string.IsNullOrEmpty(MainForm.username))
+                    {
+                        MainForm.PushToHand(new List<string>() { this.scientific_name });
+                    }
+                    MainForm.playerHand.Remove(this);
+                }
+                Location = prevLocation; // Reset to previous location if not placed
+                Drop(this);
             }
-            Location = prevLocation;
-            Drop(this);
         }
+
+
         private void putToChain(Card c, int row, int col)
         {
 

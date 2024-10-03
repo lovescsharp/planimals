@@ -692,7 +692,7 @@ namespace planimals
         private void noButton_Click(object sender, EventArgs e)
         {
             foreach (Control control in youSureWannaQuitControls) control.Hide();
-            foreach (Control control in gameControls) control.Hide();
+            foreach (Control control in gameControls) control.Show();
             foreach (Card c in playerHand) c.Show();
             foreach (List<Card> subchain in playerChain)
             {
@@ -833,99 +833,94 @@ namespace planimals
         {
             int score = 0;
             for (int i = 0; i < noOfCards; i++) score += i + 1;
-            //gonna make a better calculation of the score some day
             return score;
         }
-        private void Chain(List<Card> chain, int chainIndex)
+        private void chainButton_Click(object sender, EventArgs e)
         {
-            bool valid = true;
-            FixChainIndices(chain);
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            int chainIndex = 0;
+            foreach (List<Card> chain in playerChain)
             {
-                SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{username}' AND RowNo={chainIndex}", sqlConnection);
-                List<String> cards = new List<String>();
-                if (chain.Count < 2)
+                bool valid = true;
+                FixChainIndices(chain);
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    Display("the chain must consist of at least two organisms.");
-                    return;
-                }
-                else
-                {
-                    sqlConnection.Open();
-                    for (int i = 0; i < chain.Count - 1; i++)
+                    SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{username}' AND RowNo={chainIndex}", sqlConnection);
+                    List<String> cards = new List<String>();
+                    if (chain.Count < 2)
                     {
-                        cards.Add(chain[i].scientific_name);
-                        SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
-                        int b = (int)sqlCommand.ExecuteScalar();
-                        if (b == 0)
+                        Display("the chain must consist of at least two organisms.");
+                        return;
+                    }
+                    else
+                    {
+                        sqlConnection.Open();
+                        for (int i = 0; i < chain.Count - 1; i++)
                         {
-                            Display("Food chain is invalid");
-                            valid = false;
-                            for (int j = 0; j < chain.Count; j++)
+                            cards.Add(chain[i].scientific_name);
+                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
+                            int b = (int)sqlCommand.ExecuteScalar();
+                            if (b == 0)
                             {
-                                chain[j].Location = chain[j].prevLocation;
-                                chain[j].Picked = false;
-                                chain[j].BackColor = Color.Gray;
-                                playerHand.Add(chain[j]);
+                                Display("food chain is invalid");
+                                valid = false;
+                                for (int j = 0; j < chain.Count; j++)
+                                {
+                                    chain[j].Location = chain[j].prevLocation;
+                                    chain[j].Picked = false;
+                                    chain[j].BackColor = Color.Gray;
+                                    playerHand.Add(chain[j]);
+                                }
+                                if (username != "")
+                                {
+                                    PushToHand(cards);
+                                }
+                                chain.Clear();
+                                locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
+                                Rectangle r = new Rectangle(
+                                    fieldRectangle.Left + 10,
+                                    fieldRectangle.Top + 10,
+                                    MainForm.workingHeight / 8 + 10,
+                                    MainForm.workingWidth / 10 + 10
+                                    );
+                                locationIndicators[0].Add(r);
+                                earned = 0;
+                                return;
                             }
+                        }
+                        if (valid)
+                        {
+                            overallScore += CalcScore(chain.Count);
+                            earned += CalcScore(chain.Count);
                             if (username != "")
                             {
-                                PushToHand(cards);
+                                totalPoints += CalcScore(chain.Count);
+                                SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={totalPoints} WHERE Username='{username}'", sqlConnection);
+                                updatePoints.ExecuteNonQuery();
+                                disposeChain.ExecuteNonQuery();
                             }
+                            foreach (Card c in chain)
+                            {
+                                Controls.Remove(c);
+                                c.Image.Dispose();
+                            }
+                            sqlConnection.Close();
                             chain.Clear();
                             locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
                             Rectangle r = new Rectangle(
-                                fieldRectangle.Left + 10,
-                                fieldRectangle.Top + 10,
-                                MainForm.workingHeight / 8 + 10,
-                                MainForm.workingWidth / 10 + 10
-                                );
+                                    fieldRectangle.Left + 10,
+                                    fieldRectangle.Top + 10,
+                                    MainForm.workingHeight / 8 + 10,
+                                    MainForm.workingWidth / 10 + 10
+                                    );
                             locationIndicators[0].Add(r);
-                            earned = 0;
-                            return;
+                            for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
+                            Display($"+{earned} points");
                         }
+                        Invalidate();
                     }
-                    if (valid)
-                    {
-                        overallScore += CalcScore(chain.Count);
-                        earned += CalcScore(chain.Count);
-                        if (username != "")
-                        {
-                            totalPoints += CalcScore(chain.Count);
-                            SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={totalPoints} WHERE Username='{username}'", sqlConnection);
-                            updatePoints.ExecuteNonQuery();
-                            disposeChain.ExecuteNonQuery();
-                        }
-                        foreach (Card c in chain)
-                        {
-                            Controls.Remove(c);
-                            c.Image.Dispose();
-                        }
-                        sqlConnection.Close();
-                        chain.Clear();
-                        locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
-                        Rectangle r = new Rectangle(
-                                fieldRectangle.Left + 10,
-                                fieldRectangle.Top + 10,
-                                MainForm.workingHeight / 8 + 10,
-                                MainForm.workingWidth / 10 + 10
-                                );
-                        locationIndicators[0].Add(r);
-                        for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
-                    }
-                    Invalidate();
                 }
+                chainIndex++;
             }
-        }
-        public void chainButton_Click(object sender, EventArgs e)
-        {   
-            int i = 0;
-            foreach (List<Card> chain in playerChain)
-            {
-                Chain(chain, i);
-                i++;
-            }
-            Display($"+{earned.ToString()} points");
         }
         private void chainButton_MouseMove(object sender, MouseEventArgs e)
         {
