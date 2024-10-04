@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.NetworkInformation;
 using System.Text;
 using System.Windows.Forms;
 
@@ -13,14 +11,6 @@ namespace planimals
 {
     public partial class MainForm : Form
     {
-        //push and pull changes to Cards.mdf
-        // (*): Users points
-        // ( ): Game state
-        //      (*) : time left
-        //      (*) : deck
-        //      ( ) : chain(s)
-        //      (*) : hand
-
         #region attributes
         Random rnd;
 
@@ -78,7 +68,7 @@ namespace planimals
         private List<Control> endControls;
         private List<Control> youSureWannaQuitControls;
 
-        private Label label;
+        private static Label label;
 
         private Font largeFont;
         private Font smallFont;
@@ -406,7 +396,7 @@ namespace planimals
 
             GenerateDeck();
             imageIndex = 3;
-            timeLeft = 40;
+            timeLeft = 180;
             labelTimer.Show();
             labelTimer.Text = "";
             overallScore = 0;
@@ -438,6 +428,103 @@ namespace planimals
             }
             readySteadyGoTimer.Start();
         }
+        private void LoadPlayerChain()
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString)) // Replace with your connection string
+            {
+                sqlConnection.Open(); // Open the connection
+
+                // Prepare the SQL command to load the player chain
+                SqlCommand loadChain = new SqlCommand(
+                    "SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, FoodChainCards.PositionNo " +
+                    "FROM FoodChainCards " +
+                    "JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
+                    "WHERE Username = @Username " +
+                    "ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo;", sqlConnection);
+
+                // Add parameters to prevent SQL injection
+                loadChain.Parameters.AddWithValue("@Username", username);
+
+                using (SqlDataReader reader = loadChain.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string scientificName = reader.GetString(0); // Column 0
+                        string commonName = reader.GetString(1); // Column 1
+                        string habitat = reader.GetString(2); // Column 2
+                        int hierarchy = reader.GetInt32(3); // Column 3
+                        string description = reader.GetString(4); // Column 4
+                        int rowNo = reader.GetInt32(5); // Column 5
+                        int positionNo = reader.GetInt32(6); // Column 6
+
+                        // Create a Card object
+                        Card card = new Card(
+                            scientificName,
+                            commonName,
+                            description,
+                            Path.Combine(currentDir, "assets", "photos", $"{scientificName}.jpg"), // Using Path.Combine for better path handling
+                            hierarchy,
+                            habitat,
+                            locationIndicators[rowNo][positionNo].Location // Use the Rectangle location
+                        );
+
+                        // Ensure the playerChain is properly initialized
+                        while (playerChain.Count <= rowNo)
+                        {
+                            playerChain.Add(new List<Card>());
+                        }
+
+                        playerChain[rowNo].Add(card); // Add card to playerChain
+                        Controls.Add(card); // Add card control to the form
+                    }
+                }
+            }
+        }
+        private void LoadLocationIndicators()
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                sqlConnection.Open();
+
+                SqlCommand getSizes = new SqlCommand(
+                    "SELECT RowNo, MAX(PositionNo) AS MaxPositionNo " +
+                    "FROM FoodChainCards " +
+                    "WHERE Username = @Username " +
+                    "GROUP BY RowNo " +
+                    "ORDER BY RowNo;", sqlConnection);
+
+                getSizes.Parameters.AddWithValue("@Username", username);
+
+                using (SqlDataReader reader = getSizes.ExecuteReader())
+                {
+                    locationIndicators.Clear(); // Clear previous data
+
+                    while (reader.Read())
+                    {
+                        int rowNo = reader.GetInt32(0); // Assuming RowNo is an int
+                        int maxPositionNo = reader.GetInt32(1); // Assuming MAX(PositionNo) is also an int
+
+                        // Ensure that we have enough rows in locationIndicators
+                        while (locationIndicators.Count <= rowNo)
+                        {
+                            locationIndicators.Add(new List<Rectangle>());
+                        }
+
+                        for (int pos = 0; pos <= maxPositionNo; pos++)
+                        {
+                            Rectangle rect = new Rectangle(
+                                fieldRectangle.Left + pos * (workingHeight / 8 + 20),
+                                fieldRectangle.Top + rowNo * (workingWidth / 10 + 20),
+                                workingHeight / 8 + 10,
+                                workingWidth / 10 + 10
+                            );
+
+                            locationIndicators[rowNo].Add(rect);
+                        }
+                    }
+                }
+            }
+        }
         private void Continue()
         {
             /*    _           _   _
@@ -459,6 +546,8 @@ namespace planimals
             string strArr = "";
             playerChain.Add(new List<Card> { });
             playerChain.Add(new List<Card> { });
+            locationIndicators = new List<List<Rectangle>>();
+            
             foreach (Control control in menuControls) control.Hide();
             imageIndex = 3;
             labelTimer.Show();
@@ -472,6 +561,12 @@ namespace planimals
             catch (Exception ex) { MessageBox.Show("Failed to load image: " + ex.Message); }
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
+                SqlCommand getSizes = new SqlCommand(
+                    $"SELECT RowNo, MAX(PositionNo) AS MaxPositionNo " +
+                    $"FROM FoodChainCards " +
+                    $"WHERE Username='{username}' " +
+                    $"GROUP BY RowNo " +
+                    $"ORDER BY RowNo; ", sqlConnection);
                 SqlCommand pullGame = new SqlCommand($"SELECT * FROM Games WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();
                 using (SqlDataReader reader = pullGame.ExecuteReader())
@@ -482,7 +577,7 @@ namespace planimals
                         strArr = reader["Deck"].ToString();
                     }
                 }
-                foreach (Char c in strArr)
+                foreach (char c in strArr)
                 {
                     if (c == ',') continue;
                     deck.Push(int.Parse(c.ToString()));
@@ -509,35 +604,13 @@ namespace planimals
                         Controls.Add(c);
                     }
                 }
-                SqlCommand loadChain = new SqlCommand(
-                    $"SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, PositionNo " +
-                    $"FROM FoodChainCards " +
-                    $"JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
-                    $"WHERE Username='{username}' " +
-                    $"ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo"
-                    , sqlConnection);
-                using (SqlDataReader reader = loadChain.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        Card c = new Card(
-                            reader["Scientific_name"].ToString(),
-                            reader["Common_name"].ToString(),
-                            reader["Description"].ToString(),
-                            currentDir + "\\assets\\photos\\" + reader["Scientific_name"].ToString() + ".jpg",
-                            int.Parse(reader["Hierarchy"].ToString()),
-                            reader["Habitat"].ToString(),
-                            new Point(Card.pictureBoxWidth * playerChain[int.Parse(reader["RowNo"].ToString())].Count + fieldRectangle.Left + 5, workingHeight - Card.pictureBoxHeight * (int.Parse(reader["RowNo"].ToString()) + 1) - fieldRectangle.Top)
-                            );
-                        Controls.Add(c);
-                        playerChain[int.Parse(reader["RowNo"].ToString())].Add(c);
-                        //MessageBox.Show($"{playerChain[int.Parse(reader["RowNo"].ToString())][int.Parse(reader["PositionNo"].ToString())].common_name} in playerChain[{int.Parse(reader["RowNo"].ToString())}][{int.Parse(reader["PositionNo"].ToString())}]");
-                    }
-                }
+                LoadLocationIndicators();
+                LoadPlayerChain();
                 sqlConnection.Close();
                 foreach (List<Card> chain in playerChain) {
                     foreach (Card c in chain) c.Hide();        
                 }
+                foreach (Card c in playerHand) c.Hide();
                 readySteadyGoTimer.Start();
             }
         }
@@ -577,11 +650,16 @@ namespace planimals
                 Rectangle r = new Rectangle(
                     fieldRectangle.Left + 10,
                     fieldRectangle.Top + 10,
-                    MainForm.workingHeight / 8 + 10,
-                    MainForm.workingWidth / 10 + 10
+                    workingHeight / 8 + 10,
+                    workingWidth / 10 + 10
                     );
                 locationIndicators[0].Add(r);
                 foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
+                foreach (List<Card> chain in playerChain)
+                {
+                    foreach (Card c in chain) c.Show();
+                }
+                foreach (Card c in playerHand) c.Show();
                 countDownTimer.Start();
                 Invalidate();
             }
@@ -837,7 +915,15 @@ namespace planimals
         }
         private void chainButton_Click(object sender, EventArgs e)
         {
+            string str = "";
+            foreach (List<Card> chain in playerChain)
+            {
+                str += $"chain {playerChain.IndexOf(chain).ToString()}\n";
+                foreach (Card c in chain) str += c.common_name + '\n';
+            }
+            MessageBox.Show(str);
             int chainIndex = 0;
+            earned = 0;
             foreach (List<Card> chain in playerChain)
             {
                 bool valid = true;
@@ -845,10 +931,11 @@ namespace planimals
                 using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
                     SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{username}' AND RowNo={chainIndex}", sqlConnection);
-                    List<String> cards = new List<String>();
+                    List<string> cards = new List<string>();
                     if (chain.Count < 2)
                     {
                         Display("the chain must consist of at least two organisms.");
+                        chainIndex++;
                         return;
                     }
                     else
@@ -874,16 +961,18 @@ namespace planimals
                                 {
                                     PushToHand(cards);
                                 }
-                                chain.Clear();
+                                playerChain.Clear();
+                                playerChain.Add(new List<Card>());
                                 locationIndicators = new List<List<Rectangle>>() { new List<Rectangle>() };
                                 Rectangle r = new Rectangle(
                                     fieldRectangle.Left + 10,
                                     fieldRectangle.Top + 10,
-                                    MainForm.workingHeight / 8 + 10,
-                                    MainForm.workingWidth / 10 + 10
+                                    workingHeight / 8 + 10,
+                                    workingWidth / 10 + 10
                                     );
                                 locationIndicators[0].Add(r);
                                 earned = 0;
+                                chainIndex++;
                                 return;
                             }
                         }
@@ -909,18 +998,19 @@ namespace planimals
                             Rectangle r = new Rectangle(
                                     fieldRectangle.Left + 10,
                                     fieldRectangle.Top + 10,
-                                    MainForm.workingHeight / 8 + 10,
-                                    MainForm.workingWidth / 10 + 10
+                                    workingHeight / 8 + 10,
+                                    workingWidth / 10 + 10
                                     );
                             locationIndicators[0].Add(r);
+                            chainIndex++;
                             for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
-                            Display($"+{earned} points");
                         }
                         Invalidate();
                     }
                 }
-                chainIndex++;
             }
+            Display($"+{earned} points");
+            earned = 0;
         }
         private void chainButton_MouseMove(object sender, MouseEventArgs e)
         {
@@ -935,9 +1025,19 @@ namespace planimals
                 chainButton.Height = workingHeight / 10;
             }
         }
-        public static void PushToHand(List<String> cards)
+        public static void PushToHand(List<string> cards)
         {
-            throw new NotImplementedException();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                SqlCommand insert;
+                sqlConnection.Open();
+                foreach (string name in cards) 
+                {
+                    insert = new SqlCommand($"INSERT INTO Hand VALUES ('{username}', '{name}')", sqlConnection);
+                    insert.ExecuteNonQuery();
+                }
+                sqlConnection.Close();
+            }
         }
         #endregion
         #region draw card
@@ -1053,7 +1153,7 @@ namespace planimals
                 int b = (int)inChain.ExecuteScalar();
                 if (b == 0)
                 {
-                    SqlCommand push = new SqlCommand($"INSET INTO FoodChain Card VALUES ('{username}', {sciname}, {row}, {column})", sqlConnection);
+                    SqlCommand push = new SqlCommand($"INSERT INTO FoodChainCards VALUES ('{username}', '{sciname}', {row}, {column})", sqlConnection);
                     push.ExecuteNonQuery();
                 }
                 sqlConnection.Close();
