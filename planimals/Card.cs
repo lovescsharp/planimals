@@ -303,21 +303,7 @@ namespace planimals
         public void card_RightClick(object sender, EventArgs e)
         {
             MainForm.countDownTimer.Stop();
-            switch (hierarchy)
-            {
-                case (1):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore\nPrimarily lives in {habitat}");
-                    break;
-                case (2):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Carnivore/Omnivore\nPrimarily lives in {habitat}");
-                    break;
-                case (3):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Herbivore\nPrimarily lives in {habitat}");
-                    break;
-                case (4):
-                    MessageBox.Show($"Binomial name: {scientific_name}\nCommon name: {common_name}\n{description}\nRole in chain: Producer\nPrimarily lives in {habitat}");
-                    break;
-            }
+            MessageBox.Show($"{description}");
         }
         public static bool InRectangle(Point p) => p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
     }

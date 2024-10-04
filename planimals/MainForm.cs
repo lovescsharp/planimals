@@ -9,6 +9,8 @@ using System.Windows.Forms;
 
 namespace planimals
 {
+    //https://stackoverflow.com/questions/51567681/how-to-do-task-continewith-using-a-delay-before-the-continuewith-in-c
+    //allows to asynchronously change label.Text, looks cool 8) 
     public partial class MainForm : Form
     {
         #region attributes
@@ -611,6 +613,7 @@ namespace planimals
                     foreach (Card c in chain) c.Hide();        
                 }
                 foreach (Card c in playerHand) c.Hide();
+                playerChain.RemoveAt(2);
                 readySteadyGoTimer.Start();
             }
         }
