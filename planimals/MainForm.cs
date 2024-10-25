@@ -451,15 +451,14 @@ namespace planimals
                 {
                     while (reader.Read())
                     {
-                        string scientificName = reader.GetString(0); // Column 0
-                        string commonName = reader.GetString(1); // Column 1
-                        string habitat = reader.GetString(2); // Column 2
-                        int hierarchy = reader.GetInt32(3); // Column 3
-                        string description = reader.GetString(4); // Column 4
-                        int rowNo = reader.GetInt32(5); // Column 5
-                        int positionNo = reader.GetInt32(6); // Column 6
+                        string scientificName = reader.GetString(0); 
+                        string commonName = reader.GetString(1);
+                        string habitat = reader.GetString(2); 
+                        int hierarchy = reader.GetInt32(3);
+                        string description = reader.GetString(4);
+                        int rowNo = reader.GetInt32(5);
+                        int positionNo = reader.GetInt32(6); 
 
-                        // Create a Card object
                         Card card = new Card(
                             scientificName,
                             commonName,
@@ -600,7 +599,8 @@ namespace planimals
                             currentDir + "\\assets\\photos\\" + reader["CardID"].ToString() + ".jpg",
                             (int)reader["Hierarchy"],
                             reader["Habitat"].ToString(),
-                            new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                            new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight),
+                            this
                             );
                         playerHand.Add(c);
                         Controls.Add(c);
@@ -1080,9 +1080,7 @@ namespace planimals
         }
         private int Count(List<List<Card>> chain) {
             int counter = 0;
-            foreach (List<Card> subchain in chain) {
-                counter += subchain.Count;
-            }
+            foreach (List<Card> subchain in chain) counter += subchain.Count;
             return counter;
         }
         private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
@@ -1122,7 +1120,7 @@ namespace planimals
                                 currentDir + "\\assets\\photos\\" + $"{sciname}.jpg",
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
-                                new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                                new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight),
                                 );
                             playerHand.Add(c);
                             Controls.Add(c);

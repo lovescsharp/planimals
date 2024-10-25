@@ -22,7 +22,6 @@ namespace planimals
 
         public static int pictureBoxWidth = MainForm.workingHeight / 8;
         public static int pictureBoxHeight = MainForm.workingWidth / 10;
-
         public Card(string sname, string cname, string desc, string path, int hier, string habt, Point position)
         {
             scientific_name = sname;
@@ -30,7 +29,6 @@ namespace planimals
             description = desc;
             hierarchy = hier;
             habitat = habt;
-
             Height = pictureBoxHeight;
             Width = pictureBoxWidth;
             try
