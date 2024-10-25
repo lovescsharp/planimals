@@ -6,9 +6,6 @@
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\pkg\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\properties\\resources.resx||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -29,7 +26,7 @@
               "RelativeDocumentMoniker": "planimals\\pkg\\Card.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\pkg\\Card.cs",
               "RelativeToolTip": "planimals\\pkg\\Card.cs",
-              "ViewState": "AgIAAH0AAAAAAAAAAADwv6sAAAAfAAAAAAAAAA==",
+              "ViewState": "AgIAAMAAAAAAAAAAAADwv+cAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-01T13:40:48.511Z",
               "IsPinned": true,
@@ -38,25 +35,12 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Resources.resx",
-              "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Properties\\Resources.resx",
-              "RelativeDocumentMoniker": "planimals\\Properties\\Resources.resx",
-              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Properties\\Resources.resx",
-              "RelativeToolTip": "planimals\\Properties\\Resources.resx",
-              "ViewState": "AgIAAFUAAAAAAAAAAAASwHgAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
-              "WhenOpened": "2024-10-25T09:59:45.454Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "MainForm.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\forms\\MainForm.cs",
               "RelativeDocumentMoniker": "planimals\\forms\\MainForm.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\forms\\MainForm.cs",
               "RelativeToolTip": "planimals\\forms\\MainForm.cs",
-              "ViewState": "AgIAABIDAAAAAAAAAAAQwHcEAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAANYBAAAAAAAAAAASwOUBAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-20T14:00:06.832Z",
               "EditorCaption": ""
