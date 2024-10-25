@@ -111,7 +111,7 @@ namespace planimals
             //static size
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MinimizeBox = false;
-            Size = new Size(1920, 1080);
+            Size = new Size(1200, 800);
             workingHeight = ClientRectangle.Height;
             workingWidth = ClientRectangle.Width;
 
@@ -294,7 +294,9 @@ namespace planimals
             rnd = new Random();
             deck = new Stack<int>();
             sb = new StringBuilder();
+            Console.WriteLine("initializing deck");
             playerHand = new List<Card>();
+            Console.WriteLine("initializing playerChain with");
             playerChain = new List<List<Card>>() { new List<Card>() { } };
             //playerChain = new List<Chain>();
             MouseMove += DrawCardButton_MouseMove;
@@ -395,7 +397,7 @@ namespace planimals
 
             GenerateDeck();
             //
-            imageIndex = 0;
+            imageIndex = 3;
             //
             timeLeft = 180;
             labelTimer.Show();
@@ -429,12 +431,12 @@ namespace planimals
                 {
                     MessageBox.Show("Failed to load image: " + ex.Message);
                 }
-                Console.WriteLine("The game started");
+                Console.Write("starting the game... ");
                 readySteadyGoTimer.Start();
             }
             else
             {
-                Console.WriteLine("The game started");
+                Console.WriteLine("the game started");
                 readySteadyGoTimer.Start();
             }
         }
@@ -472,7 +474,8 @@ namespace planimals
                             Path.Combine(currentDir, "assets", "photos", $"{scientificName}.jpg"), // Using Path.Combine for better path handling
                             hierarchy,
                             habitat,
-                            locationIndicators[rowNo][positionNo].Location
+                            locationIndicators[rowNo][positionNo].Location,
+                            true
                             );
 
                         while (playerChain.Count <= rowNo) playerChain.Add(new List<Card>());
@@ -597,7 +600,8 @@ namespace planimals
                             currentDir + "\\assets\\photos\\" + reader["CardID"].ToString() + ".jpg",
                             (int)reader["Hierarchy"],
                             reader["Habitat"].ToString(),
-                            new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                            new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight),
+                            false
                             );
                         playerHand.Add(c);
                         Controls.Add(c);
@@ -631,17 +635,21 @@ namespace planimals
         }
         private void readySteadyGoTimer_Tick(object sender, EventArgs e)
         {
-            imageIndex--;
-
-            if (imageIndex > 0) readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+            if (imageIndex > 0)
+            {
+                Console.Write($"{imageIndex.ToString()} ");
+                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+            }
             else
             {
+                Console.WriteLine("\nthe game started");
+                Console.WriteLine("\nthe game started");
                 readySteadyGoTimer.Stop();
                 readySteadyGo.Hide();
-                foreach (Control control in gameControls) 
+                foreach (Control control in gameControls)
                 {
-                    control.Enabled = true; 
-                    control.Show(); 
+                    control.Enabled = true;
+                    control.Show();
                 }
                 if (deck.Count == 0)
                 {
@@ -665,6 +673,8 @@ namespace planimals
                 countDownTimer.Start();
                 Invalidate();
             }
+
+            imageIndex--;
         }
         private void countDownTimer_Tick(object sender, EventArgs e)
         {
@@ -850,7 +860,7 @@ namespace planimals
                     e.Graphics.DrawRectangle(pen, fieldRectangle);
                     foreach (List<Rectangle> chain in locationIndicators)
                     {
-                        foreach (Rectangle r in chain) if (r == chain.Last()) e.Graphics.DrawRectangle(pen, r);
+                        //foreach (Rectangle r in chain) if (r == chain.Last()) e.Graphics.DrawRectangle(pen, r);
                     }
                 }
             }
@@ -917,13 +927,19 @@ namespace planimals
         }
         private void chainButton_Click(object sender, EventArgs e)
         {
+            Chain();
+        }
+        private void Chain()
+        {
             string str = "";
+            //debugging
             foreach (List<Card> chain in playerChain)
             {
-                str += $"chain {playerChain.IndexOf(chain).ToString()}\n";
-                foreach (Card c in chain) str += c.common_name + '\n';
+                str += $"   chain {playerChain.IndexOf(chain).ToString()}\n";
+                foreach (Card c in chain) str += "        " + $"{c.common_name}" + '\n';
             }
-            MessageBox.Show(str);
+            //
+            Console.WriteLine("current chain:\n" + str);
             int chainIndex = 0;
             earned = 0;
             foreach (List<Card> chain in playerChain)
@@ -951,6 +967,7 @@ namespace planimals
                             if (b == 0)
                             {
                                 Display("food chain is invalid");
+                                Console.WriteLine($"playerChain[{playerChain.IndexOf(chain)}] is invalid as {chain[i + 1].common_name} doesn't eat {chain[i].common_name}");
                                 valid = false;
                                 for (int j = 0; j < chain.Count; j++)
                                 {
@@ -1064,7 +1081,6 @@ namespace planimals
             {
                 if (deck.Count != 0)
                 {
-                    string o = "";
                     SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS ( SELECT Scientific_name, Common_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms ) SELECT Scientific_name, Common_name FROM NumberedRows WHERE RowNum = {deck.Pop()};", sqlConnection);
                     sqlConnection.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -1112,7 +1128,7 @@ namespace planimals
                 {
                     SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
                     sqlConnection.Open();
-                    Console.WriteLine($"-getting data about {sciname} from cards.mdf");
+                    Console.WriteLine($"getting data about {sciname} from cards.mdf");
                     //Console.WriteLine($"-getting an data about {sciname} from {dbPath}");
                     using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
@@ -1125,7 +1141,8 @@ namespace planimals
                                 currentDir + "\\assets\\photos\\" + $"{sciname}.jpg",
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
-                                new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight)
+                                new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight),
+                                false
                                 );
                             playerHand.Add(c);
                             Controls.Add(c);
@@ -1133,7 +1150,7 @@ namespace planimals
                     }
                     if (deck.Count > 0)
                     {
-                        Console.WriteLine($"-getting data about {sciname} from cards.mdf");
+                        Console.WriteLine($"popping card from Games.Deck in cards.mdf");
                         //Console.WriteLine($"-getting an data about {sciname} from {dbPath}");
                         SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{username}'", sqlConnection);
                         removeCard.ExecuteNonQuery();
@@ -1142,12 +1159,13 @@ namespace planimals
                     else
                     {
                         //Console.WriteLine($"-the deck is empty, can't remove from Games.Deck in {dbPath}");
-                        Console.WriteLine($"-the deck is empty, can't remove from Games.Deck in cards.mdf");
+                        Console.WriteLine($"the deck is empty, can't remove from Games.Deck in cards.mdf");
                         Display("the deck is empty");
                         drawCardButton.Enabled = false;
                         drawCardButton.Hide();
                     }
-                    Console.WriteLine($"-adding card to Hand in {dbPath}");
+                    //Console.WriteLine($"-adding card to Hand in {dbPath}");
+                    Console.WriteLine($"-adding card to Hand in cards.mdf");
                     SqlCommand addToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{username}', '{sciname}')", sqlConnection);
                     addToHand.ExecuteNonQuery();
                     sqlConnection.Close();

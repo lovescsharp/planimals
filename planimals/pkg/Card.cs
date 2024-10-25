@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Media;
 
 namespace planimals
 {
@@ -12,6 +13,7 @@ namespace planimals
         public bool Picked;
         public Point prevLocation;
         private Point offset;
+        private bool inChain;
 
         public string scientific_name;
         public string common_name;
@@ -21,13 +23,8 @@ namespace planimals
 
         public static int pictureBoxWidth = MainForm.workingHeight / 8;
         public static int pictureBoxHeight = MainForm.workingWidth / 10;
-        public Card(string sname, string cname, string desc, string path, int hier, string habt, Point position)
+        public Card(string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inChain)
         {
-            scientific_name = sname;
-            common_name = cname;
-            description = desc;
-            hierarchy = hier;
-            habitat = habt;
             Height = pictureBoxHeight;
             Width = pictureBoxWidth;
             try
@@ -43,7 +40,7 @@ namespace planimals
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
             prevLocation = new Point(pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - pictureBoxHeight);
-            BackColor = Color.Gray;
+            BackColor = System.Drawing.Color.Gray;
             Picked = false;
 
             ContextMenu cm = new ContextMenu();
@@ -70,137 +67,85 @@ namespace planimals
         }
         private void card_MouseDown(object sender, MouseEventArgs e)
         {
+            if (MainForm.playerChain.Count <= 3)
+            {
+                for (int i = 0; i < MainForm.playerChain.Count; i++)
+                {
+                    if (MainForm.playerChain[i].Count < 5)
+                    {
+                        MainForm.locationIndicators[i].Add(
+                            new Rectangle(
+                                MainForm.fieldRectangle.Left + (MainForm.playerChain[i].Count - 1) * (MainForm.workingHeight / 8 + 20),
+                                MainForm.fieldRectangle.Top + i * (MainForm.workingWidth / 10 + 20),
+                                MainForm.workingHeight / 8 + 10,
+                                MainForm.workingWidth / 10 + 10
+                            ));
+                    }
+                }
+            }
             if (e.Button == MouseButtons.Left)
             {
+                if (inChain)
+                {
+                    for(int i = 0; i < MainForm.playerChain.Count; i++)
+                    {
+                        for (int j = 0; j < MainForm.playerChain[i].Count; j++)
+                        {
+                            if (this == MainForm.playerChain[i][j])
+                            {
+                                Console.WriteLine($"this {common_name} is in the chain at playerChain[{i}][{j}]");
+
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"this {common_name} is in the hand");
+                    //draw locationIndicators
+                }
                 offset = new Point(e.X, e.Y);
                 Pick(this);
             }
         }
         private void card_Mouseup(object sender, MouseEventArgs e)
         {
-            int row = 0;
-            int col = 0;
-            Console.WriteLine($"-dropped {this.common_name} at {this.Location}");
-            foreach (List<Card> subchain in MainForm.playerChain)
+            Console.WriteLine($"-dropped {common_name} at {Location}");
+            if (inChain)
             {
-                Console.WriteLine($"-checking whether {this.common_name} is from the chain or from the deck...");
-                foreach (Card c in subchain)
+                Console.WriteLine($"searching for cell in which the card was placed");
+                foreach (List<Rectangle> lir in MainForm.locationIndicators)
                 {
-                    if (this == c)
+                    foreach (Rectangle r in lir)
                     {
-                        Console.WriteLine($" yep this {this.common_name} is from the playerChain[{MainForm.playerChain.IndexOf(subchain)}][{subchain.IndexOf(c)}]");
-                        Console.WriteLine($"there are {MainForm.locationIndicators.Count} rows in locationIndicators");
-                        for (int i = 0; i < MainForm.locationIndicators.Count; i++)
+                        if (r.Contains(MousePosition))
                         {
-                            for (int j = 0; j < MainForm.locationIndicators[i].Count; j++)
-                            {
-                                if (MainForm.locationIndicators[i][j].Contains(FindForm().PointToClient(Cursor.Position))) //the card was just put somewhere else in the chain
-                                {
-                                    Console.WriteLine($"this {this.common_name} was moved to {MainForm.locationIndicators[i][j]}");
-                                    if (cellIsBusy(i, j))
-                                    {
-                                        Console.WriteLine("Mvoing cards by one.");
-                                        foreach (Card card in MainForm.playerChain[i])
-                                        {
-                                            card.Location = new Point(c.Location.X + c.Width + 5, c.Location.Y);
-                                            if (card == c) break;
-                                        }
-                                    }
-                                    row = i;
-                                    col = j;
-                                    try
-                                    {
-                                        MainForm.playerChain[i][j] = this;
-                                    }
-                                    catch
-                                    {
-                                        Drop(this);
-                                        Location = MainForm.locationIndicators[i][j].Location;
-                                        return;
-                                    }
-                                    MainForm.playerChain[MainForm.playerChain.IndexOf(subchain)].RemoveAt(subchain.IndexOf(c));
-                                    if (MainForm.username != "")
-                                    {
-                                        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
-                                        {
-                                            sqlConnection.Open();
-                                            SqlCommand update = new SqlCommand(
-                                                $"UPDATE FoodChainCards " +
-                                                $"SET RowNo={i}, PositionNo={j} " +
-                                                $"WHERE Username='{MainForm.username}' " +
-                                                $"AND RowNo={MainForm.playerChain.IndexOf(subchain)} " +
-                                                $"AND PositionNo={subchain.IndexOf(c)}"
-                                                , sqlConnection);
-                                            update.ExecuteNonQuery();
-                                            sqlConnection.Close();
-                                        }
-                                    }
-                                    MainForm.locationIndicators[i].Add(
-                                        new Rectangle(
-                                            MainForm.locationIndicators[i][j].X + MainForm.locationIndicators[i][j].Width + 5,
-                                            MainForm.locationIndicators[i][j].Y,
-                                            MainForm.workingHeight / 8 + 10,
-                                            MainForm.workingWidth / 10 + 10
-                                        )
-                                    );
-                                    if (MainForm.locationIndicators[0].Count == 1)
-                                    {
-                                        MainForm.locationIndicators.Add(new List<Rectangle>());
-                                        MainForm.locationIndicators[1].Add(
-                                            new Rectangle
-                                            (
-                                                10,
-                                                MainForm.fieldRectangle.Top + 10 + MainForm.locationIndicators[0][0].Height + 10,
-                                                MainForm.workingHeight / 8 + 10,
-                                                MainForm.workingWidth / 10 + 10
-                                                )                                   
-                                            );
-                                    }
-                                    FindForm().Invalidate();
-                                    Drop(this);
-                                    Location = MainForm.locationIndicators[i][j].Location;
-                                    return;
-                                }
-                            }
+                            Drop(this);
+                            //move to another cell in chain
                         }
-                        //the card was removed from the chain
-                        putToHand(row, col);
-                        return;
                     }
                 }
+                Drop(this);
+                Location = prevLocation;
             }
-            Console.WriteLine(" nope, this is from the hand");
-            for (int i = 0; i < MainForm.locationIndicators.Count; i++)
+            else
             {
-                for (int j = 0; j < MainForm.locationIndicators[i].Count; j++)
+                Console.WriteLine($"searching for cell in which the card was placed");
+                foreach (List<Rectangle> lir in MainForm.locationIndicators)
                 {
-                    if (MainForm.locationIndicators[i][j].Contains(FindForm().PointToClient(Cursor.Position))) //the card was put into the chain
+                    foreach (Rectangle r in lir)
                     {
-                        if (cellIsBusy(i, j))
+                        if (r.Contains(MousePosition))
                         {
-                            foreach (Card c in MainForm.playerChain[i])
-                            {
-                                c.Location = new Point(c.Location.X + c.Width + 5, c.Location.Y);
-                            }
+                            Drop(this);
+                            //add to another cell in chain
                         }
-                        row = i;
-                        col = j;
-                        putToChain(row, col);
-                        MainForm.locationIndicators[i].Add(
-                            new Rectangle(
-                                MainForm.locationIndicators[i][j].X + MainForm.locationIndicators[i][j].Width + 5,
-                                MainForm.locationIndicators[i][j].Y,
-                                MainForm.workingHeight / 8 + 10,
-                                MainForm.workingWidth / 10 + 10
-                            )
-                        );
-                        Drop(this);
-                        return;
                     }
                 }
+                Drop(this);
+                Location = prevLocation;
             }
-            Drop(this);
-            Location = prevLocation;
+            //update locationIndicators drawings
         }
         private void putToHand(int row, int col)
         {
@@ -316,7 +261,7 @@ namespace planimals
         public void card_RightClick(object sender, EventArgs e)
         {
             MainForm.countDownTimer.Stop();
-            MessageBox.Show($"{description}");
+            MessageBox.Show($"{description}\nprimarily lives in {habitat} and is {hierarchy} in the foodchain");
         }
         public static bool InRectangle(Point p) => p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
     }
