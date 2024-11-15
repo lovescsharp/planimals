@@ -122,9 +122,10 @@ namespace planimals
                 workingHeight / 2
             );
 
-            BackgroundImage = new Bitmap(Image.FromFile(currentDir + "\\assets\\photos\\background.png"));
-            BackgroundImageLayout = ImageLayout.Stretch;
-            
+            //BackgroundImage = new Bitmap(Image.FromFile(currentDir + "\\assets\\photos\\background.png"));
+            //BackgroundImageLayout = ImageLayout.Stretch;
+            BackColor = Color.DarkSeaGreen;
+
             username = "";
             stats = new Label();
             stats.Size = new Size(300, 100);
@@ -213,14 +214,14 @@ namespace planimals
             Controls.Add(noButton);
 
             youSureWannaQuitLabel = new Label();
-            youSureWannaQuitLabel.Size = new Size(600, 50);
-            youSureWannaQuitLabel.Location = new Point(workingWidth / 2 - 200, workingHeight / 3);
+            youSureWannaQuitLabel.AutoSize = true;
+            youSureWannaQuitLabel.Location = new Point(workingWidth / 2 - youSureWannaQuitLabel.Width, workingHeight / 3);
             youSureWannaQuitLabel.Text = "Are you sure you want to quit?";
             youSureWannaQuitLabel.ForeColor = Color.White;
             Controls.Add(youSureWannaQuitLabel);
 
             drawCardButton = new PictureBox();
-            drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
+            drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png"); 
             drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
             drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
             drawCardButton.Location = new Point(
@@ -311,7 +312,7 @@ namespace planimals
             foreach (Control control in gameControls) control.Hide();
             foreach (Control control in endControls) control.Hide();
             foreach (Control control in youSureWannaQuitControls) control.Hide();
-            foreach (Control control in Controls) if (control.GetType() == typeof(Label)) control.ForeColor = Color.DarkBlue;
+            foreach (Control control in Controls) if (control.GetType() == typeof(Label)) control.ForeColor = Color.LightGreen;
             #endregion
             Console.WriteLine("the game was initialized");
         }
@@ -475,7 +476,7 @@ namespace planimals
                             hierarchy,
                             habitat,
                             locationIndicators[rowNo][positionNo].Location,
-                            true
+                            true 
                             );
 
                         while (playerChain.Count <= rowNo) playerChain.Add(new List<Card>());
@@ -515,8 +516,8 @@ namespace planimals
                         for (int pos = 0; pos <= maxPositionNo; pos++)
                         {
                             Rectangle rect = new Rectangle(
-                                fieldRectangle.Left + pos * (workingHeight / 8 + 20),
-                                fieldRectangle.Top + rowNo * (workingWidth / 10 + 20),
+                                fieldRectangle.Left + pos * (workingHeight / 8),
+                                fieldRectangle.Top + rowNo * (workingWidth / 10),
                                 workingHeight / 8 + 10,
                                 workingWidth / 10 + 10
                             );
@@ -855,12 +856,12 @@ namespace planimals
         {
             if (countDownTimer.Enabled)
             {
-                using (Pen pen = new Pen(Color.DarkGray, 6.0f))
+                using (Pen pen = new Pen(Color.NavajoWhite, 6.0f))
                 {
                     e.Graphics.DrawRectangle(pen, fieldRectangle);
                     foreach (List<Rectangle> chain in locationIndicators)
                     {
-                        //foreach (Rectangle r in chain) if (r == chain.Last()) e.Graphics.DrawRectangle(pen, r);
+                        foreach (Rectangle r in chain) if (r == chain.Last()) e.Graphics.DrawRectangle(pen, r);
                     }
                 }
             }
@@ -936,7 +937,7 @@ namespace planimals
             foreach (List<Card> chain in playerChain)
             {
                 str += $"   chain {playerChain.IndexOf(chain).ToString()}\n";
-                foreach (Card c in chain) str += "        " + $"{c.common_name}" + '\n';
+                foreach (Card c in chain) str += "        " + $"{c.CommonName}" + '\n';
             }
             //
             Console.WriteLine("current chain:\n" + str);
@@ -961,13 +962,13 @@ namespace planimals
                         sqlConnection.Open();
                         for (int i = 0; i < chain.Count - 1; i++)
                         {
-                            cards.Add(chain[i].scientific_name);
-                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].scientific_name}' AND Consumed='{chain[i].scientific_name}'", sqlConnection);
+                            cards.Add(chain[i].ScientificName);
+                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].ScientificName}' AND Consumed='{chain[i].ScientificName}'", sqlConnection);
                             int b = (int)sqlCommand.ExecuteScalar();
                             if (b == 0)
                             {
                                 Display("food chain is invalid");
-                                Console.WriteLine($"playerChain[{playerChain.IndexOf(chain)}] is invalid as {chain[i + 1].common_name} doesn't eat {chain[i].common_name}");
+                                Console.WriteLine($"playerChain[{playerChain.IndexOf(chain)}] is invalid as {chain[i + 1].CommonName} doesn't eat {chain[i].CommonName}");
                                 valid = false;
                                 for (int j = 0; j < chain.Count; j++)
                                 {

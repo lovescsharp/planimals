@@ -15,18 +15,27 @@ namespace planimals
         private Point offset;
         private bool inChain;
 
-        public string scientific_name;
-        public string common_name;
-        private string description;
-        private int hierarchy;
-        private string habitat;
+        public string ScientificName;
+        public string CommonName;
+        private string Description;
+        private int Hierarchy;
+        private string Habitat;
 
         public static int pictureBoxWidth = MainForm.workingHeight / 8;
         public static int pictureBoxHeight = MainForm.workingWidth / 10;
-        public Card(string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inChain)
+
+        public Card(string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inchain)
         {
-            Height = pictureBoxHeight;
-            Width = pictureBoxWidth;
+            ScientificName = scientific_name;
+            CommonName = common_name;
+            Description = description;
+            Hierarchy = hierarchy;
+            Habitat = habitat;
+
+            inChain = inchain;
+
+            pictureBoxHeight = MainForm.workingWidth / 10;
+            pictureBoxWidth = MainForm.workingHeight / 8;
             try
             {
                 Image = Image.FromFile(path);
@@ -39,7 +48,7 @@ namespace planimals
             SizeMode = PictureBoxSizeMode.Zoom;
             Size = new Size(pictureBoxWidth, pictureBoxHeight);
             Location = new Point(position.X, position.Y);
-            prevLocation = new Point(pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - pictureBoxHeight);
+            prevLocation = new Point(pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Height);
             BackColor = System.Drawing.Color.Gray;
             Picked = false;
 
@@ -54,7 +63,7 @@ namespace planimals
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            using (Font myFont = new Font("Arial", 10)) e.Graphics.DrawString(common_name, myFont, System.Drawing.Brushes.Yellow, new Point(Width / 10, Height / 20));
+            using (Font myFont = new Font("Arial", 10)) e.Graphics.DrawString(CommonName, myFont, System.Drawing.Brushes.Yellow, new Point(Width / 10, Height / 20));
         }
         private void card_MouseMove(object sender, MouseEventArgs e)
         {
@@ -75,8 +84,8 @@ namespace planimals
                     {
                         MainForm.locationIndicators[i].Add(
                             new Rectangle(
-                                MainForm.fieldRectangle.Left + (MainForm.playerChain[i].Count - 1) * (MainForm.workingHeight / 8 + 20),
-                                MainForm.fieldRectangle.Top + i * (MainForm.workingWidth / 10 + 20),
+                                MainForm.fieldRectangle.Left + (MainForm.playerChain[i].Count - 1) * (MainForm.workingHeight / 8),
+                                MainForm.fieldRectangle.Top + i * (MainForm.workingWidth / 10),
                                 MainForm.workingHeight / 8 + 10,
                                 MainForm.workingWidth / 10 + 10
                             ));
@@ -93,7 +102,7 @@ namespace planimals
                         {
                             if (this == MainForm.playerChain[i][j])
                             {
-                                Console.WriteLine($"this {common_name} is in the chain at playerChain[{i}][{j}]");
+                                Console.WriteLine($"this {CommonName} is in the chain at playerChain[{i}][{j}]");
 
                             }
                         }
@@ -101,7 +110,7 @@ namespace planimals
                 }
                 else
                 {
-                    Console.WriteLine($"this {common_name} is in the hand");
+                    Console.WriteLine($"this {CommonName} is in the hand");
                     //draw locationIndicators
                 }
                 offset = new Point(e.X, e.Y);
@@ -110,7 +119,7 @@ namespace planimals
         }
         private void card_Mouseup(object sender, MouseEventArgs e)
         {
-            Console.WriteLine($"-dropped {common_name} at {Location}");
+            Console.WriteLine($"-dropped {CommonName} at {Location}");
             if (inChain)
             {
                 Console.WriteLine($"searching for cell in which the card was placed");
@@ -145,6 +154,7 @@ namespace planimals
                 Drop(this);
                 Location = prevLocation;
             }
+            Invalidate();
             //update locationIndicators drawings
         }
         private void putToHand(int row, int col)
@@ -156,8 +166,8 @@ namespace planimals
                 using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
                 {
                     sqlConnection.Open();
-                    SqlCommand push = new SqlCommand($"INSERT INTO Hand values ('{MainForm.username}', '{scientific_name}')", sqlConnection);
-                    SqlCommand delete = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{MainForm.username}' AND CardID='{scientific_name}' AND RowNo={row} AND PositionNo={col}", sqlConnection);
+                    SqlCommand push = new SqlCommand($"INSERT INTO Hand values ('{MainForm.username}', '{ScientificName}')", sqlConnection);
+                    SqlCommand delete = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{MainForm.username}' AND CardID='{ScientificName}' AND RowNo={row} AND PositionNo={col}", sqlConnection);
                     push.ExecuteNonQuery();
                     delete.ExecuteNonQuery();
                     sqlConnection.Close();
@@ -181,7 +191,7 @@ namespace planimals
                 foreach (Card c in MainForm.playerChain[row])
                     if (MainForm.locationIndicators[row][col].Location == c.Location)
                     {
-                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].common_name}");
+                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].CommonName}");
                         return true;
                     }
             }
@@ -191,7 +201,7 @@ namespace planimals
                 foreach (Card c in MainForm.playerChain[row]) 
                     if (MainForm.locationIndicators[row][col].Location == c.Location)
                     {
-                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].common_name}");
+                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].CommonName}");
                         return true;
                     }
             }
@@ -228,8 +238,8 @@ namespace planimals
                 using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
                 {
                     sqlConnection.Open();
-                    SqlCommand push = new SqlCommand($"INSERT INTO FoodChainCards values ('{MainForm.username}', '{scientific_name}', {row}, {col})", sqlConnection);
-                    SqlCommand delete = new SqlCommand($"DELETE FROM Hand WHERE Username='{MainForm.username}' AND CardID='{scientific_name}'", sqlConnection);
+                    SqlCommand push = new SqlCommand($"INSERT INTO FoodChainCards values ('{MainForm.username}', '{ScientificName}', {row}, {col})", sqlConnection);
+                    SqlCommand delete = new SqlCommand($"DELETE FROM Hand WHERE Username='{MainForm.username}' AND CardID='{ScientificName}'", sqlConnection);
                     push.ExecuteNonQuery();
                     delete.ExecuteNonQuery();
                     sqlConnection.Close();
@@ -261,8 +271,8 @@ namespace planimals
         public void card_RightClick(object sender, EventArgs e)
         {
             MainForm.countDownTimer.Stop();
-            MessageBox.Show($"{description}\nprimarily lives in {habitat} and is {hierarchy} in the foodchain");
+            MessageBox.Show($"{Description}\nprimarily lives in {Habitat} and is {Hierarchy} in the foodchain");
         }
         public static bool InRectangle(Point p) => p.X < MainForm.fieldRectangle.Right && p.X > MainForm.fieldRectangle.Left - pictureBoxWidth / 2 && p.Y > MainForm.fieldRectangle.Top - pictureBoxHeight / 2 && p.Y < MainForm.fieldRectangle.Bottom;
     }
-}
+}   
