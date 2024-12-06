@@ -139,7 +139,7 @@ namespace planimals
                     password.Value = LoginForm.Hash(passwordInput.Text);
                     createUser.Parameters.Add(password);
 
-                    MainForm.username = usernameInput.Text.Trim();
+                    MainForm.game.username = usernameInput.Text.Trim();
                     Close();
                 }
                 else

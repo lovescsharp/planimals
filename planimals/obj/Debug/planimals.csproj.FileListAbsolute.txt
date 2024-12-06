@@ -38,3 +38,4 @@ C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimal
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\obj\Debug\planimals.pdb
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\obj\Debug\planimals.MainForm.resources
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.MainForm.resources
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.LoginForm.resources

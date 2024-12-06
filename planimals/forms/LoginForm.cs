@@ -117,7 +117,7 @@ namespace planimals
                 if (b == 1)
                 {
                     //log in, and assign username in form1
-                    MainForm.username = usernameInput.Text;
+                    MainForm.game.username = usernameInput.Text;
                     label.Text = "Login successful";
                     Close();
                     MainForm.stats.Text = $"hey, {usernameInput.Text}!";
@@ -157,6 +157,10 @@ namespace planimals
 
             
             return sb.ToString();
+        }
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
