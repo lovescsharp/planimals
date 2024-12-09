@@ -10,6 +10,7 @@ namespace planimals
     {
         public bool Picked;
         public Point prevLocation;
+        private Point rectLocation;
         private Point offset;
         private bool inChain;
 
@@ -18,6 +19,8 @@ namespace planimals
         private string Description;
         private int Hierarchy;
         private string Habitat;
+
+
 
         public static int pictureBoxWidth = MainForm.workingHeight / 8;
         public static int pictureBoxHeight = MainForm.workingWidth / 10;
@@ -61,13 +64,13 @@ namespace planimals
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            using (Font myFont = new Font("Arial", 10)) e.Graphics.DrawString(CommonName, myFont, System.Drawing.Brushes.Yellow, new Point(Width / 10, Height / 20));
+            using (Font myFont = new Font("Arial", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Yellow, new Point(Width / 10, Height / 20));
         }
         private void card_MouseMove(object sender, MouseEventArgs e)
         {
             if (Picked)
             {
-                Point newPosition = this.FindForm().PointToClient(Cursor.Position);
+                Point newPosition = FindForm().PointToClient(Cursor.Position);
                 newPosition.Offset(-offset.X, -offset.Y);
                 Location = newPosition;
             }
@@ -76,102 +79,95 @@ namespace planimals
         {
             for (int i = 0; i < MainForm.playerHand.Count; i++)
             {
-                
+                if (MainForm.playerHand[i].Picked)
+                {
+                    Drop(MainForm.playerHand[i]);
+                    MainForm.playerHand[i].Location = MainForm.playerHand[i].prevLocation;
+                }
             }
             Pick(this);
+            Console.WriteLine($"picked {CommonName}");
         }
         private void card_Mouseup(object sender, MouseEventArgs e)
         {
-
-        }
-        private void putToHand(int row, int col)
-        {
-
-        }
-        private bool cellIsBusy(int row, int col)
-        {
-            try
+            if (!inChain)
             {
-                foreach (Card c in MainForm.playerChain[row])
-                    if (MainForm.locationIndicators[row][col].Location == c.Location)
-                    {
-                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].CommonName}");
-                        return true;
-                    }
-            }
-            catch
-            {
-                MainForm.playerChain.Add(new List<Card>());
-                foreach (Card c in MainForm.playerChain[row]) 
-                    if (MainForm.locationIndicators[row][col].Location == c.Location)
-                    {
-                        Console.WriteLine($"playerChain[{row}][{col}] is busy by {MainForm.playerChain[row][col].CommonName}");
-                        return true;
-                    }
-            }
-            Console.WriteLine($"playerChain[{row}][{col}] is empty");
-            return false;
-        }
-        private void putToChain(int row, int col)
-        {
-            if (MainForm.playerChain[0].Count == 0 && row == 0)
-            {
-                MainForm.locationIndicators.Add(new List<Rectangle>());
-
-                for (int i = 0; i < MainForm.locationIndicators[0].Count; i++)
+                Console.WriteLine($"Searching for reactangle with coords : {PointToClient(MousePosition)}");
+                for (int i = 0; i < MainForm.cells.Count; i++)
                 {
-                    Rectangle newRect = new Rectangle(
-                        MainForm.locationIndicators[0][i].X,
-                        MainForm.locationIndicators[0][i].Y + pictureBoxHeight + 10,
-                        pictureBoxWidth,
-                        pictureBoxHeight
-                    );
-                    MainForm.locationIndicators[1].Add(newRect);
+                    for (int j = 0; j < MainForm.cells[i].Count; j++)
+                    {
+                        Console.WriteLine(MainForm.cells[i][j].Item1.Location);
+                        Console.WriteLine(MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)));
+                        if (MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)))
+                        {
+                            if (!MainForm.cells[i][j].Item2)
+                            {
+                                Console.WriteLine("found an empty cell");
+                                Drop(this);
+                                Location = MainForm.cells[i][j].Item1.Location;
+                                (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, true);
+                                MainForm.cells[i][j] = tuple;
+                                inChain = true;
+                                MainForm.playerHand.Remove(this);
+                                MainForm.playerChain[i].Add(this);
+                                MainForm.UpdateCells();
+                                FindForm().Invalidate();
+                                rectLocation = Location;
+                                return;
+                            }
+                            else
+                            {
+                                Console.WriteLine("cells not empty");
+                                Drop(this);
+                                Location = prevLocation;
+                                return;
+                            }
+                        }
+                    }
                 }
-
+                Drop(this);
+                Location = prevLocation;
+                return;
             }
-            if (row < MainForm.playerChain.Count)
+            else if (inChain)
             {
-                if (col < MainForm.playerChain[row].Count) MainForm.playerChain[row][col] = this;
-                else  MainForm.playerChain[row].Add(this);
-            }
-            MainForm.playerHand.Remove(this);
-
-            if (MainForm.game.username != "")
-            {
-                using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+                for (int i = 0; i < MainForm.cells.Count; i++)
                 {
-                    sqlConnection.Open();
-                    SqlCommand push = new SqlCommand($"INSERT INTO FoodChainCards values ('{MainForm.game.username}', '{ScientificName}', {row}, {col})", sqlConnection);
-                    SqlCommand delete = new SqlCommand($"DELETE FROM Hand WHERE Username='{MainForm.game.username}' AND CardID='{ScientificName}'", sqlConnection);
-                    push.ExecuteNonQuery();
-                    delete.ExecuteNonQuery();
-                    sqlConnection.Close();
+                    for (int j = 0; j < MainForm.cells[i].Count; j++)
+                    {
+                        if (MainForm.cells[i][j].Item1.Location == rectLocation)
+                        {
+                            (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
+                            MainForm.cells[i][j] = tuple;
+                            MainForm.playerChain[i].Remove(this);
+                            MainForm.playerHand.Add(this);
+                            MainForm.UpdateCells();
+                            Drop(this);
+                            Location = prevLocation;
+                            rectLocation = new Point(0, 0);
+                            inChain = false;    
+                            return;
+                        }
+                    }
                 }
-            }
-
-            Drop(this);
-            Location = MainForm.locationIndicators[row][col].Location;
-        }
-        private void UpdateLocations(int row) 
-        { 
-            for (int i = 0;  i < MainForm.playerChain[row].Count; i++)
-            {
-                MainForm.playerChain[row][i].Location = new Point(i*Width + 5, MainForm.playerChain[row][i].Location.Y);
             }
         }
         private void Drop(Card c) {
             c.Picked = false;
-            c.BackColor = System.Drawing.Color.Gray;
+            c.BackColor = Color.Gray;
             FindForm().Invalidate();
         }
         private void Pick(Card c) {
             c.Picked = true;
-            c.BackColor = System.Drawing.Color.White;
+            c.BackColor = Color.White;
             FindForm().Invalidate();
             BringToFront();
         }
-        private void card_LeftClick() => Location = prevLocation;
+        private void PutToHand() 
+        {
+            
+        }
         public void card_RightClick(object sender, EventArgs e)
         {
             MainForm.countDownTimer.Stop();

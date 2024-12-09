@@ -7,11 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Media.Media3D;
 
 namespace planimals
 {
     //https://stackoverflow.com/questions/51567681/how-to-do-task-continewith-using-a-delay-before-the-continuewith-in-c
     //allows to asynchronously change label.Text, looks cool 8) 
+
     public partial class MainForm : Form
     {
         #region attributes
@@ -47,7 +49,8 @@ namespace planimals
         private StringBuilder sb;
         public static List<Card> playerHand;
         public static List<List<Card>> playerChain;
-        public static List<List<Rectangle>> locationIndicators;
+        public static List<List<(Rectangle, bool)>> cells;
+        private static Rectangle cell;
         public static Rectangle liRectangle;
 
         private PictureBox retryButton;
@@ -285,11 +288,6 @@ namespace planimals
             readySteadyGoTimer = new Timer();
             readySteadyGoTimer.Interval = 1000;
             readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
-
-            locationIndicators = new List<List<Rectangle>>();
-            locationIndicators.Add(new List<Rectangle>());
-            locationIndicators[0].Add(new Rectangle(10, 10, Card.pictureBoxWidth + 10, Card.pictureBoxHeight + 10));
-
             #endregion
             #region backs
 
@@ -303,7 +301,7 @@ namespace planimals
             Console.WriteLine("initializing deck");
             playerHand = new List<Card>();
             Console.WriteLine("initializing playerChain with");
-            playerChain = new List<List<Card>>() { new List<Card>() { } };
+            playerChain = new List<List<Card>>() { new List<Card>() };
             //playerChain = new List<Chain>();
             MouseMove += DrawCardButton_MouseMove;
             Paint += new PaintEventHandler(Draw);
@@ -319,6 +317,12 @@ namespace planimals
             foreach (Control control in youSureWannaQuitControls) control.Hide();
             foreach (Control control in Controls) if (control.GetType() == typeof(Label)) control.ForeColor = Color.LightGreen;
             #endregion
+
+            cells = new List<List<(Rectangle, bool)>>();
+            cell = new Rectangle(Width / 8, Height / 6, workingHeight / 8 + 3, workingWidth / 10 + 3);
+            //cells.Add(new List<(Rectangle, bool)>() { (cell, false) });
+            UpdateCells();
+
             Console.WriteLine("the game was initialized");
         }
         #region testing db
@@ -480,7 +484,7 @@ namespace planimals
                             Path.Combine(currentDir, "assets", "photos", $"{scientificName}.jpg"), // Using Path.Combine for better path handling
                             hierarchy,
                             habitat,
-                            //locationIndicators[rowNo][positionNo].Location, pos
+                            //cells[rowNo][positionNo].Location, pos
                             new Point(10, 10),
                             true 
                             );
@@ -493,7 +497,7 @@ namespace planimals
                 }
             }
         }
-        private void LoadLocationIndicators()
+        private void Loadcells()
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -510,14 +514,14 @@ namespace planimals
 
                 using (SqlDataReader r = getSizes.ExecuteReader())
                 {
-                    locationIndicators.Clear();
+                    cells.Clear();
 
                     while (r.Read())
                     {
                         int rowNo = r.GetInt32(0);
                         int maxPositionNo = r.GetInt32(1);
 
-                        while (locationIndicators.Count <= rowNo) locationIndicators.Add(new List<Rectangle>());
+                        while (cells.Count <= rowNo) cells.Add(new List<(Rectangle, bool)>());
 
                         for (int pos = 0; pos <= maxPositionNo; pos++)
                         {
@@ -528,7 +532,7 @@ namespace planimals
                                 workingWidth / 10 + 10
                             );
 
-                            locationIndicators[rowNo].Add(rect);
+                            cells[rowNo].Add((rect, false));
                         }
                     }
                 }
@@ -553,9 +557,7 @@ namespace planimals
                                       |__/
              */
             string strArr = "";
-            playerChain.Add(new List<Card> { });
-            playerChain.Add(new List<Card> { });
-            locationIndicators = new List<List<Rectangle>>();
+            cells = new List<List<(Rectangle, bool)>>();
             
             foreach (Control control in menuControls) control.Hide();
             imageIndex = 3;
@@ -614,7 +616,7 @@ namespace planimals
                         Controls.Add(c);
                     }
                 }
-                LoadLocationIndicators();
+                Loadcells();
                 LoadPlayerChain();
                 sqlConnection.Close();
                 foreach (List<Card> chain in playerChain) 
@@ -849,9 +851,9 @@ namespace planimals
             {
                 using (Pen pen = new Pen(Color.NavajoWhite, 6.0f))
                 {
-                    foreach (List<Rectangle> chain in locationIndicators)
+                    foreach (List<(Rectangle, bool)> tuples in cells)
                     {
-                        foreach (Rectangle r in chain) if (r == chain.Last()) e.Graphics.DrawRectangle(pen, r);
+                        foreach ((Rectangle, bool) tuple in tuples) e.Graphics.DrawRectangle(pen, tuple.Item1);
                     }
                 }
             }
@@ -862,22 +864,30 @@ namespace planimals
                 _ => Invoke(new MethodInvoker(() => label.Text = ""))
             );
         }
-        public void UpdateLocInd() 
+        public static void UpdateCells() 
         {
-            locationIndicators.Clear();
-            for (int i = 0; i < playerChain.Count; i++)
+            cells.Clear();
+            int cardCount = playerChain.Count;
+            for (int i = 0; i <= playerChain.Count; i++)
             {
-                locationIndicators.Add(new List<Rectangle>());
-                for (int j = 0; j < playerChain[i].Count; j++)
+                cells.Add(new List<(Rectangle, bool)>());
+                if (i != playerChain.Count)
                 {
-                    locationIndicators[i].Add(
-                        new Rectangle(
-                            j*1 + 10, i*1 + 10, Card.pictureBoxWidth, Card.pictureBoxHeight    
-                        )
-                    );
+                    for (int j = 0; j <= playerChain[i].Count; j++)
+                    {
+                        if (j == playerChain[i].Count)
+                        {
+                            Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
+                            cells[i].Add((rect, false));
+                        }
+                        else
+                        {
+                            Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
+                            cells[i].Add((rect, true));
+                        }
+                    }
                 }
             }
-            Invalidate();
         }
         #endregion
         #region login and stuff
@@ -948,15 +958,15 @@ namespace planimals
             Console.WriteLine("current chain:\n" + str);
             int chainIndex = 0;
             earned = 0;
-            foreach (List<Card> chain in playerChain)
+            for (int index = 0; index < playerChain.Count; index++)
             {
                 bool valid = true;
-                FixChainIndices(chain);
+                FixChainIndices(playerChain[index]);
                 using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
                     SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND RowNo={chainIndex}", sqlConnection);
                     List<string> cards = new List<string>();
-                    if (chain.Count < 2)
+                    if (playerChain[index].Count < 2)
                     {
                         Display("the chain must consist of at least two organisms.");
                         chainIndex++;
@@ -965,55 +975,54 @@ namespace planimals
                     else
                     {
                         sqlConnection.Open();
-                        for (int i = 0; i < chain.Count - 1; i++)
+                        for (int i = 0; i < playerChain[index].Count - 1; i++)
                         {
-                            cards.Add(chain[i].ScientificName);
-                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[i + 1].ScientificName}' AND Consumed='{chain[i].ScientificName}'", sqlConnection);
+                            cards.Add(playerChain[index][i].ScientificName);
+                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{playerChain[index][i + 1].ScientificName}' AND Consumed='{playerChain[index][i].ScientificName}'", sqlConnection);
                             int b = (int)sqlCommand.ExecuteScalar();
                             if (b == 0)
                             {
                                 Display("food chain is invalid");
-                                Console.WriteLine($"playerChain[{playerChain.IndexOf(chain)}] is invalid as {chain[i + 1].CommonName} doesn't eat {chain[i].CommonName}");
+                                Console.WriteLine($"playerChain[{playerChain.IndexOf(playerChain[index])}] is invalid as {playerChain[index][i + 1].CommonName} doesn't eat {playerChain[index][i].CommonName}");
                                 valid = false;
-                                for (int j = 0; j < chain.Count; j++)
+                                for (int j = 0; j < playerChain[index].Count; j++)
                                 {
-                                    chain[j].Location = chain[j].prevLocation;
-                                    chain[j].Picked = false;
-                                    chain[j].BackColor = Color.Gray;
-                                    playerHand.Add(chain[j]);
+                                    playerChain[index][j].Location = playerChain[index][j].prevLocation;
+                                    playerChain[index][j].Picked = false;
+                                    playerChain[index][j].BackColor = Color.Gray;
+                                    playerHand.Add(playerChain[index][j]);
                                 }
-                                if (game.username != "")
-                                {
-                                    PushToHand(cards);
-                                }
+                                if (game.username != "") PushToHand(cards);
                                 playerChain.Clear();
                                 playerChain.Add(new List<Card>());
                                 earned = 0;
                                 chainIndex++;
+                                UpdateCells();
                                 return;
                             }
                         }
                         if (valid)
                         {
-                            overallScore += CalcScore(chain.Count);
-                            earned += CalcScore(chain.Count);
+                            overallScore += CalcScore(playerChain[index].Count);
+                            earned += CalcScore(playerChain[index].Count);
                             if (game.username != "")
                             {
-                                totalPoints += CalcScore(chain.Count);
+                                totalPoints += CalcScore(playerChain[index].Count);
                                 SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={totalPoints} WHERE Username='{game.username}'", sqlConnection);
                                 updatePoints.ExecuteNonQuery();
                                 disposeChain.ExecuteNonQuery();
                             }
-                            foreach (Card c in chain)
+                            foreach (Card c in playerChain[index])
                             {
                                 Controls.Remove(c);
                                 c.Image.Dispose();
                             }
                             sqlConnection.Close();
-                            chain.Clear();
+                            playerChain[index].Clear();
                             chainIndex++;
                             for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
                         }
+                        UpdateCells();
                         Invalidate();
                     }
                 }
@@ -1159,6 +1168,9 @@ namespace planimals
                     SqlCommand addToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{sciname}')", sqlConnection);
                     addToHand.ExecuteNonQuery();
                     sqlConnection.Close();
+                    
+
+                    //TODO! update prevLocations of cards in Chain and Hand
                 }
             }
             else Display("cannot hold more than 15 cards"); //instead call CheckHand();
