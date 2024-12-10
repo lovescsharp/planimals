@@ -18,7 +18,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 164,
+          "DockedWidth": 169,
           "SelectedChildIndex": 0,
           "Children": [
             {
@@ -27,9 +27,9 @@
               "Title": "Card.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Card.cs",
-              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs",
-              "RelativeToolTip": "planimals\\Entities\\Card.cs",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAAAF8AAAAkAAAAAAAAAA==",
+              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs*",
+              "RelativeToolTip": "planimals\\Entities\\Card.cs*",
+              "ViewState": "AgIAABgAAAAAAAAAAAAMwLIAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-01T13:40:48.511Z",
               "IsPinned": true,
@@ -45,13 +45,12 @@
               "RelativeToolTip": "planimals\\Entities\\Game.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-06T09:50:29.349Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-06T09:50:29.349Z"
             }
           ]
         },
         {
-          "DockedWidth": 236,
+          "DockedWidth": 231,
           "SelectedChildIndex": 0,
           "Children": [
             {
@@ -62,7 +61,7 @@
               "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
-              "ViewState": "AgIAAMUDAAAAAAAAAAAqwNQDAAAvAAAAAAAAAA==",
+              "ViewState": "AgIAAGEBAAAAAAAAAAAIwN8BAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-20T14:00:06.832Z",
               "EditorCaption": ""
