@@ -332,7 +332,7 @@ namespace planimals
         delete from Games where Username='player1'
         delete from Hand where Username='player1'
         insert into Games(Username, Time, Deck) values
-        ('player1', 36, ',1, 1, 1, 1, 1, 1, 1, 1')
+        ('player1', 36, ',1,1,1,1,1,1,1,1')
 
         insert into Hand(Username, CardID) values
         ('player1', 'Omocestus viridulus'),
@@ -343,7 +343,7 @@ namespace planimals
         ('player1', 'Poa pratensis', 0, 0),
         ('player1', 'Omocestus viridulus', 0, 1),
         ('player1', 'Turdus merula', 0, 2),
-        ('player1', 'Black Rat Snake', 0, 3),
+        ('player1', 'Pantherophis obsoletus', 0, 3),
         ('player1', 'Tyto alba', 0, 4),
         ('player1', 'Poa pratensis', 1, 0),
         ('player1', 'Microtus arvalis', 1, 1); 
@@ -352,7 +352,7 @@ namespace planimals
         {
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
+                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
                 sqlConnection.Open(); test.ExecuteNonQuery(); sqlConnection.Close();
             }
         }
@@ -477,6 +477,8 @@ namespace planimals
                         int rowNo = reader.GetInt32(5);
                         int positionNo = reader.GetInt32(6);
 
+                        Console.WriteLine($"Adding {commonName} to cells[{rowNo}][{positionNo}]");
+
                         Card card = new Card(
                             scientificName,
                             commonName,
@@ -484,55 +486,51 @@ namespace planimals
                             Path.Combine(currentDir, "assets", "photos", $"{scientificName}.jpg"), // Using Path.Combine for better path handling
                             hierarchy,
                             habitat,
-                            //cells[rowNo][positionNo].Location, pos
-                            new Point(10, 10),
+                            cells[rowNo][positionNo].Item1.Location,
                             true 
                             );
+                        card.rectLocation = cells[rowNo][positionNo].Item1.Location;
 
                         while (playerChain.Count <= rowNo) playerChain.Add(new List<Card>());
-
+                            
                         playerChain[rowNo].Add(card);
                         Controls.Add(card);
                     }
                 }
             }
         }
-        private void Loadcells()
+        private void LoadCells()
         {
+            cells.Clear();
+            int rows = 0, columns = 0;
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
 
-                SqlCommand getSizes = new SqlCommand(
-                    "SELECT RowNo, MAX(PositionNo) AS MaxPositionNo " +
-                    "FROM FoodChainCards " +
-                    "WHERE Username = @Username " +
-                    "GROUP BY RowNo " +
-                    "ORDER BY RowNo;", sqlConnection);
-
+                SqlCommand getSizes = new SqlCommand("SELECT RowNo, MAX(PositionNo) AS MaxPositionNo\r\nFROM FoodChainCards\r\nWHERE Username = @Username\r\nGROUP BY RowNo\r\n", sqlConnection);
                 getSizes.Parameters.AddWithValue("@Username", game.username);
-
                 using (SqlDataReader r = getSizes.ExecuteReader())
                 {
-                    cells.Clear();
-
                     while (r.Read())
                     {
-                        int rowNo = r.GetInt32(0);
-                        int maxPositionNo = r.GetInt32(1);
+                        rows = int.Parse(r["RowNo"].ToString());
+                        columns = int.Parse(r["MaxPositionNo"].ToString());
 
-                        while (cells.Count <= rowNo) cells.Add(new List<(Rectangle, bool)>());
-
-                        for (int pos = 0; pos <= maxPositionNo; pos++)
+                        cells.Add(new List<(Rectangle, bool)>());
+                        Console.WriteLine($"Added a row {rows}");
+                        for (int j = 0; j <= columns; j++)
                         {
-                            Rectangle rect = new Rectangle(
-                                pos * (workingHeight / 8),
-                                rowNo * (workingWidth / 10),
-                                workingHeight / 8 + 10,
-                                workingWidth / 10 + 10
-                            );
-
-                            cells[rowNo].Add((rect, false));
+                            if (j == columns)
+                            {
+                                Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, rows * cell.Height + cell.Y, cell.Width, cell.Height);
+                                cells[rows].Add((rect, false));
+                            }
+                            else
+                            {
+                                Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, rows * cell.Height + cell.Y, cell.Width, cell.Height);
+                                cells[rows].Add((rect, true));
+                            }
+                            Console.WriteLine($"Added cell {j} to row {rows}");
                         }
                     }
                 }
@@ -616,7 +614,7 @@ namespace planimals
                         Controls.Add(c);
                     }
                 }
-                Loadcells();
+                LoadCells();
                 LoadPlayerChain();
                 sqlConnection.Close();
                 foreach (List<Card> chain in playerChain) 
@@ -624,7 +622,6 @@ namespace planimals
                     foreach (Card c in chain) c.Hide();        
                 }
                 foreach (Card c in playerHand) c.Hide();
-                playerChain.RemoveAt(2);
                 readySteadyGoTimer.Start();
             }
         }
@@ -867,7 +864,6 @@ namespace planimals
         public static void UpdateCells() 
         {
             cells.Clear();
-            int cardCount = playerChain.Count;
             for (int i = 0; i <= playerChain.Count; i++)
             {
                 cells.Add(new List<(Rectangle, bool)>());
@@ -985,19 +981,24 @@ namespace planimals
                                 Display("food chain is invalid");
                                 Console.WriteLine($"playerChain[{playerChain.IndexOf(playerChain[index])}] is invalid as {playerChain[index][i + 1].CommonName} doesn't eat {playerChain[index][i].CommonName}");
                                 valid = false;
-                                for (int j = 0; j < playerChain[index].Count; j++)
+                                for (int k = 0; k < playerChain.Count; k++)
                                 {
-                                    playerChain[index][j].Location = playerChain[index][j].prevLocation;
-                                    playerChain[index][j].Picked = false;
-                                    playerChain[index][j].BackColor = Color.Gray;
-                                    playerHand.Add(playerChain[index][j]);
+                                    for (int j = 0; j < playerChain[k].Count; j++)
+                                    {
+                                        playerChain[k][j].Location = playerChain[k][j].prevLocation;
+                                        playerChain[k][j].Picked = false;
+                                        playerChain[k][j].inChain = false;
+                                        playerChain[k][j].BackColor = Color.Gray;
+                                        playerHand.Add(playerChain[k][j]);
+                                    }
+                                    if (game.username != "") PushToHand(cards);
+                                    playerChain.Clear();
+                                    playerChain.Add(new List<Card>());
+                                    earned = 0;
+                                    chainIndex++;
+                                    UpdateCells();
                                 }
-                                if (game.username != "") PushToHand(cards);
-                                playerChain.Clear();
-                                playerChain.Add(new List<Card>());
-                                earned = 0;
-                                chainIndex++;
-                                UpdateCells();
+                                Console.WriteLine($"Chain size = {playerChain.Count}");
                                 return;
                             }
                         }

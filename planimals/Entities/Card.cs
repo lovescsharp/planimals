@@ -10,9 +10,9 @@ namespace planimals
     {
         public bool Picked;
         public Point prevLocation;
-        private Point rectLocation;
+        public Point rectLocation;
         private Point offset;
-        private bool inChain;
+        public bool inChain;
 
         public string ScientificName;
         public string CommonName;
@@ -132,12 +132,14 @@ namespace planimals
             }
             else if (inChain)
             {
+                Console.Write($"{CommonName} in chain at ");
                 for (int i = 0; i < MainForm.cells.Count; i++)
                 {
                     for (int j = 0; j < MainForm.cells[i].Count; j++)
                     {
                         if (MainForm.cells[i][j].Item1.Location == rectLocation)
                         {
+                            Console.Write($"cells[{i}][{j}]");
                             (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
                             MainForm.cells[i][j] = tuple;
                             MainForm.playerChain[i].Remove(this);
@@ -164,7 +166,7 @@ namespace planimals
             FindForm().Invalidate();
             BringToFront();
         }
-        private void PutToHand() 
+        private void PutToChain(int row) 
         {
             
         }
