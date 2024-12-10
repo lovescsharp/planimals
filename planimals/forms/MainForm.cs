@@ -82,17 +82,18 @@ public partial class MainForm : Form
     {
         #region Init component
         /*
-                -=====-                             -=====-
-                    _..._                               _..._
-                .~     `~.                         .~`     ~.
-        ,_     /          }                       {          \     _,
+                  -=====-                            -=====-
+                   _..._                               _..._
+                 .~     `~.                         .~`     ~.
+         ,_     /          }                       {          \     _,
         ,_\'--, \   _.'`~~/                        \~~`'._   / ,--'/_,
-            \'--,_`{_,}    -(                          )-    {,_}`_,--'/
-            '.`-.`\;--,___.'_                        _'.___,--;/`.-`.'
+         \'--,_`{_,}    -(                          )-    {,_}`_,--'/
+          '.`-.`\;--,___.'_                        _'.___,--;/`.-`.'
             '._`/    |_ _{@}                       {@}_ _|    \`_.'
-            /     ` |-';/                        \;'-| `     \
-            /   \    / */ InitializeComponent(); /*|  \    /   \
-            /     '--;_                                _;--'     \
+               /     ` |-';/                        \;'-| `     \
+              /   \    / */
+        InitializeComponent(); /*|  \    /   \
+             /     '--;_                                _;--'     \
             _\          `\                            /`          /_
         / |`-.___.    /                           \    .___,-'| \
         `--`------'`--`^^^^^^^^^^^^^^^^^^^^^^^^^^^^`--`'------`--`
@@ -112,7 +113,8 @@ public partial class MainForm : Form
         //static size
         FormBorderStyle = FormBorderStyle.Fixed3D;
         MinimizeBox = false;
-        Size = new Size(1200, 800);
+        //Size = new Size(1366, 768);
+        Size = new Size(1600, 900);
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
@@ -221,7 +223,7 @@ public partial class MainForm : Form
         Controls.Add(youSureWannaQuitLabel);
 
         drawCardButton = new PictureBox();
-        drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png"); 
+        drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
         drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
         drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
         drawCardButton.Location = new Point(
@@ -234,13 +236,13 @@ public partial class MainForm : Form
         drawCardButton.Image = drawCardButtonBack;
         Controls.Add(drawCardButton);
         drawCardButton.Click += new EventHandler(DrawCard);
-        drawCardButton.MouseMove += DrawCardButton_MouseMove;
+        drawCardButton.MouseEnter += drawCardButton_MouseEnter;
+        drawCardButton.MouseLeave += drawCardButton_MouseLeave;
 
         chainButton = new PictureBox();
         chainButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\chain.png");
         chainButton.SizeMode = PictureBoxSizeMode.StretchImage;
-        chainButton.Width = workingWidth / 10;
-        chainButton.Height = workingHeight / 10;
+        chainButton.Size = new Size(workingWidth / 10, workingHeight / 10);
         chainButton.Location = new Point(
             workingWidth - drawCardButton.Width - workingHeight / 10,
             workingHeight / 2 - drawCardButton.Height / 2);
@@ -252,7 +254,8 @@ public partial class MainForm : Form
         chainButton.Image = chainButtonBack;
         Controls.Add(chainButton);
         chainButton.Click += new EventHandler(chainButton_Click);
-        chainButton.MouseMove += chainButton_MouseMove;
+        chainButton.MouseEnter += chainButton_MouseEnter;
+        chainButton.MouseLeave += chainButton_MouseLeave;
 
         label = new System.Windows.Forms.Label();
         label.Location = new Point(workingWidth / 10, workingHeight / 20);
@@ -302,7 +305,6 @@ public partial class MainForm : Form
         Console.WriteLine("initializing playerChain with");
         playerChain = new List<List<Card>>() { new List<Card>() };
         //playerChain = new List<Chain>();
-        MouseMove += DrawCardButton_MouseMove;
         Paint += new PaintEventHandler(Draw);
         //Resize += new EventHandler(OnResize);
 
@@ -319,6 +321,32 @@ public partial class MainForm : Form
         UpdateCells();
         Console.WriteLine("the game was initialized");
     }
+
+    private void drawCardButton_MouseEnter(object sender, EventArgs e) 
+    {
+        drawCardButton.Location = new Point(drawCardButton.Location.X - 3, drawCardButton.Location.Y - 3);
+        drawCardButton.Size = new Size(drawCardButton.Width + 6, drawCardButton.Height + 6);
+    }
+    private void drawCardButton_MouseLeave(object sender, EventArgs e) 
+    {
+        drawCardButton.Location = new Point(
+            drawCardButton.Width - workingHeight / 100 * 5,
+            workingHeight / 2 - drawCardButton.Height / 2);
+        drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
+    }
+    private void chainButton_MouseEnter(object sender, EventArgs e)
+    {
+        chainButton.Location = new Point(chainButton.Location.X - 3, chainButton.Location.Y - 3);
+        chainButton.Size = new Size(chainButton.Width + 6, chainButton.Height + 6);
+    }
+    private void chainButton_MouseLeave(object sender, EventArgs e) 
+    {
+        chainButton.Location = new Point(
+            workingWidth - drawCardButton.Width - workingHeight / 10,
+            workingHeight / 2 - drawCardButton.Height / 2);
+        chainButton.Size = new Size(workingWidth / 10, workingHeight / 10); 
+    }
+
     #region testing db
     // query creates an example of a saved game, so that you can test pulling and pushing \\
     /*
@@ -398,10 +426,12 @@ public partial class MainForm : Form
             }
             subchain.Clear();
         }
+        playerChain.Clear();
+        playerChain.Add(new List<Card>());
 
         GenerateDeck();
         //
-        imageIndex = 0;
+        imageIndex = 3;
         //
         timeLeft = 180;
         labelTimer.Show();
@@ -484,9 +514,9 @@ public partial class MainForm : Form
                         true 
                         );
                     card.rectLocation = cells[rowNo][positionNo].Item1.Location;
+                    //card.prevLocation = new Point(); //do something about it 
 
-                    while (playerChain.Count <= rowNo) playerChain.Add(new List<Card>());
-                            
+                    while (playerChain.Count <= rowNo + 1) playerChain.Add(new List<Card>());
                     playerChain[rowNo].Add(card);
                     Controls.Add(card);
                 }
@@ -512,9 +542,9 @@ public partial class MainForm : Form
 
                     cells.Add(new List<(Rectangle, bool)>());
                     Console.WriteLine($"Added a row {rows}");
-                    for (int j = 0; j <= columns; j++)
+                    for (int j = 0; j <= columns + 1; j++)
                     {
-                        if (j == columns)
+                        if (j == columns + 1)
                         {
                             Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, rows * cell.Height + cell.Y, cell.Width, cell.Height);
                             cells[rows].Add((rect, false));
@@ -768,6 +798,7 @@ public partial class MainForm : Form
             control.Show();
             control.Enabled = true;
         }
+        Invalidate();
     }
     private void yesButton_Click(object sender, EventArgs e) => goToMenuButton_Click(sender, e);
     private void noButton_Click(object sender, EventArgs e)
@@ -975,24 +1006,28 @@ public partial class MainForm : Form
                             Display("food chain is invalid");
                             Console.WriteLine($"playerChain[{playerChain.IndexOf(playerChain[index])}] is invalid as {playerChain[index][i + 1].CommonName} doesn't eat {playerChain[index][i].CommonName}");
                             valid = false;
+                            Console.WriteLine($"Moving cards back to hand");
                             for (int k = 0; k < playerChain.Count; k++)
                             {
+                                Console.WriteLine($"row[{k}]");
                                 for (int j = 0; j < playerChain[k].Count; j++)
                                 {
+                                    Console.WriteLine($"card[{k}][{j}]");
                                     playerChain[k][j].Location = playerChain[k][j].prevLocation;
                                     playerChain[k][j].Picked = false;
                                     playerChain[k][j].inChain = false;
                                     playerChain[k][j].BackColor = Color.Gray;
                                     playerHand.Add(playerChain[k][j]);
                                 }
-                                if (game.username != "") PushToHand(cards);
-                                playerChain.Clear();
-                                playerChain.Add(new List<Card>());
-                                earned = 0;
-                                chainIndex++;
-                                UpdateCells();
                             }
+                            if (game.username != "") PushToHand(cards);
+                            earned = 0;
+                            chainIndex++;
+                            playerChain.Clear();
+                            playerChain.Add(new List<Card>());
                             Console.WriteLine($"Chain size = {playerChain.Count}");
+                            UpdateCells();
+                            Invalidate();
                             return;
                         }
                     }
@@ -1094,23 +1129,6 @@ public partial class MainForm : Form
         int counter = 0;
         foreach (List<Card> subchain in chain) counter += subchain.Count;
         return counter;
-    }
-    private void DrawCardButton_MouseMove(object sender, MouseEventArgs e)
-    {
-        Point initPos = new Point(drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
-        if (MousePosition.X < drawCardRectangle.Right && MousePosition.X > drawCardRectangle.Left && MousePosition.Y < drawCardRectangle.Bottom && MousePosition.Y > drawCardRectangle.Top)
-        {
-            drawCardButton.Location = new Point(initPos.X - 5, initPos.Y - 5);
-            drawCardButton.Width = workingHeight / 8 + 5;
-            drawCardButton.Height = workingWidth / 10 + 5;
-        }
-        else
-        {
-            drawCardButton.Location = new Point(initPos.X + 5, initPos.Y + 5);
-            drawCardButton.Width = workingHeight / 8;
-            drawCardButton.Height = workingWidth / 10;
-        }
     }
     public void DrawCard(object sender, EventArgs e)
     {

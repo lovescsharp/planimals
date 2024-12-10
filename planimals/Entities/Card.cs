@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 public class Card : PictureBox
@@ -57,8 +58,9 @@ public class Card : PictureBox
 
         MouseDown += card_MouseDown;
         MouseUp += card_Mouseup;
-        MouseEnter += card_MouseEnter;
-        MouseLeave += card_MouseLeave;
+        MouseMove += card_MouseMove;
+        //MouseEnter += card_MouseEnter;
+        //MouseLeave += card_MouseLeave;
         Paint += new PaintEventHandler(OnPaint);
     }
     protected void OnPaint(object sender, PaintEventArgs e)
@@ -168,6 +170,15 @@ public class Card : PictureBox
     {
         MainForm.countDownTimer.Stop();
         MessageBox.Show($"{Description}\nprimarily lives in {Habitat} and is {Hierarchy} in the foodchain");
+    }
+    private void card_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (Picked)
+        {
+            Point newPosition = FindForm().PointToClient(Cursor.Position);
+            newPosition.Offset(-offset.X, -offset.Y);
+            Location = newPosition;
+        }
     }
     private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
     private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
