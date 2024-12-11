@@ -33,8 +33,7 @@ public partial class MainForm : Form
     private static PictureBox readySteadyGo;
     private int imageIndex = 3;
 
-    public static string currentDir = Environment.CurrentDirectory;
-    private static string dbPath = currentDir + "\\cards.mdf";
+    private static string dbPath = Path.Combine(Environment.CurrentDirectory, "cards.mdf");
     public static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
     private static readonly SqlConnection sqlConnection = new SqlConnection(connectionString);
 
@@ -42,9 +41,11 @@ public partial class MainForm : Form
     public static int workingWidth;
 
     public static Stack<int> deck;
+    public static int livingCards;
     private StringBuilder sb;
     public static List<Card> playerHand;
     public static List<List<Card>> playerChain;
+    private string lastOrganism;
     public static List<List<(Rectangle, bool)>> cells;
     private static Rectangle cell;
     public static Rectangle liRectangle;
@@ -176,7 +177,7 @@ public partial class MainForm : Form
         Controls.Add(title);
 
         retryButton = new PictureBox();
-        retryButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\retry.png");
+        retryButton.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "retry.png"));
         retryButton.SizeMode = PictureBoxSizeMode.StretchImage;
         retryButton.Size = new Size(workingWidth / 10, workingWidth / 10);
         retryButton.Location = new Point(workingWidth / 2 - retryButton.Width / 2, workingHeight / 2 - retryButton.Height / 2);
@@ -184,7 +185,7 @@ public partial class MainForm : Form
         Controls.Add(retryButton);
 
         goToMenuButton = new PictureBox();
-        goToMenuButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
+        goToMenuButton.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "exit.png"));
         goToMenuButton.SizeMode = PictureBoxSizeMode.StretchImage;
         goToMenuButton.Size = new Size(workingWidth / 10, workingWidth / 8);
         goToMenuButton.Location = new Point(workingWidth / 2 + goToMenuButton.Width, workingHeight / 2 - goToMenuButton.Height / 2);
@@ -192,7 +193,7 @@ public partial class MainForm : Form
         Controls.Add(goToMenuButton);
 
         goToMenuInGameButton = new PictureBox();
-        goToMenuInGameButton.Image = Image.FromFile(currentDir + "\\assets\\photos\\exit.png");
+        goToMenuInGameButton.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "exit.png"));
         goToMenuInGameButton.SizeMode = PictureBoxSizeMode.StretchImage;
         goToMenuInGameButton.Size = new Size(workingWidth / 20, workingWidth / 16);
         goToMenuInGameButton.Location = new Point(5, 5);
@@ -223,7 +224,7 @@ public partial class MainForm : Form
         Controls.Add(youSureWannaQuitLabel);
 
         drawCardButton = new PictureBox();
-        drawCardButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\back.png");
+        drawCardButtonBack = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "back.png"));
         drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
         drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
         drawCardButton.Location = new Point(
@@ -240,7 +241,7 @@ public partial class MainForm : Form
         drawCardButton.MouseLeave += drawCardButton_MouseLeave;
 
         chainButton = new PictureBox();
-        chainButtonBack = Image.FromFile(currentDir + "\\assets\\photos\\chain.png");
+        chainButtonBack = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "chain.png"));
         chainButton.SizeMode = PictureBoxSizeMode.StretchImage;
         chainButton.Size = new Size(workingWidth / 10, workingHeight / 10);
         chainButton.Location = new Point(
@@ -300,10 +301,9 @@ public partial class MainForm : Form
         rnd = new Random();
         deck = new Stack<int>();
         sb = new StringBuilder();
-        Console.WriteLine("initializing deck");
         playerHand = new List<Card>();
-        Console.WriteLine("initializing playerChain with");
         playerChain = new List<List<Card>>() { new List<Card>() };
+        lastOrganism = "";
         //playerChain = new List<Chain>();
         Paint += new PaintEventHandler(Draw);
         //Resize += new EventHandler(OnResize);
@@ -321,32 +321,6 @@ public partial class MainForm : Form
         UpdateCells();
         Console.WriteLine("the game was initialized");
     }
-
-    private void drawCardButton_MouseEnter(object sender, EventArgs e) 
-    {
-        drawCardButton.Location = new Point(drawCardButton.Location.X - 3, drawCardButton.Location.Y - 3);
-        drawCardButton.Size = new Size(drawCardButton.Width + 6, drawCardButton.Height + 6);
-    }
-    private void drawCardButton_MouseLeave(object sender, EventArgs e) 
-    {
-        drawCardButton.Location = new Point(
-            drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
-        drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
-    }
-    private void chainButton_MouseEnter(object sender, EventArgs e)
-    {
-        chainButton.Location = new Point(chainButton.Location.X - 3, chainButton.Location.Y - 3);
-        chainButton.Size = new Size(chainButton.Width + 6, chainButton.Height + 6);
-    }
-    private void chainButton_MouseLeave(object sender, EventArgs e) 
-    {
-        chainButton.Location = new Point(
-            workingWidth - drawCardButton.Width - workingHeight / 10,
-            workingHeight / 2 - drawCardButton.Height / 2);
-        chainButton.Size = new Size(workingWidth / 10, workingHeight / 10); 
-    }
-
     #region testing db
     // query creates an example of a saved game, so that you can test pulling and pushing \\
     /*
@@ -459,7 +433,7 @@ public partial class MainForm : Form
             readySteadyGo.Enabled = true;
             try
             {
-                readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+                readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
             }
             catch (Exception ex)
             {
@@ -489,6 +463,8 @@ public partial class MainForm : Form
 
             loadChain.Parameters.AddWithValue("@Username", game.username);
 
+            int count = playerHand.Count;
+
             using (SqlDataReader reader = loadChain.ExecuteReader())
             {
                 while (reader.Read())
@@ -507,18 +483,19 @@ public partial class MainForm : Form
                         scientificName,
                         commonName,
                         description,
-                        Path.Combine(currentDir, "assets", "photos", $"{scientificName}.jpg"), // Using Path.Combine for better path handling
+                        Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{scientificName}.jpg"),
                         hierarchy,
                         habitat,
                         cells[rowNo][positionNo].Item1.Location,
                         true 
                         );
                     card.rectLocation = cells[rowNo][positionNo].Item1.Location;
-                    //card.prevLocation = new Point(); //do something about it 
+                    card.prevLocation = new Point(card.Width * count, workingHeight - card.Height);
 
                     while (playerChain.Count <= rowNo + 1) playerChain.Add(new List<Card>());
                     playerChain[rowNo].Add(card);
                     Controls.Add(card);
+                    count++;
                 }
             }
         }
@@ -566,8 +543,8 @@ public partial class MainForm : Form
         | |_ ___ ___| |_(_)_ __   __ _
         | __/ _ / __| __| | '_ \ / _` |
         | ||  __\__ | |_| | | | | (_| |
-            \__\___|___/\__|_|_| |_|\__, |
-                                    |__/
+         \__\___|___/\__|_|_| |_|\__, |
+                                   |__/
         */
         dbTesting();
         /*
@@ -575,8 +552,8 @@ public partial class MainForm : Form
         | |_ ___ ___| |_(_)_ __   __ _
         | __/ _ / __| __| | '_ \ / _` |
         | ||  __\__ | |_| | | | | (_| |
-            \__\___|___/\__|_|_| |_|\__, |
-                                    |__/
+         \__\___|___/\__|_|_| |_|\__, |
+                                   |__/
             */
         string strArr = "";
         cells = new List<List<(Rectangle, bool)>>();
@@ -590,7 +567,7 @@ public partial class MainForm : Form
         label.Location = new Point(workingWidth / 10, workingHeight / 20);
         readySteadyGo.Show();
         readySteadyGo.Enabled = true;
-        try { readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png"); }
+        try { readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png")); }
         catch (Exception ex) { MessageBox.Show("Failed to load image: " + ex.Message); }
         using (SqlConnection sqlConnection = new SqlConnection(connectionString))
         {
@@ -628,10 +605,10 @@ public partial class MainForm : Form
                         reader["CardID"].ToString(),
                         reader["Common_name"].ToString(),
                         reader["Description"].ToString(),
-                        currentDir + "\\assets\\photos\\" + reader["CardID"].ToString() + ".jpg",
+                        Path.Combine(Environment.CurrentDirectory, "assets", "photos", reader["CardID"].ToString() + ".jpg"),
                         (int)reader["Hierarchy"],
                         reader["Habitat"].ToString(),
-                        new Point(Card.pictureBoxWidth * playerHand.Count, Height - Card.pictureBoxHeight),
+                        new Point(Card.cardWidth * playerHand.Count, Height - 30),
                         false
                         );
                     playerHand.Add(c);
@@ -665,10 +642,10 @@ public partial class MainForm : Form
     }
     private void readySteadyGoTimer_Tick(object sender, EventArgs e)
     {
+        imageIndex--;
         if (imageIndex > 0)
         {
-            Console.Write($"{imageIndex.ToString()} ");
-            readySteadyGo.Image = Image.FromFile(currentDir + "\\assets\\photos\\" + imageIndex.ToString() + ".png");
+            readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
         }
         else
         {
@@ -694,8 +671,6 @@ public partial class MainForm : Form
             countDownTimer.Start();
             Invalidate();
         }
-
-        imageIndex--;
     }
     private void countDownTimer_Tick(object sender, EventArgs e)
     {
@@ -840,13 +815,13 @@ public partial class MainForm : Form
             c.Location = new Point(workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - loginButton.Height / 2);
         }    
 
-        Card.pictureBoxWidth = workingHeight / 8;
-        Card.pictureBoxHeight = workingWidth / 10;
+        Card.cardWidth = workingHeight / 8;
+        Card.cardHeight = workingWidth / 10;
         for (int i = 0; i < playerHand.Count; i++)
         {
             playerHand[i].Width = workingHeight / 8;
             playerHand[i].Height = workingWidth / 10;
-            playerHand[i].Location = playerHand[i].prevLocation = new Point(Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
+            playerHand[i].Location = playerHand[i].prevLocation = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
         }
         foreach (List<Card> chain in playerChain)
         {
@@ -855,14 +830,14 @@ public partial class MainForm : Form
                 chain[i].Width = workingHeight / 8;
                 chain[i].Height = workingWidth / 10;
                 //chain[i].Location = new Point((int)(chain[i].Location.X * 0.5625), (int)(chain[i].Location.Y * 0.5625));
-                chain[i].prevLocation = new Point(playerHand.LastOrDefault().Location.X + Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
+                chain[i].prevLocation = new Point(playerHand.LastOrDefault().Location.X + Card.cardWidth * i, workingHeight - Card.cardHeight);
             }
         }
         for (int i = 0; i < playerHand.Count; i++)
         {
             playerHand[i].Width = workingHeight / 8;
             playerHand[i].Height = workingWidth / 10;
-            playerHand[i].Location = new Point(Card.pictureBoxWidth * i, workingHeight - Card.pictureBoxHeight);
+            playerHand[i].Location = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
         }
         label.Location = new Point(workingWidth / 10, workingHeight / 8);
         Invalidate();
@@ -910,6 +885,30 @@ public partial class MainForm : Form
             }
         }
     }
+    private void drawCardButton_MouseEnter(object sender, EventArgs e)
+    {
+        drawCardButton.Location = new Point(drawCardButton.Location.X - 3, drawCardButton.Location.Y - 3);
+        drawCardButton.Size = new Size(drawCardButton.Width + 6, drawCardButton.Height + 6);
+    }
+    private void drawCardButton_MouseLeave(object sender, EventArgs e)
+    {
+        drawCardButton.Location = new Point(
+            drawCardButton.Width - workingHeight / 100 * 5,
+            workingHeight / 2 - drawCardButton.Height / 2);
+        drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
+    }
+    private void chainButton_MouseEnter(object sender, EventArgs e)
+    {
+        chainButton.Location = new Point(chainButton.Location.X - 3, chainButton.Location.Y - 3);
+        chainButton.Size = new Size(chainButton.Width + 6, chainButton.Height + 6);
+    }
+    private void chainButton_MouseLeave(object sender, EventArgs e)
+    {
+        chainButton.Location = new Point(
+            workingWidth - drawCardButton.Width - workingHeight / 10,
+            workingHeight / 2 - drawCardButton.Height / 2);
+        chainButton.Size = new Size(workingWidth / 10, workingHeight / 10);
+    }
     #endregion
     #region login and stuff
     private void Login(object sender, EventArgs e)
@@ -940,10 +939,7 @@ public partial class MainForm : Form
             sqlConnection.Close();
         }
     }
-    private void UpdateStatsLabel()
-    {
-        if (game.username != "") stats.Text = $"Hey, {game.username}!\ntotal points: {totalPoints}";
-    }
+    private void UpdateStatsLabel() { if (game.username != "") stats.Text = $"Hey, {game.username}!\ntotal points: {totalPoints}"; }
     #endregion
     #region chain
     private void FixChainIndices(List<Card> chain)
@@ -1050,7 +1046,7 @@ public partial class MainForm : Form
                         sqlConnection.Close();
                         playerChain[index].Clear();
                         chainIndex++;
-                        for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.pictureBoxWidth * (j), Height - Card.pictureBoxHeight);
+                        for (int j = 0; j < playerHand.Count; j++) playerHand[j].Location = playerHand[j].prevLocation = new Point(Card.cardWidth * (j), Height - Card.cardHeight);
                     }
                     UpdateCells();
                     Invalidate();
@@ -1086,6 +1082,15 @@ public partial class MainForm : Form
             }
             sqlConnection.Close();
         }
+    }
+    public void lastLink()
+    {
+        int longestChainIndex = 0;
+        for (int i = 0; i < playerChain.Count; i++)
+        {
+            if (playerChain[i].Count > longestChainIndex) longestChainIndex = i;
+        }
+        lastOrganism = playerChain[longestChainIndex][playerChain[longestChainIndex].Count - 1].ScientificName;
     }
     #endregion
     #region draw card
@@ -1141,7 +1146,6 @@ public partial class MainForm : Form
                 SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
                 sqlConnection.Open();
                 Console.WriteLine($"getting data about {sciname} from cards.mdf");
-                //Console.WriteLine($"-getting an data about {sciname} from {dbPath}");
                 using (SqlDataReader reader = sqlCommand.ExecuteReader())
                 {
                     while (reader.Read())
@@ -1150,10 +1154,10 @@ public partial class MainForm : Form
                             sciname,
                             reader["Common_name"].ToString(),
                             reader["Description"].ToString(),
-                            currentDir + "\\assets\\photos\\" + $"{sciname}.jpg",
+                            Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.jpg"),
                             (int)reader["Hierarchy"],
                             reader["Habitat"].ToString(),
-                            new Point(Card.pictureBoxWidth * playerHand.Count, workingHeight - Card.pictureBoxHeight),
+                            new Point(Card.cardWidth * playerHand.Count, workingHeight - Card.cardHeight),
                             false
                             );
                         playerHand.Add(c);
@@ -1163,14 +1167,12 @@ public partial class MainForm : Form
                 if (deck.Count > 0)
                 {
                     Console.WriteLine($"popping card from Games.Deck in cards.mdf");
-                    //Console.WriteLine($"-getting an data about {sciname} from {dbPath}");
                     SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
                     removeCard.ExecuteNonQuery();
                     Console.WriteLine("-success!");
                 }
                 else
                 {
-                    //Console.WriteLine($"-the deck is empty, can't remove from Games.Deck in {dbPath}");
                     Console.WriteLine($"the deck is empty, can't remove from Games.Deck in cards.mdf");
                     Display("the deck is empty");
                     drawCardButton.Enabled = false;

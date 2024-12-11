@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 
 public class Card : PictureBox
@@ -19,8 +18,8 @@ public class Card : PictureBox
     private int Hierarchy;
     private string Habitat;
 
-    public static int pictureBoxWidth = MainForm.workingHeight / 8;
-    public static int pictureBoxHeight = MainForm.workingWidth / 10;
+    public static int cardWidth = MainForm.workingHeight / 8;
+    public static int cardHeight = MainForm.workingWidth / 10;
 
     public Card(string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inchain)
     {
@@ -33,9 +32,8 @@ public class Card : PictureBox
         Habitat = habitat;
         inChain = inchain;
 
-        pictureBoxHeight = MainForm.workingWidth / 10;
-        pictureBoxWidth = MainForm.workingHeight / 8;
-        offset = new Point(pictureBoxWidth / 2, pictureBoxHeight / 2);
+ 
+        offset = new Point(cardWidth / 2, cardHeight / 2);
         try
         {
             Image = Image.FromFile(path);
@@ -46,9 +44,9 @@ public class Card : PictureBox
         }
 
         SizeMode = PictureBoxSizeMode.Zoom;
-        Size = new Size(pictureBoxWidth, pictureBoxHeight);
+        Size = new Size(cardWidth, cardHeight);
         Location = position;
-        prevLocation = new Point(pictureBoxWidth * MainForm.playerHand.Count, MainForm.workingHeight - Height);
+        prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - Height);
         BackColor = Color.Gray;
         Picked = false;
 
@@ -135,6 +133,7 @@ public class Card : PictureBox
                         (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
                         MainForm.cells[i][j] = tuple;
                         MainForm.playerChain[i].Remove(this);
+                        ((MainForm) FindForm()).lastLink();
                         MainForm.playerHand.Add(this);
                         MainForm.UpdateCells();
                         if (MainForm.playerChain[i].Count != 0) ShiftCards(MainForm.playerChain[i], j);
