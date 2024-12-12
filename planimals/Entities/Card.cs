@@ -46,7 +46,7 @@ public class Card : PictureBox
         SizeMode = PictureBoxSizeMode.Zoom;
         Size = new Size(cardWidth, cardHeight);
         Location = position;
-        prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - Height);
+        prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
         BackColor = Color.Gray;
         Picked = false;
 
@@ -76,31 +76,34 @@ public class Card : PictureBox
             }
         }
         Pick(this);
-        Console.WriteLine($"picked {CommonName}");
+        //Console.WriteLine($"picked {CommonName}");
     }
     private void card_Mouseup(object sender, MouseEventArgs e)
     {
         if (!inChain)
         {
-            Console.WriteLine($"Searching for reactangle with coords : {PointToClient(MousePosition)}");
+            //Console.WriteLine($"Searching for reactangle with coords : {PointToClient(MousePosition)}");
             for (int i = 0; i < MainForm.cells.Count; i++)
             {
                 for (int j = 0; j < MainForm.cells[i].Count; j++)
                 {
-                    Console.WriteLine(MainForm.cells[i][j].Item1.Location);
-                    Console.WriteLine(MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)));
+                    //Console.WriteLine(MainForm.cells[i][j].Item1.Location);
+                    //Console.WriteLine(MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)));
                     if (MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)))
                     {
                         if (!MainForm.cells[i][j].Item2)
                         {
-                            Console.WriteLine("found an empty cell");
+                            //Console.WriteLine("found an empty cell");
                             Drop(this);
                             Location = MainForm.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, true);
                             MainForm.cells[i][j] = tuple;
                             inChain = true;
                             MainForm.playerHand.Remove(this);
+                            prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
                             MainForm.playerChain[i].Add(this);
+                            if (MainForm.playerChain[i].Count == 1) MainForm.playerChain.Add(new List<Card>());
+                            if (MainForm.game.username != "") ((MainForm) FindForm()).PushToChain(this, i, j);
                             MainForm.UpdateCells();
                             FindForm().Invalidate();
                             rectLocation = Location;
@@ -108,7 +111,7 @@ public class Card : PictureBox
                         }
                         else
                         {
-                            Console.WriteLine("cells not empty");
+                            //Console.WriteLine("cells not empty");
                             Drop(this);
                             Location = prevLocation;
                             return;
@@ -122,22 +125,27 @@ public class Card : PictureBox
         }
         else if (inChain)
         {
-            Console.Write($"{CommonName} in chain at ");
             for (int i = 0; i < MainForm.cells.Count; i++)
             {
                 for (int j = 0; j < MainForm.cells[i].Count; j++)
                 {
                     if (MainForm.cells[i][j].Item1.Location == rectLocation)
                     {
-                        Console.Write($"cells[{i}][{j}]");
+                        //Console.Write($"cells[{i}][{j}]");
                         (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
                         MainForm.cells[i][j] = tuple;
                         MainForm.playerChain[i].Remove(this);
-                        ((MainForm) FindForm()).lastLink();
+                        if (MainForm.game.username != "") ((MainForm)FindForm()).RemoveFromChain(this, i, j);
+                        if (MainForm.playerChain[i].Count == 0 && i != 0) MainForm.playerChain.RemoveAt(i);
+                        Console.WriteLine("UDALIL KARTU BLYAT N3 E6y4E7O CHAINA N DO6ABN/ EE 6/Rtb B Pyky");
                         MainForm.playerHand.Add(this);
+                        Console.WriteLine($"teper ebuchij count = {MainForm.playerHand.Count}");
+                        MainForm.PushToHand(new List<string>() { ScientificName });
                         MainForm.UpdateCells();
-                        if (MainForm.playerChain[i].Count != 0) ShiftCards(MainForm.playerChain[i], j);
+                        Console.WriteLine(i);
+                        //if (MainForm.playerChain[i].Count != 0) ShiftCards(MainForm.playerChain[i], j);
                         Drop(this);
+                        UpdateLocations();
                         Location = prevLocation;
                         rectLocation = new Point(0, 0);
                         inChain = false;
@@ -181,4 +189,11 @@ public class Card : PictureBox
     }
     private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
     private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
+    private void UpdateLocations() 
+    {
+        for (int i = 0; i < MainForm.playerHand.Count; i++)
+        {
+            MainForm.playerHand[i].prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
+        }
+    }
 }
