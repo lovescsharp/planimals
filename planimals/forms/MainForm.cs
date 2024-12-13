@@ -262,7 +262,7 @@ public partial class MainForm : Form
         chainButton.MouseEnter += chainButton_MouseEnter;
         chainButton.MouseLeave += chainButton_MouseLeave;
 
-        label = new System.Windows.Forms.Label();
+        label = new Label();
         label.Location = new Point(workingWidth / 10, workingHeight / 20);
         label.ForeColor = Color.White;
         label.AutoSize = true;
@@ -306,7 +306,7 @@ public partial class MainForm : Form
         deck = new Stack<int>();
         sb = new StringBuilder();
         playerHand = new List<Card>();
-        playerChain = new List<List<Card>>() { new List<Card>() };
+        playerChain = new List<List<Card>>();
         lastOrganism = "";
         longestChainIndex = -1;
         //playerChain = new List<Chain>();
@@ -323,7 +323,6 @@ public partial class MainForm : Form
         foreach (Control control in youSureWannaQuitControls) control.Hide();
         foreach (Control control in Controls) if (control.GetType() == typeof(Label)) control.ForeColor = Color.LightGreen;
         #endregion
-        UpdateCells()   ;
         Console.WriteLine("game was initialized");
         #region testing db
         // query creates an example of a saved game, so that you can test pulling and pushing \\
@@ -387,7 +386,6 @@ public partial class MainForm : Form
     }
     private void Start()
     {
-        Console.WriteLine("staring the game");
         foreach (Card c in playerHand)
         {
             c.Hide();
@@ -408,7 +406,6 @@ public partial class MainForm : Form
         }
         playerChain.Clear();
         cells.Clear();
-        playerChain.Add(new List<Card>());
         UpdateCells();
 
         GenerateDeck();
@@ -447,7 +444,6 @@ public partial class MainForm : Form
             {
                 MessageBox.Show("Failed to load image: " + ex.Message);
             }
-            Console.Write("starting the game... ");
             readySteadyGoTimer.Start();
         }
         else
@@ -456,7 +452,7 @@ public partial class MainForm : Form
             readySteadyGoTimer.Start();
         }
     }
-    private void LoadPlayerChain()
+    private void LoadPlayerChain() //update prevLocations
     {
         using (SqlConnection sqlConnection = new SqlConnection(connectionString))
         {
@@ -496,7 +492,7 @@ public partial class MainForm : Form
                         true 
                         );
                     card.rectLocation = cells[rowNo][positionNo].Item1.Location;
-                    card.prevLocation = new Point(card.Width * MainForm.playerHand.Count, workingHeight - card.Height); //do something about it
+                    //card.prevLocation = new Point(card.Width * MainForm.playerHand.Count, workingHeight - card.Height); //do something about it
 
                     while (playerChain.Count <= rowNo + 1) playerChain.Add(new List<Card>());
                     playerChain[rowNo].Add(card);
@@ -853,24 +849,30 @@ public partial class MainForm : Form
     public static void UpdateCells() 
     {
         cells.Clear();
+        Rectangle rect;
         for (int i = 0; i <= playerChain.Count; i++)
         {
             cells.Add(new List<(Rectangle, bool)>());
-            if (i != playerChain.Count)
+            if (i < playerChain.Count)
             {
                 for (int j = 0; j <= playerChain[i].Count; j++)
                 {
                     if (j == playerChain[i].Count)
                     {
-                        Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
+                        rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
                         cells[i].Add((rect, false));
                     }
                     else
                     {
-                        Rectangle rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
+                        rect = new Rectangle(j * (cell.Width) + cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
                         cells[i].Add((rect, true));
                     }
                 }
+            }
+            else
+            {
+                rect = new Rectangle(cell.X, i * cell.Height + cell.Y, cell.Width, cell.Height);
+                cells[i].Add((rect, false));
             }
         }
     }
@@ -914,7 +916,7 @@ public partial class MainForm : Form
             loginButton.Text = "log in";
         }
     }
-    private void CleanDb() 
+    private void CleanDb()
     {
         using (SqlConnection sqlConnection = new SqlConnection(connectionString))
         {
@@ -928,7 +930,10 @@ public partial class MainForm : Form
             sqlConnection.Close();
         }
     }
-    private void UpdateStatsLabel() { if (game.username != "") stats.Text = $"Hey, {game.username}!\ntotal points: {totalPoints}"; }
+    private void UpdateStatsLabel() 
+    { 
+        if (game.username != "") stats.Text = $"Hey, {game.username}!\ntotal points: {totalPoints}";
+    }
     #endregion
     #region chain
     private void FixChainIndices(List<Card> chain)
@@ -953,7 +958,6 @@ public partial class MainForm : Form
     private void chainButton_Click(object sender, EventArgs e) => Chain();
     private void Chain()
     {
-        /* debugging
         string str = "";
         foreach (List<Card> chain in playerChain)
         {
@@ -961,7 +965,7 @@ public partial class MainForm : Form
             foreach (Card c in chain) str += "        " + $"{c.CommonName}" + '\n';
         }
         Console.WriteLine("current chain:\n" + str);
-        */
+        
         int chainIndex = 0;
         earned = 0;
         for (int index = 0; index < playerChain.Count - 1; index++)
@@ -972,13 +976,11 @@ public partial class MainForm : Form
             {
                 SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND RowNo={chainIndex}", sqlConnection);
                 List<string> cards = new List<string>();
-                //Console.WriteLine(playerChain[index].Count);
                 if (playerChain[index].Count < 2 && index != playerChain.Count - 1)
                 {
-                    Console.WriteLine("hello???");
                     Display("the chain must consist of at least two organisms.");
                     chainIndex++;
-                    return; //SUKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                    return;
                 }
                 else
                 {
@@ -1009,7 +1011,7 @@ public partial class MainForm : Form
                                         playerHand.Add(playerChain[k][j]);
                                         playerChain[k][j].prevLocation = new Point(playerChain[k][j].Width * playerHand.Count, workingHeight - playerChain[k][j].Height);
                                         Console.WriteLine($"{i} {j}");
-                                        playerChain[k][j].Location = playerChain[i][j].prevLocation;
+                                        playerChain[k][j].Location = playerChain[k][j].prevLocation;
                                         playerChain[k][j].Picked = false;
                                         playerChain[k][j].inChain = false;
                                         playerChain[k][j].BackColor = Color.Gray;
@@ -1019,8 +1021,6 @@ public partial class MainForm : Form
                                 earned = 0;
                                 chainIndex++;
                                 playerChain.Clear();
-                                playerChain.Add(new List<Card>());
-                                Console.WriteLine($"Chain size = {playerChain.Count}");
                                 UpdateCells();
                                 Invalidate();
                                 return;
@@ -1055,7 +1055,6 @@ public partial class MainForm : Form
                             earned = 0;
                             chainIndex++;
                             playerChain.Clear();
-                            playerChain.Add(new List<Card>());
                             Console.WriteLine($"Chain size = {playerChain.Count}");
                             UpdateCells();
                             Invalidate();
@@ -1120,7 +1119,6 @@ public partial class MainForm : Form
     }
     public static void PushToHand(List<string> cards)
     {
-        Console.WriteLine("Pusing to hand");
         using (SqlConnection sqlConnection = new SqlConnection(connectionString))
         {
             SqlCommand insert;
@@ -1165,7 +1163,6 @@ public partial class MainForm : Form
     }
     public string GetScientificNameFromDeck()
     {
-        Console.WriteLine("-getting an organism from deck");
         using (SqlConnection sqlConnection = new SqlConnection(connectionString))
         {
             if (deck.Count != 0)
@@ -1176,7 +1173,6 @@ public partial class MainForm : Form
                 {
                     while (reader.Read())
                     {
-                        Console.WriteLine($"    it's {reader["Common_name"].ToString()}!");
                         return reader["Scientific_name"].ToString();
                     }
                 }
@@ -1192,55 +1188,51 @@ public partial class MainForm : Form
     }
     public void DrawCard(object sender, EventArgs e)
     {
-        Console.WriteLine("DrawCardButton was clicked");
         if (playerHand.Count + Count(playerChain) < 15)
         {
-            string sciname = GetScientificNameFromDeck();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            string sciname;
+            for (int i = 0; i < 3; i++)
             {
-                SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
-                sqlConnection.Open();
-                Console.WriteLine($"getting data about {sciname} from cards.mdf");
-                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                sciname = GetScientificNameFromDeck();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    while (reader.Read())
+                    SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
+                    sqlConnection.Open();
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
-                        Card c = new Card(
-                            sciname,
-                            reader["Common_name"].ToString(),
-                            reader["Description"].ToString(),
-                            Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.jpg"),
-                            (int)reader["Hierarchy"],
-                            reader["Habitat"].ToString(),
-                            new Point(Card.cardWidth * playerHand.Count, workingHeight - Card.cardHeight),
-                            false
-                            );
-                        playerHand.Add(c);
-                        Controls.Add(c);
+                        while (reader.Read())
+                        {
+                            Card c = new Card(
+                                sciname,
+                                reader["Common_name"].ToString(),
+                                reader["Description"].ToString(),
+                                Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.jpg"),
+                                (int)reader["Hierarchy"],
+                                reader["Habitat"].ToString(),
+                                new Point(Card.cardWidth * playerHand.Count, workingHeight - Card.cardHeight),
+                                false
+                                );
+                            playerHand.Add(c);
+                            Controls.Add(c);
+                        }
                     }
-                }
-                if (deck.Count > 0)
-                {
-                    Console.WriteLine($"popping card from Games.Deck in cards.mdf");
-                    SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
-                    removeCard.ExecuteNonQuery();
-                    Console.WriteLine("-success!");
-                }
-                else
-                {
-                    Console.WriteLine($"the deck is empty, can't remove from Games.Deck in cards.mdf");
-                    Display("the deck is empty");
-                    drawCardButton.Enabled = false;
-                    drawCardButton.Hide();
-                }
-                //Console.WriteLine($"-adding card to Hand in {dbPath}");
-                Console.WriteLine($"-adding card to Hand in cards.mdf");
-                SqlCommand addToHand = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{sciname}')", sqlConnection);
-                addToHand.ExecuteNonQuery();
-                sqlConnection.Close();
-                    
+                    if (deck.Count > 0)
+                    {
+                        SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
+                        removeCard.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"the deck is empty, can't remove from Games.Deck in cards.mdf");
+                        Display("the deck is empty");
+                        drawCardButton.Enabled = false;
+                        drawCardButton.Hide();
+                    }
+                    sqlConnection.Close();
+                    PushToHand(new List<string>() { sciname });
 
-                //TODO! update prevLocations of cards in Chain and Hand
+                    //TODO! update prevLocations of cards in Chain and Hand
+                }
             }
         }
         else Display("cannot hold more than 15 cards"); //instead call CheckHand();

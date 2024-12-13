@@ -82,18 +82,15 @@ public class Card : PictureBox
     {
         if (!inChain)
         {
-            //Console.WriteLine($"Searching for reactangle with coords : {PointToClient(MousePosition)}");
             for (int i = 0; i < MainForm.cells.Count; i++)
             {
                 for (int j = 0; j < MainForm.cells[i].Count; j++)
                 {
-                    //Console.WriteLine(MainForm.cells[i][j].Item1.Location);
-                    //Console.WriteLine(MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)));
                     if (MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)))
                     {
-                        if (!MainForm.cells[i][j].Item2)
+                        if (!MainForm.cells[i][j].Item2) //cell is empty
                         {
-                            //Console.WriteLine("found an empty cell");
+                            if (MainForm.cells[i].Count == 1) MainForm.playerChain.Add(new List<Card>()); 
                             Drop(this);
                             Location = MainForm.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, true);
@@ -102,16 +99,16 @@ public class Card : PictureBox
                             MainForm.playerHand.Remove(this);
                             prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
                             MainForm.playerChain[i].Add(this);
-                            if (MainForm.playerChain[i].Count == 1) MainForm.playerChain.Add(new List<Card>());
                             if (MainForm.game.username != "") ((MainForm) FindForm()).PushToChain(this, i, j);
                             MainForm.UpdateCells();
+                            UpdateLocations();
+                            ShiftCards();
                             FindForm().Invalidate();
                             rectLocation = Location;
                             return;
                         }
                         else
                         {
-                            //Console.WriteLine("cells not empty");
                             Drop(this);
                             Location = prevLocation;
                             return;
@@ -121,7 +118,6 @@ public class Card : PictureBox
             }
             Drop(this);
             Location = prevLocation;
-            return;
         }
         else if (inChain)
         {
@@ -131,21 +127,28 @@ public class Card : PictureBox
                 {
                     if (MainForm.cells[i][j].Item1.Location == rectLocation)
                     {
-                        //Console.Write($"cells[{i}][{j}]");
                         (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
                         MainForm.cells[i][j] = tuple;
+                        //Console.WriteLine($"before removing {CommonName}: {MainForm.playerChain[i].Count}");
                         MainForm.playerChain[i].Remove(this);
+                        //Console.WriteLine($"after : {MainForm.playerChain[i].Count}");
+                        if (MainForm.playerChain[i].Count == 0 && i != 0)
+                        {
+                            //Console.WriteLine($"removing chain[{i}]");
+                            MainForm.playerChain.RemoveAt(i);
+                            MainForm.UpdateCells();
+                        }
+                        else if (i == 0 && MainForm.playerChain[0].Count == 0)
+                        {
+                            MainForm.playerChain.Clear();
+                        }
                         if (MainForm.game.username != "") ((MainForm)FindForm()).RemoveFromChain(this, i, j);
-                        if (MainForm.playerChain[i].Count == 0 && i != 0) MainForm.playerChain.RemoveAt(i);
-                        Console.WriteLine("UDALIL KARTU BLYAT N3 E6y4E7O CHAINA N DO6ABN/ EE 6/Rtb B Pyky");
                         MainForm.playerHand.Add(this);
-                        Console.WriteLine($"teper ebuchij count = {MainForm.playerHand.Count}");
                         MainForm.PushToHand(new List<string>() { ScientificName });
                         MainForm.UpdateCells();
-                        Console.WriteLine(i);
-                        //if (MainForm.playerChain[i].Count != 0) ShiftCards(MainForm.playerChain[i], j);
-                        Drop(this);
                         UpdateLocations();
+                        ShiftCards();
+                        Drop(this);
                         Location = prevLocation;
                         rectLocation = new Point(0, 0);
                         inChain = false;
@@ -155,19 +158,21 @@ public class Card : PictureBox
             }
         }
     }
-    public void ShiftCards(List<Card> subchain, int startingIdx) // starting point
+    public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
     {
-        for (int i = startingIdx; i < subchain.Count; i++)
-        {
-            subchain[i].rectLocation = rectLocation;
-        }
-    }
-    private void Drop(Card c) {
+        for (int i = 0; i < MainForm.playerChain.Count; i++)
+        for (int j = 0; j < MainForm.playerChain[i].Count; j++) 
+        MainForm.playerChain[i][j].Location = MainForm.playerChain[i][j].rectLocation = 
+        MainForm.cells[i][j].Item1.Location;
+    }   
+    private void Drop(Card c) 
+    {
         c.Picked = false;
         c.BackColor = Color.Gray;
         FindForm().Invalidate();
     }
-    private void Pick(Card c) {
+    private void Pick(Card c)
+    {
         c.Picked = true;
         c.BackColor = Color.White;
         FindForm().Invalidate();
@@ -193,7 +198,8 @@ public class Card : PictureBox
     {
         for (int i = 0; i < MainForm.playerHand.Count; i++)
         {
-            MainForm.playerHand[i].prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
+            MainForm.playerHand[i].prevLocation = new Point(cardWidth * i, MainForm.workingHeight - cardHeight);
+            Location = prevLocation;
         }
     }
 }

@@ -30,9 +30,9 @@
               "Title": "Card.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Card.cs",
-              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs",
-              "RelativeToolTip": "planimals\\Entities\\Card.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAAAGUAAAAvAAAAAAAAAA==",
+              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs*",
+              "RelativeToolTip": "planimals\\Entities\\Card.cs*",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAgwI4AAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-01T13:40:48.511Z",
               "IsPinned": true,
@@ -52,8 +52,7 @@
               "RelativeToolTip": "planimals\\Entities\\Game.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-06T09:50:29.349Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-06T09:50:29.349Z"
             }
           ]
         },
@@ -67,9 +66,9 @@
               "Title": "MainForm.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
-              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
-              "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAkAAAAAAAAAA==",
+              "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs*",
+              "RelativeToolTip": "planimals\\Forms\\MainForm.cs*",
+              "ViewState": "AgIAAFkDAAAAAAAAAAAQwGsDAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-10T13:43:55.105Z",
               "EditorCaption": ""
@@ -84,8 +83,7 @@
               "RelativeToolTip": "planimals\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-10T13:42:21.885Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-10T13:42:21.885Z"
             }
           ]
         }
