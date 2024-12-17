@@ -1,11 +1,15 @@
 ﻿using planimals;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Media;
 
 public class Card : PictureBox
 {
+    private Game game;
+
     public bool Picked;
     public Point prevLocation;
     public Point rectLocation;
@@ -18,11 +22,12 @@ public class Card : PictureBox
     private int Hierarchy;
     private string Habitat;
 
-    public static int cardWidth = MainForm.workingHeight / 8;
-    public static int cardHeight = MainForm.workingWidth / 10;
+    public static int cardWidth;
+    public static int cardHeight;
 
-    public Card(string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inchain)
+    public Card(Game g, string scientific_name, string common_name, string description, string path, int hierarchy, string habitat, Point position, bool inchain)
     {
+        game = g;
         DoubleBuffered = true;
 
         ScientificName = scientific_name;
@@ -32,7 +37,9 @@ public class Card : PictureBox
         Habitat = habitat;
         inChain = inchain;
 
- 
+        cardWidth = game.form.ClientRectangle.Height / 8;
+        cardHeight = game.form.ClientRectangle.Width / 10;
+
         offset = new Point(cardWidth / 2, cardHeight / 2);
         try
         {
@@ -46,8 +53,8 @@ public class Card : PictureBox
         SizeMode = PictureBoxSizeMode.Zoom;
         Size = new Size(cardWidth, cardHeight);
         Location = position;
-        prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
-        BackColor = Color.Gray;
+        prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+        BackColor = System.Drawing.Color.Gray;
         Picked = false;
 
         ContextMenu cm = new ContextMenu();
@@ -63,16 +70,16 @@ public class Card : PictureBox
     }
     protected void OnPaint(object sender, PaintEventArgs e)
     {
-        using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
+        using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, System.Drawing.Brushes.Black, new Point(Width / 10, Height / 20));
     }
     private void card_MouseDown(object sender, MouseEventArgs e)
     {
-        for (int i = 0; i < MainForm.playerHand.Count; i++)
+        for (int i = 0; i < game.playerHand.Count; i++)
         {
-            if (MainForm.playerHand[i].Picked)
+            if (game.playerHand[i].Picked)
             {
-                Drop(MainForm.playerHand[i]);
-                MainForm.playerHand[i].Location = MainForm.playerHand[i].prevLocation;
+                Drop(game.playerHand[i]);
+                game.playerHand[i].Location = game.playerHand[i].prevLocation;
             }
         }
         Pick(this);
@@ -82,26 +89,31 @@ public class Card : PictureBox
     {
         if (!inChain)
         {
-            for (int i = 0; i < MainForm.cells.Count; i++)
+            Console.WriteLine("moving from hand");
+            for (int i = 0; i < game.cells.Count; i++)
             {
-                for (int j = 0; j < MainForm.cells[i].Count; j++)
+                for (int j = 0; j < game.cells[i].Count; j++)
                 {
-                    if (MainForm.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)))
+                    if (game.cells[i][j].Item1.Contains(FindForm().PointToClient(MousePosition)))
                     {
-                        if (!MainForm.cells[i][j].Item2) //cell is empty
+                        if (!game.cells[i][j].Item2) //cell is empty
                         {
-                            if (MainForm.cells[i].Count == 1) MainForm.playerChain.Add(new List<Card>()); 
+                            if (game.cells[i].Count == 1) game.playerChain.chain.Add(new List<Card>());
                             Drop(this);
-                            Location = MainForm.cells[i][j].Item1.Location;
-                            (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, true);
-                            MainForm.cells[i][j] = tuple;
+                            Location = game.cells[i][j].Item1.Location;
+                            (Rectangle, bool) tuple = (game.cells[i][j].Item1, true);
+                            game.cells[i][j] = tuple;
                             inChain = true;
-                            MainForm.playerHand.Remove(this);
-                            prevLocation = new Point(cardWidth * MainForm.playerHand.Count, MainForm.workingHeight - cardHeight);
-                            MainForm.playerChain[i].Add(this);
-                            if (MainForm.game.username != "") ((MainForm) FindForm()).PushToChain(this, i, j);
-                            MainForm.UpdateCells();
-                            UpdateLocations();
+                            game.playerHand.Remove(this);
+                            prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                            game.playerChain.chain[i].Add(this);
+                            if (game.username != "")
+                            {
+                                RemoveFromHand();
+                                PushToChain(i, j);
+                            }
+                            game.UpdateCells();
+                            game.playerHand.ShiftCards();
                             ShiftCards();
                             FindForm().Invalidate();
                             rectLocation = Location;
@@ -121,35 +133,34 @@ public class Card : PictureBox
         }
         else if (inChain)
         {
-            for (int i = 0; i < MainForm.cells.Count; i++)
+            Console.WriteLine("moving from chain");
+            for (int i = 0; i < game.cells.Count; i++)
             {
-                for (int j = 0; j < MainForm.cells[i].Count; j++)
+                for (int j = 0; j < game.cells[i].Count; j++)
                 {
-                    if (MainForm.cells[i][j].Item1.Location == rectLocation)
+                    if (game.cells[i][j].Item1.Location == rectLocation)
                     {
-                        (Rectangle, bool) tuple = (MainForm.cells[i][j].Item1, false);
-                        MainForm.cells[i][j] = tuple;
-                        //Console.WriteLine($"before removing {CommonName}: {MainForm.playerChain[i].Count}");
-                        MainForm.playerChain[i].Remove(this);
-                        //Console.WriteLine($"after : {MainForm.playerChain[i].Count}");
-                        if (MainForm.playerChain[i].Count == 0 && i != 0)
+                        (Rectangle, bool) tuple = (game.cells[i][j].Item1, false);
+                        game.cells[i][j] = tuple;
+                        //Console.WriteLine($"before removing {CommonName}: {playerChain[i].Count}");
+                        game.playerChain.chain[i].Remove(this);
+                        //Console.WriteLine($"afte r : {playerChain[i].Count}");
+                        if (game.playerChain.chain[i].Count == 0)
                         {
-                            //Console.WriteLine($"removing chain[{i}]");
-                            MainForm.playerChain.RemoveAt(i);
-                            MainForm.UpdateCells();
+                            Console.WriteLine($"removing chain[{i}]");
+                            game.playerChain.chain.RemoveAt(i);
                         }
-                        else if (i == 0 && MainForm.playerChain[0].Count == 0)
+                        game.playerHand.Add(this);
+                        if (game.username != "")
                         {
-                            MainForm.playerChain.Clear();
+                            RemoveFromChain(i, j);
+                            PushToHand();
                         }
-                        if (MainForm.game.username != "") ((MainForm)FindForm()).RemoveFromChain(this, i, j);
-                        MainForm.playerHand.Add(this);
-                        MainForm.PushToHand(new List<string>() { ScientificName });
-                        MainForm.UpdateCells();
-                        UpdateLocations();
+                        game.UpdateCells();
+                        game.playerHand.ShiftCards();
                         ShiftCards();
                         Drop(this);
-                        Location = prevLocation;
+                        Location = prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
                         rectLocation = new Point(0, 0);
                         inChain = false;
                         return;
@@ -160,27 +171,67 @@ public class Card : PictureBox
     }
     public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
     {
-        for (int i = 0; i < MainForm.playerChain.Count; i++)
-        for (int j = 0; j < MainForm.playerChain[i].Count; j++) 
-        MainForm.playerChain[i][j].Location = MainForm.playerChain[i][j].rectLocation = 
-        MainForm.cells[i][j].Item1.Location;
-    }   
-    private void Drop(Card c) 
+        for (int i = 0; i < game.playerChain.chain.Count; i++)
+            for (int j = 0; j < game.playerChain.chain[i].Count; j++)
+                game.playerChain.chain[i][j].Location = game.playerChain.chain[i][j].rectLocation =
+                game.cells[i][j].Item1.Location;
+    }
+    public void PushToHand()
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        {
+            sqlConnection.Open();
+            SqlCommand insert = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{ScientificName}')", sqlConnection);
+            insert.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
+    }
+    public void RemoveFromHand()
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        {
+            SqlCommand removeCard = new SqlCommand($"DELETE FROM Hand Where Username='{game.username}' AND CardID='{ScientificName}'", sqlConnection);
+            sqlConnection.Open();
+            removeCard.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
+    }
+    public void PushToChain(int RowNo, int ColNo)
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        {
+            SqlCommand pushCardToChain = new SqlCommand($"INSERT INTO FoodChainCards(Username, CardID, RowNo, PositionNo) VALUES ('{game.username}', '{ScientificName}', {RowNo}, {ColNo})", sqlConnection);
+            sqlConnection.Open();
+            pushCardToChain.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
+    }
+    public void RemoveFromChain(int RowNo, int ColNo)
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        {
+            SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);
+            sqlConnection.Open();
+            deleteCardFromChain.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
+    }
+    private void Drop(Card c)
     {
         c.Picked = false;
-        c.BackColor = Color.Gray;
+        c.BackColor = System.Drawing.Color.Gray;
         FindForm().Invalidate();
     }
     private void Pick(Card c)
     {
         c.Picked = true;
-        c.BackColor = Color.White;
+        c.BackColor = System.Drawing.Color.White;
         FindForm().Invalidate();
         BringToFront();
     }
     public void card_RightClick(object sender, EventArgs e)
     {
-        MainForm.countDownTimer.Stop();
+        game.countDownTimer.Stop();
         MessageBox.Show($"{Description}\nprimarily lives in {Habitat} and is {Hierarchy} in the foodchain");
     }
     private void card_MouseMove(object sender, MouseEventArgs e)
@@ -194,12 +245,4 @@ public class Card : PictureBox
     }
     private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
     private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
-    private void UpdateLocations() 
-    {
-        for (int i = 0; i < MainForm.playerHand.Count; i++)
-        {
-            MainForm.playerHand[i].prevLocation = new Point(cardWidth * i, MainForm.workingHeight - cardHeight);
-            Location = prevLocation;
-        }
-    }
 }

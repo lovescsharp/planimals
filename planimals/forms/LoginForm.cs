@@ -8,6 +8,8 @@ namespace planimals
 {
     public partial class LoginForm : Form
     {
+        MainForm form;
+
         private int workingWidth;
         private int workingHeight;
 
@@ -20,9 +22,11 @@ namespace planimals
 
         private Label label;
 
-        public LoginForm()
+        public LoginForm(MainForm f)
         {
             InitializeComponent();
+
+            form = f;
 
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
@@ -109,7 +113,6 @@ namespace planimals
 
                 SqlParameter paramPasswd = new SqlParameter();
                 paramPasswd.ParameterName = "@password";
-                //paramPasswd.Value = Hash(passwordInput.Text);
                 paramPasswd.Value = passwordInput.Text.Trim();
                 cmd.Parameters.Add(paramPasswd);
                 sqlConnection.Open();
@@ -117,20 +120,12 @@ namespace planimals
                 if (b == 1)
                 {
                     //log in, and assign username in form1
-                    MainForm.game.username = usernameInput.Text;
+                    form.username = usernameInput.Text.Trim();
+                    form.loggedIn = true;
                     label.Text = "Login successful";
                     Close();
-                    MainForm.stats.Text = $"hey, {usernameInput.Text}!";
-                    SqlCommand cmd1 = new SqlCommand($"SELECT Points from Players where Username='{usernameInput.Text}'", sqlConnection);
-                    using (SqlDataReader reader = cmd1.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            MainForm.stats.Text += $"\ntotal points: {reader["Points"].ToString()}";
-                            MainForm.totalPoints = int.Parse(reader["Points"].ToString());
-                        }
-                    }
-                    MainForm.loginButton.Text = "log out";
+                    form.stats.Text = $"hey, {usernameInput.Text}!";
+                    form.loginButton.Text = "log out";
                 }
                 else
                 {
@@ -144,7 +139,7 @@ namespace planimals
         private void SignUp(object sender, EventArgs e)
         {
             Close();
-            CreateAccountForm createAccountForm = new CreateAccountForm();
+            CreateAccountForm createAccountForm = new CreateAccountForm(form);
             createAccountForm.Show();
             createAccountForm.BringToFront();
             

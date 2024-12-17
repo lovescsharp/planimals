@@ -59,7 +59,10 @@
     <Compile Include="Entities\Card.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Entities\Chain.cs" />
+    <Compile Include="Entities\Deck.cs" />
     <Compile Include="Entities\Game.cs" />
+    <Compile Include="Entities\Hand.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace planimals
 {
     public partial class CreateAccountForm : Form
     {
+        private MainForm form;
+
         private TextBox usernameInput;
         private TextBox emailInput;
         private TextBox passwordInput;
@@ -25,9 +21,11 @@ namespace planimals
         private int workingWidth;
         private int workingHeight;
 
-        public CreateAccountForm()
+        public CreateAccountForm(MainForm f)
         {
             InitializeComponent();
+
+            form = f;
 
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
@@ -139,7 +137,7 @@ namespace planimals
                     password.Value = LoginForm.Hash(passwordInput.Text);
                     createUser.Parameters.Add(password);
 
-                    MainForm.game.username = usernameInput.Text.Trim();
+                    form.username = usernameInput.Text.Trim();
                     Close();
                 }
                 else
