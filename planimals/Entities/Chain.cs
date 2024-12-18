@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 
 public class Chain
 {
     private Game game;
-
     public List<List<Card>> chain;
     private string lastOrganism;
     private int longestChainIndex;
@@ -68,81 +68,36 @@ public class Chain
     }
     public void CHAIN()
     {
-        string str = "";
-        foreach (List<Card> subchain in chain)
+        if (chain.Count == 0)
         {
-            str += $"   chain {chain.IndexOf(subchain).ToString()}\n";
-            foreach (Card c in subchain) str += "        " + $"{c.CommonName}" + '\n';
+            game.form.Display("the chain must consist of at least to organisms");
+            return;
         }
-        Console.WriteLine("current chain:\n" + str);
-
-        int chainIndex = 0;
-        earned = 0;
-        for (int index = 0; index < chain.Count - 1; index++)
+        else
         {
-            bool valid = true;
-            FixChainIndices(chain[index]);
+            /*
+            string str = "";
+            foreach (List<Card> subchain in chain)
+            {
+                str += $"   chain {chain.IndexOf(subchain).ToString()}\n";
+                foreach (Card c in subchain) str += "        " + $"{c.CommonName}" + '\n';
+            }
+            Console.WriteLine("current chain:\n" + str);
+            */
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
             {
-                SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND RowNo={chainIndex}", sqlConnection);
-                List<string> cards = new List<string>();
-                if (chain[index].Count < 2)
+                for (int i = 0; i < chain.Count; i++)
                 {
-                    game.form.Display("the chain must consist of at least two organisms.");
-                    chainIndex++;
-                    return;
-                }
-                else
-                {
-                    lastLink();
-                    Console.WriteLine(lastOrganism);
-                    Console.WriteLine(longestChainIndex);
-                    sqlConnection.Open();
-                    for (int i = 0; i < chain.Count; i++)
+                    if (i != game.playerChain.longestChainIndex && chain[i].Count != 0)
                     {
-                        if (i != game.playerChain.longestChainIndex && chain[i].Count != 0)
-                        {
-                            SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{lastOrganism}' AND Consumed = '{chain[i][chain[i].Count - 1].ScientificName}'", sqlConnection);
-                            Console.WriteLine(sqlCommand.CommandText);
-                            int b = (int)sqlCommand.ExecuteScalar();
-                            if (b == 0)
-                            {
-                                game.form.Display("food chain is invalid");
-                                Console.WriteLine($"playerChain.chain[{chain.IndexOf(chain[index])}] is invalid as {lastOrganism} doesn't eat {chain[i][chain[i].Count - 1].CommonName}");
-                                valid = false;
-                                Console.WriteLine($"Moving cards back to hand");
-                                for (int k = 0; k < chain.Count; k++)
-                                {
-                                    Console.WriteLine($"row[{k}]");
-                                    for (int j = 0; j < chain[k].Count; j++)
-                                    {
-                                        Console.WriteLine($"card[{k}][{j}]");
-                                        if (game.username != "") chain[k][j].PushToHand();
-                                        chain[k][j].prevLocation = new Point(chain[k][j].Width * game.playerHand.Count,  game.form.workingHeight - chain[k][j].Height);
-                                        Console.WriteLine($"{i} {j}");
-                                        chain[k][j].Location = chain[k][j].prevLocation;
-                                        chain[k][j].Picked = false;
-                                        chain[k][j].inChain = false;
-                                        chain[k][j].BackColor = Color.Gray;
-                                    }
-                                }
-                                earned = 0;
-                                chainIndex++;
-                                chain.Clear();
-                                return;
-                            }
-                        }
-                    }
-                    for (int i = 0; i < chain[index].Count - 1; i++) // inefficient as i know that chains share a predator so TODO!
-                    {
-                        cards.Add(chain[index][i].ScientificName);
-                        SqlCommand sqlCommand = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[index][i + 1].ScientificName}' AND Consumed='{chain[index][i].ScientificName}'", sqlConnection);
-                        int b = (int)sqlCommand.ExecuteScalar();
+                        SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{lastOrganism}' AND Consumed = '{chain[i][chain[i].Count - 1].ScientificName}'", sqlConnection);
+                        //Console.WriteLine(sqlCommand.CommandText);
+                        sqlConnection.Open();
+                        int b = (int)checkRelation.ExecuteScalar();
                         if (b == 0)
                         {
                             game.form.Display("food chain is invalid");
-                            Console.WriteLine($"playerChain.chain[{chain.IndexOf(chain[index])}] is invalid as {chain[index][i + 1].CommonName} doesn't eat {chain[index][i].CommonName}");
-                            valid = false;
+                            Console.WriteLine($"playerChain.chain[{i}] is invalid as {lastOrganism} doesn't eat {chain[i][chain[i].Count - 1].CommonName}");
                             Console.WriteLine($"Moving cards back to hand");
                             for (int k = 0; k < chain.Count; k++)
                             {
@@ -150,49 +105,105 @@ public class Chain
                                 for (int j = 0; j < chain[k].Count; j++)
                                 {
                                     Console.WriteLine($"card[{k}][{j}]");
+                                    if (game.username != "") chain[k][j].PushToHand();
+                                    chain[k][j].prevLocation = new Point(chain[k][j].Width * game.playerHand.Count, game.form.workingHeight - chain[k][j].Height);
+                                    Console.WriteLine($"{i} {j}");
                                     chain[k][j].Location = chain[k][j].prevLocation;
                                     chain[k][j].Picked = false;
                                     chain[k][j].inChain = false;
                                     chain[k][j].BackColor = Color.Gray;
-                                    game.playerHand.Add(chain[k][j]);
-                                    if (game.username != "") chain[k][j].PushToHand();
+                                    (Rectangle, bool) tuple = (game.cells[k][j].Item1, false);
+                                    game.cells[k][j] = tuple;
                                 }
                             }
                             earned = 0;
-                            chainIndex++;
                             chain.Clear();
-                            Console.WriteLine($"Chain size = {chain.Count}");
+                            if (game.form.loggedIn)
+                            {
+                                SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
+                                disposeChain.ExecuteNonQuery();
+                            }
+                            sqlConnection.Close();
                             return;
                         }
                     }
-                    if (valid)
+                }//checking the common predator
+                for (int index = 0; index < chain.Count; index++) //iterating through the chain
+                {
+                    if (chain[index].Count < 2) //the subchain consists of one organism
                     {
-                        game.overallScore += CalcScore(chain[index].Count);
+                        game.form.Display("the chain must consist of at least two organisms.");
+                        return;
+                    }
+                    else
+                    {
+                        FixChainIndices(chain[index]);
+                        List<string> cards = new List<string>();
+                        Console.WriteLine(chain[index].Count);
+                        lastLink();
+                        Console.WriteLine(lastOrganism);
+                        sqlConnection.Open();
+                        for (int i = 0; i < chain[index].Count - 1; i++) // inefficient as i know that chains share a predator so TODO!
+                        {
+                            cards.Add(chain[index][i].ScientificName);
+                            SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[index][i + 1].ScientificName}' AND Consumed='{chain[index][i].ScientificName}'", sqlConnection);
+                            int b = (int)checkRelation.ExecuteScalar();
+                            if (b == 0)
+                            {
+                                game.form.Display("food chain is invalid");
+                                Console.WriteLine($"playerChain.chain[{chain.IndexOf(chain[index])}] is invalid as {chain[index][i + 1].CommonName} doesn't eat {chain[index][i].CommonName}");
+                                Console.WriteLine($"Moving cards back to hand");
+                                for (int k = 0; k < chain.Count; k++)
+                                {
+                                    Console.WriteLine($"row[{k}]");
+                                    for (int j = 0; j < chain[k].Count; j++)
+                                    {
+                                        Console.WriteLine($"card[{k}][{j}]");
+                                        chain[k][j].Location = chain[k][j].prevLocation;
+                                        chain[k][j].Picked = false;
+                                        chain[k][j].inChain = false;
+                                        chain[k][j].BackColor = Color.Gray;
+                                        game.playerHand.Add(chain[k][j]);
+                                        if (game.username != "") chain[k][j].PushToHand();
+                                        (Rectangle, bool) tuple = (game.cells[k][j].Item1, false);
+                                        game.cells[k][j] = tuple;
+                                    }
+                                }
+                                earned = 0;
+                                chain.Clear();
+                                if (game.form.loggedIn)
+                                {
+                                    SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
+                                    disposeChain.ExecuteNonQuery();
+                                }
+                                return;
+                            }
+                        }//if you get here, there is a common predator, now check all the other relations
+                        game.overallScore += CalcScore(chain[index].Count); //lessgooo everything is okay
                         earned += CalcScore(chain[index].Count);
-                        if (game.username != "")
-                        {
-                            game.totalPoints += CalcScore(chain[index].Count);
-                            SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.totalPoints} WHERE Username='{game.username}'", sqlConnection);
-                            updatePoints.ExecuteNonQuery();
-                            disposeChain.ExecuteNonQuery();
-                        }
-                        foreach (Card c in chain[index])
-                        {
-                            game.form.RemoveCardControl(c);
-                            c.Image.Dispose();
-                        }
-                        sqlConnection.Close();
-                        chain[index].Clear();
-                        chainIndex++;
-                        for (int j = 0; j < game.playerHand.Count; j++) game.playerHand[j].Location = game.playerHand[j].prevLocation = new Point(Card.cardWidth * (j), game.form.workingHeight
-                            - Card.cardHeight);
                     }
                 }
+                if (game.username != "")
+                {
+                    game.totalPoints += game.overallScore;
+                    SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.totalPoints} WHERE Username='{game.username}'", sqlConnection);
+                    updatePoints.ExecuteNonQuery();
+                    SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
+                    disposeChain.ExecuteNonQuery();
+                }
+                chain.Clear();
+                for (int j = 0; j < game.playerHand.Count; j++)
+                {
+                    game.playerHand[j].Location = game.playerHand[j].prevLocation = new Point(
+                        Card.cardWidth * (j),
+                        game.form.workingHeight - Card.cardHeight
+                    );
+                }
+                game.form.Display($"+{earned} points");
+                earned = 0;
+                game.form.Invalidate();
             }
         }
-        game.form.Display($"+{earned} points");
-        earned = 0;
-        game.form.Invalidate();
     }
     public void LoadChain() //update prevLocations
     {

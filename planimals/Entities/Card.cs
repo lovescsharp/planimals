@@ -1,10 +1,8 @@
-﻿using planimals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Media;
 
 public class Card : PictureBox
 {

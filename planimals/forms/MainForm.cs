@@ -81,8 +81,8 @@ public partial class MainForm : Form
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
-        //BackgroundImage = new Bitmap(Image.FromFile(currentDir + "\\assets\\photos\\background.png"));
-        //BackgroundImageLayout = ImageLayout.Stretch;
+        BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
+        BackgroundImageLayout = ImageLayout.Stretch;
         BackColor = Color.DarkSeaGreen;
         stats = new Label();
         stats.Size = new Size(300, 100);
@@ -420,19 +420,11 @@ public partial class MainForm : Form
     }
     public void Draw(object sender, PaintEventArgs e)
     {
-        if (game != null)
-        {
+        if (game != null) 
             if (game.countDownTimer.Enabled)
-            {
                 using (Pen pen = new Pen(Color.NavajoWhite, 6.0f))
-                {
                     foreach (List<(Rectangle, bool)> tuples in game.cells)
-                    {
                         foreach ((Rectangle, bool) tuple in tuples) e.Graphics.DrawRectangle(pen, tuple.Item1);
-                    }
-                }
-            }
-        }
     }
     public async void Display(string s) {
         label.Text = s;

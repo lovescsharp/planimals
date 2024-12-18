@@ -24,8 +24,8 @@ public class Game
     public static Rectangle cell;
     public Rectangle liRectangle;
 
-    public int overallScore;
-    public int totalPoints;
+    public int overallScore; //points earned in this round
+    public int totalPoints; //total points the player has on their account
     public Game(string u, int t, string s, MainForm f)
     {
         username = u;
@@ -34,7 +34,7 @@ public class Game
 
         strArr = s;
 
-        countDownTimer = new System.Windows.Forms.Timer();
+        countDownTimer = new Timer();
         countDownTimer.Interval = 1000;
         countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
 
@@ -51,7 +51,6 @@ public class Game
         cells = new List<List<(Rectangle, bool)>>();
         cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
     }
-    // query creates an example of a saved game, so that you can test pulling and pushing \\
     /*
     delete from FoodChainCards where Username='player1'
     delete from Games where Username='player1'
@@ -72,7 +71,7 @@ public class Game
     ('player1', 'Tyto alba', 0, 4),
     ('player1', 'Poa pratensis', 1, 0),
     ('player1', 'Microtus arvalis', 1, 1); 
-    */
+    */    // query creates an example of a saved game, so that you can test pulling and pushing \\
     public void dbTesting()
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
@@ -97,43 +96,43 @@ public class Game
     }
     public void countDownTimer_Tick(object sender, EventArgs e)
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        if (form.loggedIn)
         {
-            SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
-            sqlConnection.Open();
-            if (time > -1)
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
             {
-                updateTimer.ExecuteNonQuery();
-                form.labelTimer.Text = time.ToString();
-            }
-            else
-            {
-                countDownTimer.Stop();
-                form.Hide();
-                if (username != "")
+                SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
+                sqlConnection.Open();
+                if (time > -1)
                 {
-                    form.UpdateStatsLabel();
-                    CleanDb();
-                };
+                    updateTimer.ExecuteNonQuery();
+                    form.labelTimer.Text = time.ToString();
+                }
+                else
+                {
+                    countDownTimer.Stop();
+                    if (form.loggedIn)
+                    {
+                        form.UpdateStatsLabel();
+                        CleanDb();
+                    };
 
-                form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
-                form.label.Font = form.largeFont;
-                form.label.Text = "Score: " + overallScore.ToString();
-                foreach (Control control in form.endControls)
-                {
-                    control.Enabled = true;
-                    control.Show();
+                    form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
+                    form.label.Font = form.largeFont;
+                    form.label.Text = "Score: " + overallScore.ToString();
+                    foreach (Control control in form.endControls)
+                    {
+                        control.Enabled = true;
+                        control.Show();
+                    }
+                    foreach (Control control in form.gameControls) control.Enabled = false;
+                    foreach (Card c in playerHand) c.Enabled = false;
+                    foreach (List<Card> subchain in playerChain.chain)
+                        foreach (Card card in subchain) card.Enabled = false;
                 }
-                foreach (Control control in form.gameControls) control.Enabled = false;
-                foreach (Card c in playerHand) c.Enabled = false;
-                foreach (List<Card> subchain in playerChain.chain)
-                {
-                    foreach (Card card in subchain) card.Enabled = false;
-                }
+                sqlConnection.Close();
             }
-            UpdateTime();
-            sqlConnection.Close();
         }
+        time -= 1;
     }
     private void readySteadyGoTimer_Tick(object sender, EventArgs e)
     {
@@ -169,49 +168,30 @@ public class Game
     }
     public void Start()
     {
-
-        foreach (Card c in playerHand)
-        {
-            c.Hide();
-            c.Image.Dispose();
-            c.Dispose();
-        }
         playerHand.Clear();
-        foreach (List<Card> subchain in playerChain.chain)
-        {
-            foreach (Card c in subchain)
-            {
-                c.Hide();
-                c.Image.Dispose();
-                c.Dispose();
-            }
-            subchain.Clear();
-        }
         playerChain.chain.Clear();
         cells.Clear();
         UpdateCells();
         deck.GenerateDeck();
         imageIndex = 3;
-        time = 180;
+        time = 10;
         form.labelTimer.Show();
         form.labelTimer.Text = "";
         overallScore = 0;
         form.label.Show();
         form.label.Text = "";
         form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
-
         if (form.loggedIn)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
             {
                 CleanDb();
-                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', 40, '{deck.sb.ToString()}')", sqlConnection);
+                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', {time}, '{deck.sb.ToString()}')", sqlConnection);
                 sqlConnection.Open();
                 createGame.ExecuteNonQuery();
                 sqlConnection.Close();
             }
         }
-
         if (imageIndex == 3)
         {
             form.readySteadyGo.Show();
@@ -306,7 +286,6 @@ public class Game
             readySteadyGoTimer.Start();
         }
     }
-    public void UpdateTime() => time -= 1;
     public void UpdateCells()
     {
         cells.Clear();

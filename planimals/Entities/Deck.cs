@@ -16,7 +16,6 @@ public partial class Deck : Stack<int>
     {
         rnd = new Random();
         sb = new StringBuilder();
-    
         game = g;
     }
     private int GetNumberOfOrganisms()
@@ -116,6 +115,9 @@ public partial class Deck : Stack<int>
                 }
             }
         }
-        else game.form.Display("cannot hold more than 15 cards"); //instead call CheckHand();
+        else
+        {   
+            if (game.playerHand.IsHot()) game.form.Display("i think you can build a chain out of cards on your hand");
+        }
     }
 }
