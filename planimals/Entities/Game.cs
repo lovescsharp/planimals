@@ -128,20 +128,10 @@ public class Game
             {
                 SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();
-                if (time > -1)
-                {
-                    updateTimer.ExecuteNonQuery();
-                    form.labelTimer.Text = time.ToString();
-                }
+                if (time > -1) updateTimer.ExecuteNonQuery();
                 else
                 {
                     countDownTimer.Stop();
-                    if (form.loggedIn)
-                    {
-                        form.UpdateStatsLabel();
-                        CleanDb();
-                    };
-
                     form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
                     form.label.Font = form.largeFont;
                     form.label.Text = "Score: " + overallScore.ToString();
@@ -156,6 +146,25 @@ public class Game
                         foreach (Card card in subchain) card.Enabled = false;
                 }
                 sqlConnection.Close();
+            }
+        }
+        else
+        {
+            if (time <= -1) 
+            {
+                countDownTimer.Stop();
+                form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
+                form.label.Font = form.largeFont;
+                form.label.Text = "Score: " + overallScore.ToString();
+                foreach (Control control in form.endControls)
+                {
+                    control.Enabled = true;
+                    control.Show();
+                }
+                foreach (Control control in form.gameControls) control.Enabled = false;
+                foreach (Card c in playerHand) c.Enabled = false;
+                foreach (List<Card> subchain in playerChain.chain)
+                    foreach (Card card in subchain) card.Enabled = false;
             }
         }
         form.labelTimer.Text = time.ToString();

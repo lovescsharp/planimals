@@ -190,7 +190,6 @@ public partial class MainForm : Form
         drawCardRectangle = new Rectangle(drawCardButton.Location.X, drawCardButton.Location.Y, drawCardButton.Width, drawCardButton.Height);
         drawCardButton.Image = drawCardButtonBack;
         Controls.Add(drawCardButton);
-        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
         drawCardButton.MouseEnter += drawCardButton_MouseEnter;
         drawCardButton.MouseLeave += drawCardButton_MouseLeave;
 
@@ -260,6 +259,7 @@ public partial class MainForm : Form
             control.Hide();
         }
         game = new Game(this, username);
+        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
         game.Start();
     }
     private void continueButton_Click(object sender, EventArgs e)
@@ -279,6 +279,7 @@ public partial class MainForm : Form
                         while (r.Read())
                         {
                             game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
+                            drawCardButton.Click += new EventHandler(game.deck.DrawCard);
                             game.Load(sqlConnection);
                         }
                     }
@@ -315,23 +316,9 @@ public partial class MainForm : Form
         foreach (Control control in gameControls) { control.Enabled = false; control.Hide(); }
         foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
         foreach (Control control in menuControls) { control.Enabled = true; control.Show(); }
-        foreach (Card c in game.playerHand)
-        {
-            c.Hide();
-            c.Image.Dispose();
-            c.Dispose();
-        }
-        game.playerHand.Clear();
-        foreach (List<Card> subchain in game.playerChain.chain)
-        {
-            foreach (Card c in subchain)
-            {
-                c.Hide();
-                c.Image.Dispose();
-                c.Dispose();
-            }
-            subchain.Clear();
-        }
+        foreach (Card c in game.playerHand)c.Dispose();
+        foreach (List<Card> subchain in game.playerChain.chain) foreach (Card c in subchain) c.Dispose();
+        //need to dispose the game!!!!!!!!!!!!!!!!!!
         foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
         Invalidate();
     }

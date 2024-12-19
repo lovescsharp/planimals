@@ -127,6 +127,7 @@ public class Chain
                             game.UpdateCells();
                             game.form.Invalidate();
                             sqlConnection.Close();
+                            Console.WriteLine("terminating as no common predator");
                             return;
                         }
                     }
