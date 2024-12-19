@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media.Media3D;
 
@@ -17,7 +18,6 @@ public class Game
     public Timer readySteadyGoTimer;
     
     public Deck deck;
-    private string strArr;
     public Hand playerHand;
     public Chain playerChain;
     public List<List<(Rectangle, bool)>> cells;
@@ -26,14 +26,11 @@ public class Game
 
     public int overallScore; //points earned in this round
     public int totalPoints; //total points the player has on their account
-    public Game(string u, int t, string s, MainForm f)
+    public Game(MainForm f, string u)
     {
-        username = u;
-        time = t;
         form = f;
-
-        strArr = s;
-
+        username = u;
+        
         countDownTimer = new Timer();
         countDownTimer.Interval = 1000;
         countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
@@ -50,6 +47,35 @@ public class Game
         playerChain = new Chain(this);
         cells = new List<List<(Rectangle, bool)>>();
         cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
+    }
+    public Game(MainForm f, string u, int t, string d)
+    {
+        form = f;
+        username = u;
+        time = t;
+
+        deck = new Deck(this);
+        playerHand = new Hand(this);
+
+        playerChain = new Chain(this);
+        cells = new List<List<(Rectangle, bool)>>();
+        cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
+
+        for (int i = 0; i < d.Length; i++)
+        {
+            if (d[i] == ',') continue;
+            deck.Push(d[i]);
+        }
+
+        countDownTimer = new Timer();
+        countDownTimer.Interval = 1000;
+        countDownTimer.Tick += new EventHandler(countDownTimer_Tick);
+
+        imageIndex = 3;
+
+        readySteadyGoTimer = new Timer();
+        readySteadyGoTimer.Interval = 1000;
+        readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
     }
     /*
     delete from FoodChainCards where Username='player1'
@@ -132,6 +158,7 @@ public class Game
                 sqlConnection.Close();
             }
         }
+        form.labelTimer.Text = time.ToString();
         time -= 1;
     }
     private void readySteadyGoTimer_Tick(object sender, EventArgs e)
@@ -174,7 +201,7 @@ public class Game
         UpdateCells();
         deck.GenerateDeck();
         imageIndex = 3;
-        time = 10;
+        time = 25;
         form.labelTimer.Show();
         form.labelTimer.Text = "";
         overallScore = 0;
@@ -216,11 +243,8 @@ public class Game
             readySteadyGoTimer.Start();
         }
     }
-    public void Load()
+    public void Load(SqlConnection sqlConnection)
     {
-        cells = new List<List<(Rectangle, bool)>>();
-        playerChain = new Chain(this);
-
         foreach (Control control in form.menuControls) control.Hide();
         imageIndex = 3;
         form.labelTimer.Show();
@@ -236,55 +260,17 @@ public class Game
             form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", indx.ToString() + ".png"));
         }
         catch (Exception ex) { MessageBox.Show("Failed to load image: " + ex.Message); }
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
-        {
-            SqlCommand getSizes = new SqlCommand(
-                $"SELECT RowNo, MAX(PositionNo) AS MaxPositionNo " +
-                $"FROM FoodChainCards " +
-                $"WHERE Username='{username}' " +
-                $"GROUP BY RowNo " +
-                $"ORDER BY RowNo; ", sqlConnection);
-            sqlConnection.Open();
-            foreach (char c in strArr)
-            {
-                if (c == ',') continue;
-                deck.Push(int.Parse(c.ToString()));
-            }
-            SqlCommand pullHand = new SqlCommand(
-                $"SELECT Hand.CardID, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description " +
-                $"FROM Hand " +
-                $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
-                $"WHERE Username='{username}'", sqlConnection);
-            using (SqlDataReader reader = pullHand.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    Card c = new Card(
-                        this,
-                        reader["CardID"].ToString(),
-                        reader["Common_name"].ToString(),
-                        reader["Description"].ToString(),
-                        Path.Combine(Environment.CurrentDirectory, "assets", "photos", reader["CardID"].ToString() + ".jpg"),
-                        (int)reader["Hierarchy"],
-                        reader["Habitat"].ToString(),
-                        new Point(Card.cardWidth * playerHand.Count, form.Height - form.workingWidth / 10),
-                        false
-                        );
-                    playerHand.Add(c);
-                    form.Controls.Add(c);
-                }
-            }
-            LoadCells();
-            playerChain.LoadChain();
 
-            sqlConnection.Close();
-            foreach (List<Card> chain in playerChain.chain)
-            {
-                foreach (Card c in chain) c.Hide();
-            }
-            foreach (Card c in playerHand) c.Hide();
-            readySteadyGoTimer.Start();
-        }
+        playerHand.LoadHand(sqlConnection);
+        playerChain.LoadChain(sqlConnection);
+        UpdateCells();
+        for (int i = 0; i < playerChain.chain.Count; i++) for (int j = 0; j < playerChain.chain[i].Count; j++) playerChain.chain[i][j].rectLocation = cells[i][j].Item1.Location;
+        sqlConnection.Close();
+
+        foreach (List<Card> chain in playerChain.chain) foreach (Card c in chain) c.Hide();
+        foreach (Card c in playerHand) c.Hide();
+        readySteadyGoTimer.Start();
+        
     }
     public void UpdateCells()
     {
@@ -328,49 +314,7 @@ public class Game
             }
         }
     }
-    public void LoadCells()
-    {
-        cells.Clear();
-        int rows = 0, columns = 0;
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
-        {
-            sqlConnection.Open();
-
-            SqlCommand getSizes = new SqlCommand("SELECT RowNo, MAX(PositionNo) AS MaxPositionNo\r\nFROM FoodChainCards\r\nWHERE Username = @Username\r\nGROUP BY RowNo\r\n", sqlConnection);
-            getSizes.Parameters.AddWithValue("@Username", username);
-            using (SqlDataReader r = getSizes.ExecuteReader())
-            {
-                while (r.Read())
-                {
-                    rows = int.Parse(r["RowNo"].ToString());
-                    columns = int.Parse(r["MaxPositionNo"].ToString());
-
-                    cells.Add(new List<(Rectangle, bool)>());
-                    Console.WriteLine($"Added a row {rows}");
-                    for (int j = 0; j <= columns + 1; j++)
-                    {
-                        if (j == columns + 1)
-                        {
-                            Rectangle rect = new Rectangle(
-                                j * (cell.Width) + cell.X, 
-                                rows * cell.Height + cell.Y, 
-                                cell.Width, 
-                                cell.Height);
-                            cells[rows].Add((rect, false));
-                        }
-                        else
-                        {
-                            Rectangle rect = new Rectangle(
-                                j * (cell.Width) + cell.X,
-                                rows * cell.Height + cell.Y, 
-                                cell.Width, 
-                                cell.Height);
-                            cells[rows].Add((rect, true));
-                        }
-                        Console.WriteLine($"Added cell {j} to row {rows}");
-                    }
-                }
-            }
-        }
+    ~Game() { 
+        
     }
 }

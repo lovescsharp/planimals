@@ -81,8 +81,8 @@ public partial class MainForm : Form
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
-        BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
-        BackgroundImageLayout = ImageLayout.Stretch;
+        //BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
+        //BackgroundImageLayout = ImageLayout.Stretch;
         BackColor = Color.DarkSeaGreen;
         stats = new Label();
         stats.Size = new Size(300, 100);
@@ -190,6 +190,7 @@ public partial class MainForm : Form
         drawCardRectangle = new Rectangle(drawCardButton.Location.X, drawCardButton.Location.Y, drawCardButton.Width, drawCardButton.Height);
         drawCardButton.Image = drawCardButtonBack;
         Controls.Add(drawCardButton);
+        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
         drawCardButton.MouseEnter += drawCardButton_MouseEnter;
         drawCardButton.MouseLeave += drawCardButton_MouseLeave;
 
@@ -258,9 +259,8 @@ public partial class MainForm : Form
             control.Enabled = false;
             control.Hide();
         }
-        game = new Game(username, 0, string.Empty,this); //deck is generated after initialized 
+        game = new Game(this, username);
         game.Start();
-        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
     }
     private void continueButton_Click(object sender, EventArgs e)
     {
@@ -273,14 +273,13 @@ public partial class MainForm : Form
                 int b = (int)cmd.ExecuteScalar();
                 if (b == 1)
                 {
-                    SqlCommand pullGame = new SqlCommand($"SELECT Time, Deck FROM Games WHERE Username='{username}'", sqlConnection);
-                    using (SqlDataReader r = pullGame.ExecuteReader())
+                    SqlCommand pullTimeHand = new SqlCommand($"SELECT Time, Deck FROM Games WHERE Username='{username}'", sqlConnection);
+                    using (SqlDataReader r = pullTimeHand.ExecuteReader()) 
                     {
                         while (r.Read())
                         {
-                            game = new Game(username, (int)r["Time"], r["Deck"].ToString(), this); // plug in a pulled value of deck
-                            drawCardButton.Click += new EventHandler(game.deck.DrawCard);
-                            game.Load();
+                            game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
+                            game.Load(sqlConnection);
                         }
                     }
                 }
@@ -339,6 +338,7 @@ public partial class MainForm : Form
     private void goToMenuInGameButton_Click(object sender, EventArgs e)
     {
         game.countDownTimer.Stop();
+        
         UpdateStatsLabel();
         foreach (Control control in gameControls) control.Hide();
         foreach (Card c in game.playerHand) c.Hide();

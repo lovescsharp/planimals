@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.IO;
+using System.Windows.Forms;
 
 public class Hand : List<Card>
 {
@@ -40,5 +44,32 @@ public class Hand : List<Card>
             }
         }
         else return false;
+    }
+    public void LoadHand(SqlConnection sqlConnection)
+    {
+        SqlCommand pullHand = new SqlCommand(
+                $"SELECT Hand.CardID, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description " +
+        $"FROM Hand " +
+                $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
+                $"WHERE Username='{game.username}'", sqlConnection);
+        using (SqlDataReader reader = pullHand.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                Card c = new Card(
+                    game,
+                    reader["CardID"].ToString(),
+                    reader["Common_name"].ToString(),
+                    reader["Description"].ToString(),
+                    Path.Combine(Environment.CurrentDirectory, "assets", "photos", reader["CardID"].ToString() + ".jpg"),
+                    (int)reader["Hierarchy"],
+                    reader["Habitat"].ToString(),
+                    new Point(Card.cardWidth * Count, game.form.Height - game.form.workingWidth / 10),
+                    false
+                    );
+                Add(c);
+                game.form.Controls.Add(c);
+            }
+        }
     }
 }

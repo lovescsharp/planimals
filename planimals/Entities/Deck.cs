@@ -8,7 +8,6 @@ using System.Text;
 public partial class Deck : Stack<int>
 {
     Game game;
-
     Random rnd;
     public StringBuilder sb;
 
@@ -116,7 +115,7 @@ public partial class Deck : Stack<int>
             }
         }
         else
-        {   
+        {
             if (game.playerHand.IsHot()) game.form.Display("i think you can build a chain out of cards on your hand");
         }
     }

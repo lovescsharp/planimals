@@ -105,7 +105,7 @@ public class Card : PictureBox
                             game.playerHand.Remove(this);
                             prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
                             game.playerChain.chain[i].Add(this);
-                            if (game.username != "")
+                            if (game.form.loggedIn)
                             {
                                 RemoveFromHand();
                                 PushToChain(i, j);
@@ -149,7 +149,7 @@ public class Card : PictureBox
                             game.playerChain.chain.RemoveAt(i);
                         }
                         game.playerHand.Add(this);
-                        if (game.username != "")
+                        if (game.form.loggedIn)
                         {
                             RemoveFromChain(i, j);
                             PushToHand();
