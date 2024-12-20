@@ -109,7 +109,7 @@ namespace planimals
         private void Cancel(object sender, EventArgs e) => Close();
         private void Create(object sender, EventArgs e) 
         {
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand userExists = new SqlCommand("SELECT COUNT(*) FROM Players WHERE Username=@username", sqlConnection);
                 SqlParameter username = new SqlParameter();

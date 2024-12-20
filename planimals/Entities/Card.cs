@@ -176,7 +176,7 @@ public class Card : PictureBox
     }
     public void PushToHand()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             sqlConnection.Open();
             SqlCommand insert = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{ScientificName}')", sqlConnection);
@@ -186,7 +186,7 @@ public class Card : PictureBox
     }
     public void RemoveFromHand()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand removeCard = new SqlCommand($"DELETE FROM Hand Where Username='{game.username}' AND CardID='{ScientificName}'", sqlConnection);
             sqlConnection.Open();
@@ -196,7 +196,7 @@ public class Card : PictureBox
     }
     public void PushToChain(int RowNo, int ColNo)
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand pushCardToChain = new SqlCommand($"INSERT INTO FoodChainCards(Username, CardID, RowNo, PositionNo) VALUES ('{game.username}', '{ScientificName}', {RowNo}, {ColNo})", sqlConnection);
             sqlConnection.Open();
@@ -206,7 +206,7 @@ public class Card : PictureBox
     }
     public void RemoveFromChain(int RowNo, int ColNo)
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);
             sqlConnection.Open();

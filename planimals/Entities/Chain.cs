@@ -84,15 +84,16 @@ public class Chain
             Console.WriteLine("current chain:\n" + str);
             */
             lastLink();
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
+                SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
+                sqlConnection.Open();
                 for (int i = 0; i < chain.Count; i++)
                 {
                     if (i != game.playerChain.longestChainIndex && chain[i].Count != 0)
                     {
                         SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{lastOrganism}' AND Consumed = '{chain[i][chain[i].Count - 1].ScientificName}'", sqlConnection);
                         //Console.WriteLine(sqlCommand.CommandText);
-                        sqlConnection.Open();
                         int b = (int)checkRelation.ExecuteScalar();
                         if (b == 0)
                         {
@@ -119,11 +120,7 @@ public class Chain
                             }
                             earned = 0;
                             chain.Clear();
-                            if (game.form.loggedIn)
-                            {
-                                SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
-                                disposeChain.ExecuteNonQuery();
-                            }
+                            if (game.form.loggedIn) disposeChain.ExecuteNonQuery();
                             game.UpdateCells();
                             game.form.Invalidate();
                             sqlConnection.Close();
@@ -132,7 +129,7 @@ public class Chain
                         }
                     }
                 }//checking the common predator
-                for (int index = 0; index < chain.Count; index++) //iterating through the chain
+                for (int index = 0; index < chain.Count; index++)
                 {
                     if (chain[index].Count < 2) //the subchain consists of one organism
                     {
@@ -142,10 +139,10 @@ public class Chain
                     else
                     {
                         FixChainIndices(chain[index]);
-                        sqlConnection.Open();
                         for (int i = 0; i < chain[index].Count - 1; i++) // inefficient as i know that chains share a predator so TODO!
                         {
                             SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{chain[index][i + 1].ScientificName}' AND Consumed='{chain[index][i].ScientificName}'", sqlConnection);
+                            Console.WriteLine(checkRelation.CommandText);
                             int b = (int)checkRelation.ExecuteScalar();
                             if (b == 0)
                             {
@@ -168,27 +165,22 @@ public class Chain
                                     }
                                 }
                                 earned = 0;
-                                
-                                if (game.form.loggedIn)
-                                {
-                                    SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
-                                    disposeChain.ExecuteNonQuery();
-                                }
+                                if (game.form.loggedIn) disposeChain.ExecuteNonQuery();
+                                sqlConnection.Close();
                                 game.UpdateCells();
                                 game.form.Invalidate();
                                 return;
                             }
-                        }//if you get here, there is a common predator, now check all the other relations
+                        }
                         game.overallScore += CalcScore(chain[index].Count); //lessgooo everything is okay
                         earned += CalcScore(chain[index].Count);
                     }
-                }
+                }//iterating through the chain
                 if (game.form.loggedIn)
                 {
                     game.totalPoints += game.overallScore;
                     SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.totalPoints} WHERE Username='{game.username}'", sqlConnection);
                     updatePoints.ExecuteNonQuery();
-                    SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
                     disposeChain.ExecuteNonQuery();
                 }
                 for (int j = 0; j < game.playerHand.Count; j++)
@@ -198,7 +190,8 @@ public class Chain
                         game.form.workingHeight - Card.cardHeight
                     );
                 }//updating cards locations in chain
-                foreach (List<Card> subchain in chain) for (int i = 0; i < subchain.Count; i++) subchain[i].Dispose();
+                foreach (List<Card> subchain in chain) for (int i = 0; i < subchain.Count; i++) game.form.RemoveCardControl(subchain[i]);
+                sqlConnection.Close();
                 chain.Clear();
                 game.form.Display($"+{earned} points");
                 earned = 0;

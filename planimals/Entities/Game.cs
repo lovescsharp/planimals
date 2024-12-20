@@ -100,7 +100,7 @@ public class Game
     */    // query creates an example of a saved game, so that you can test pulling and pushing \\
     public void dbTesting()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
             sqlConnection.Open(); test.ExecuteNonQuery(); sqlConnection.Close();
@@ -108,7 +108,7 @@ public class Game
     }
     public void CleanDb()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand clearGame = new SqlCommand($"DELETE FROM Games WHERE Username='{username}'", sqlConnection);
             SqlCommand clearHand = new SqlCommand($"DELETE FROM Hand WHERE Username='{username}'", sqlConnection);
@@ -124,7 +124,7 @@ public class Game
     {
         if (form.loggedIn)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();
@@ -150,7 +150,7 @@ public class Game
         }
         else
         {
-            if (time <= -1) 
+            if (time < 0) 
             {
                 countDownTimer.Stop();
                 form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
@@ -204,13 +204,14 @@ public class Game
     }
     public void Start()
     {
+        foreach (Control c in form.Controls) if (c is Card) form.RemoveCardControl((Card) c);
         playerHand.Clear();
         playerChain.chain.Clear();
         cells.Clear();
         UpdateCells();
         deck.GenerateDeck();
         imageIndex = 3;
-        time = 25;
+        time = 5;
         form.labelTimer.Show();
         form.labelTimer.Text = "";
         overallScore = 0;
@@ -219,7 +220,7 @@ public class Game
         form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
         if (form.loggedIn)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 CleanDb();
                 SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', {time}, '{deck.sb.ToString()}')", sqlConnection);

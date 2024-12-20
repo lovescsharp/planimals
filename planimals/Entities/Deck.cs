@@ -20,7 +20,7 @@ public partial class Deck : Stack<int>
     private int GetNumberOfOrganisms()
     {
         int count = 0;
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand sqlCommand = new SqlCommand("SELECT COUNT(*) AS num FROM Organisms", sqlConnection);
             sqlConnection.Open();
@@ -45,7 +45,7 @@ public partial class Deck : Stack<int>
     }
     public string GetScientificNameFromDeck()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             if (Count != 0)
             {
@@ -71,7 +71,7 @@ public partial class Deck : Stack<int>
             for (int i = 0; i < 3; i++)
             {
                 sciname = GetScientificNameFromDeck();
-                using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
                 {
                     SqlCommand sqlCommand = new SqlCommand($"SELECT * FROM Organisms WHERE Scientific_name='{sciname}'", sqlConnection);
                     sqlConnection.Open();

@@ -18,7 +18,7 @@ public partial class MainForm : Form
     public bool loggedIn;
     Game game;
     private static string dbPath = Path.Combine(Environment.CurrentDirectory, "cards.mdf");
-    public static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
+    public static string CONNECTION_STRING = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
 
 
     public Button playButton;
@@ -266,7 +266,7 @@ public partial class MainForm : Form
     {
         if (loggedIn)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(CONNECTION_STRING))
             {
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();

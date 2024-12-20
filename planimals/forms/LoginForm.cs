@@ -102,7 +102,7 @@ namespace planimals
         }
         private void LoginClick(object sender, EventArgs e)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand cmd = new SqlCommand("SELECT Count(*) FROM Players WHERE Username=@username AND Password=@password", sqlConnection);
                 

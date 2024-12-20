@@ -21,7 +21,7 @@ public class Hand : List<Card>
     {
         if (Count <= 1)
         {
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.connectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand checkRelation;
                 for (int i = 0; i < Count; i++)
