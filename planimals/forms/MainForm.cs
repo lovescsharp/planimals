@@ -317,7 +317,7 @@ public partial class MainForm : Form
         foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
         foreach (Control control in menuControls) { control.Enabled = true; control.Show(); }
         foreach (Card c in game.playerHand)c.Dispose();
-        foreach (List<Card> subchain in game.playerChain.chain) foreach (Card c in subchain) c.Dispose();
+        foreach (List<Card> subchain in game.playerChain) foreach (Card c in subchain) c.Dispose();
         //need to dispose the game!!!!!!!!!!!!!!!!!!
         foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
         Invalidate();
@@ -329,7 +329,7 @@ public partial class MainForm : Form
         UpdateStatsLabel();
         foreach (Control control in gameControls) control.Hide();
         foreach (Card c in game.playerHand) c.Hide();
-        foreach (List<Card> subchain in game.playerChain.chain)
+        foreach (List<Card> subchain in game.playerChain)
         {
             foreach (Card c in subchain) c.Hide();
         }
@@ -346,7 +346,7 @@ public partial class MainForm : Form
         foreach (Control control in youSureWannaQuitControls) control.Hide();
         foreach (Control control in gameControls) control.Show();
         foreach (Card c in game.playerHand) c.Show();
-        foreach (List<Card> subchain in game.playerChain.chain)
+        foreach (List<Card> subchain in game.playerChain)
         {
             foreach (Card c in subchain) c.Show();
         }
@@ -386,13 +386,13 @@ public partial class MainForm : Form
             game.playerHand[i].Height = workingWidth / 10;
             game.playerHand[i].Location = game.playerHand[i].prevLocation = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
         }
-        foreach (List<Card> chain in game.playerChain.chain)
+        foreach (List<Card> chain in game.playerChain)
         {
             for (int i = 0; i < chain.Count; i++)
             {
                 chain[i].Width = workingHeight / 8;
                 chain[i].Height = workingWidth / 10;
-                //chain[i].Location = new Point((int)(chain[i].Location.X * 0.5625), (int)(chain[i].Location.Y * 0.5625));
+                //this[i].Location = new Point((int)(this[i].Location.X * 0.5625), (int)(this[i].Location.Y * 0.5625));
                 chain[i].prevLocation = new Point(game.playerHand.LastOrDefault().Location.X + Card.cardWidth * i, workingHeight - Card.cardHeight);
             }
         }

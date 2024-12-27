@@ -96,7 +96,7 @@ public class Card : PictureBox
                     {
                         if (!game.cells[i][j].Item2) //cell is empty
                         {
-                            if (game.cells[i].Count == 1) game.playerChain.chain.Add(new List<Card>());
+                            if (game.cells[i].Count == 1) game.playerChain.Add(new List<Card>());
                             Drop(this);
                             Location = game.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (game.cells[i][j].Item1, true);
@@ -104,7 +104,7 @@ public class Card : PictureBox
                             inChain = true;
                             game.playerHand.Remove(this);
                             prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
-                            game.playerChain.chain[i].Add(this);
+                            game.playerChain[i].Add(this);
                             if (game.form.loggedIn)
                             {
                                 RemoveFromHand();
@@ -141,12 +141,12 @@ public class Card : PictureBox
                         (Rectangle, bool) tuple = (game.cells[i][j].Item1, false);
                         game.cells[i][j] = tuple;
                         //Console.WriteLine($"before removing {CommonName}: {playerChain[i].Count}");
-                        game.playerChain.chain[i].Remove(this);
+                        game.playerChain[i].Remove(this);
                         //Console.WriteLine($"afte r : {playerChain[i].Count}");
-                        if (game.playerChain.chain[i].Count == 0)
+                        if (game.playerChain[i].Count == 0)
                         {
                             Console.WriteLine($"removing chain[{i}]");
-                            game.playerChain.chain.RemoveAt(i);
+                            game.playerChain.RemoveAt(i);
                         }
                         game.playerHand.Add(this);
                         if (game.form.loggedIn)
@@ -169,9 +169,9 @@ public class Card : PictureBox
     }
     public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
     {
-        for (int i = 0; i < game.playerChain.chain.Count; i++)
-            for (int j = 0; j < game.playerChain.chain[i].Count; j++)
-                game.playerChain.chain[i][j].Location = game.playerChain.chain[i][j].rectLocation =
+        for (int i = 0; i < game.playerChain.Count; i++)
+            for (int j = 0; j < game.playerChain[i].Count; j++)
+                game.playerChain[i][j].Location = game.playerChain[i][j].rectLocation =
                 game.cells[i][j].Item1.Location;
     }
     public void PushToHand()

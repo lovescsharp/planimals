@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -17,24 +25,43 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 192,
-          "SelectedChildIndex": 1,
+          "DockedWidth": 161,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            },
+            }
+          ]
+        },
+        {
+          "DockedWidth": 223,
+          "SelectedChildIndex": 0,
+          "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Card.cs",
-              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Card.cs",
-              "RelativeDocumentMoniker": "planimals\\Entities\\Card.cs",
-              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Card.cs*",
-              "RelativeToolTip": "planimals\\Entities\\Card.cs*",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAACsAAACVAAAAAAAAAA==",
+              "Title": "Chain.cs",
+              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Chain.cs",
+              "RelativeDocumentMoniker": "planimals\\Entities\\Chain.cs",
+              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Chain.cs",
+              "RelativeToolTip": "planimals\\Entities\\Chain.cs",
+              "ViewState": "AgIAAIUAAAAAAAAAAAAUwKcAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-27T16:17:56.111Z",
+              "WhenOpened": "2024-12-27T16:37:27.806Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Forms\\MainForm.cs",
+              "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
+              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Forms\\MainForm.cs",
+              "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
+              "ViewState": "AgIAAHEBAAAAAAAAAAAmwIgBAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-27T16:32:42.808Z",
               "EditorCaption": ""
             },
             {
@@ -45,9 +72,22 @@
               "RelativeDocumentMoniker": "planimals\\Entities\\Game.cs",
               "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Game.cs",
               "RelativeToolTip": "planimals\\Entities\\Game.cs",
-              "ViewState": "AgIAAC4AAAAANDMzMzMLwDwAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAmwJAAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-20T20:24:56.015Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Card.cs",
+              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Card.cs",
+              "RelativeDocumentMoniker": "planimals\\Entities\\Card.cs",
+              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Card.cs",
+              "RelativeToolTip": "planimals\\Entities\\Card.cs",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAEwK0AAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-27T16:17:56.111Z",
               "EditorCaption": ""
             }
           ]

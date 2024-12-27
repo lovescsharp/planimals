@@ -142,7 +142,7 @@ public class Game
                     }
                     foreach (Control control in form.gameControls) control.Enabled = false;
                     foreach (Card c in playerHand) c.Enabled = false;
-                    foreach (List<Card> subchain in playerChain.chain)
+                    foreach (List<Card> subchain in playerChain)
                         foreach (Card card in subchain) card.Enabled = false;
                 }
                 sqlConnection.Close();
@@ -163,7 +163,7 @@ public class Game
                 }
                 foreach (Control control in form.gameControls) control.Enabled = false;
                 foreach (Card c in playerHand) c.Enabled = false;
-                foreach (List<Card> subchain in playerChain.chain)
+                foreach (List<Card> subchain in playerChain)
                     foreach (Card card in subchain) card.Enabled = false;
             }
         }
@@ -193,7 +193,7 @@ public class Game
                 form.drawCardButton.Hide();
             }
             foreach (Control control in form.endControls) { control.Enabled = false; control.Hide(); }
-            foreach (List<Card> chain in playerChain.chain)
+            foreach (List<Card> chain in playerChain)
             {
                 foreach (Card c in chain) c.Show();
             }
@@ -206,12 +206,12 @@ public class Game
     {
         foreach (Control c in form.Controls) if (c is Card) form.RemoveCardControl((Card) c);
         playerHand.Clear();
-        playerChain.chain.Clear();
+        playerChain.Clear();
         cells.Clear();
         UpdateCells();
         deck.GenerateDeck();
         imageIndex = 3;
-        time = 5;
+        time = 240;
         form.labelTimer.Show();
         form.labelTimer.Text = "";
         overallScore = 0;
@@ -274,10 +274,10 @@ public class Game
         playerHand.LoadHand(sqlConnection);
         playerChain.LoadChain(sqlConnection);
         UpdateCells();
-        for (int i = 0; i < playerChain.chain.Count; i++) for (int j = 0; j < playerChain.chain[i].Count; j++) playerChain.chain[i][j].rectLocation = cells[i][j].Item1.Location;
+        for (int i = 0; i < playerChain.Count; i++) for (int j = 0; j < playerChain[i].Count; j++) playerChain[i][j].rectLocation = cells[i][j].Item1.Location;
         sqlConnection.Close();
 
-        foreach (List<Card> chain in playerChain.chain) foreach (Card c in chain) c.Hide();
+        foreach (List<Card> chain in playerChain) foreach (Card c in chain) c.Hide();
         foreach (Card c in playerHand) c.Hide();
         readySteadyGoTimer.Start();
         
@@ -286,14 +286,14 @@ public class Game
     {
         cells.Clear();
         Rectangle rect;
-        for (int i = 0; i <= playerChain.chain.Count; i++)
+        for (int i = 0; i <= playerChain.Count; i++)
         {
             cells.Add(new List<(Rectangle, bool)>());
-            if (i < playerChain.chain.Count)
+            if (i < playerChain.Count)
             {
-                for (int j = 0; j <= playerChain.chain[i].Count; j++)
+                for (int j = 0; j <= playerChain[i].Count; j++)
                 {
-                    if (j == playerChain.chain[i].Count)
+                    if (j == playerChain[i].Count)
                     {
                         rect = new Rectangle(
                             j * (cell.Width) + cell.X, 
