@@ -41,7 +41,7 @@ public class Card : PictureBox
         offset = new Point(cardWidth / 2, cardHeight / 2);
         try
         {
-            Image = Image.FromFile(path);
+            Image = Image.FromFile(path); //C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\assets\photos
         }
         catch
         {
