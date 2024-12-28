@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.Windows.Forms;
 
 public class Chain : List<List<Card>>
 {
@@ -47,7 +46,7 @@ public class Chain : List<List<Card>>
     }
     private void FixChainIndices(List<Card> chain)
     {
-        for (int i = 0; i < Count - 1; i++)
+        for (int i = 0; i < chain.Count - 1; i++)
         {
             //MessageBox.Show($"{this[i].common_name} at {this[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
             if (chain[i].Location.X > chain[i + 1].Location.X)
@@ -196,6 +195,7 @@ public class Chain : List<List<Card>>
                 earned = 0;
                 game.UpdateCells();
                 game.form.Invalidate();
+                if (game.deck.Count == 0 && !game.playerHand.IsHot()) game.Stop();
             }
         }
     }

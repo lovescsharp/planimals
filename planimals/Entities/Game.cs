@@ -122,53 +122,38 @@ public class Game
     }
     public void countDownTimer_Tick(object sender, EventArgs e)
     {
-        if (form.loggedIn)
+        if (form.loggedIn) //we need to update time if the user is logged in
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();
-                if (time > -1) updateTimer.ExecuteNonQuery();
-                else
-                {
-                    countDownTimer.Stop();
-                    form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
-                    form.label.Font = form.largeFont;
-                    form.label.Text = "Score: " + overallScore.ToString();
-                    foreach (Control control in form.endControls)
-                    {
-                        control.Enabled = true;
-                        control.Show();
-                    }
-                    foreach (Control control in form.gameControls) control.Enabled = false;
-                    foreach (Card c in playerHand) c.Enabled = false;
-                    foreach (List<Card> subchain in playerChain)
-                        foreach (Card card in subchain) card.Enabled = false;
-                }
+                if (time >= 0) updateTimer.ExecuteNonQuery();
+                else Stop();
                 sqlConnection.Close();
             }
         }
-        else
+        else //otherwise just wait 'til timer is 0
         {
-            if (time < 0) 
-            {
-                countDownTimer.Stop();
-                form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
-                form.label.Font = form.largeFont;
-                form.label.Text = "Score: " + overallScore.ToString();
-                foreach (Control control in form.endControls)
-                {
-                    control.Enabled = true;
-                    control.Show();
-                }
-                foreach (Control control in form.gameControls) control.Enabled = false;
-                foreach (Card c in playerHand) c.Enabled = false;
-                foreach (List<Card> subchain in playerChain)
-                    foreach (Card card in subchain) card.Enabled = false;
-            }
+            if (time <= 0) Stop(); 
         }
         form.labelTimer.Text = time.ToString();
         time -= 1;
+    }
+    public void Stop() {
+        countDownTimer.Stop();
+        form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
+        form.label.Font = form.largeFont;
+        form.label.Text = "Score: " + overallScore.ToString();
+        foreach (Control control in form.endControls)
+        {
+            control.Enabled = true;
+            control.Show();
+        }
+        foreach (Control control in form.gameControls) control.Enabled = false;
+        foreach (Card c in playerHand) c.Enabled = false;
+        foreach (List<Card> subchain in playerChain)
+            foreach (Card card in subchain) card.Enabled = false;
     }
     private void readySteadyGoTimer_Tick(object sender, EventArgs e)
     {
@@ -179,7 +164,7 @@ public class Game
         }
         else
         {
-            Console.WriteLine("\nthe game started");
+            //Console.WriteLine("\nthe game started");
             readySteadyGoTimer.Stop();
             form.readySteadyGo.Hide();
             foreach (Control control in form.gameControls)
@@ -204,7 +189,7 @@ public class Game
     }
     public void Start()
     {
-        foreach (Control c in form.Controls) if (c is Card) form.RemoveCardControl((Card) c);
+        foreach (Control c in form.Controls) if (c is Card) form.Controls.Remove(c);
         playerHand.Clear();
         playerChain.Clear();
         cells.Clear();
@@ -249,7 +234,7 @@ public class Game
         }
         else
         {
-            Console.WriteLine("the game started");
+            //Console.WriteLine("the game started");
             readySteadyGoTimer.Start();
         }
     }

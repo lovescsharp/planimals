@@ -226,7 +226,7 @@ public partial class MainForm : Form
 
         foreach (Control control in Controls)
         {
-            if (control.GetType() == typeof(Label))
+            if (control is Label)
             {
                 if (Width < 1920 || Height < 1080) control.Font = smallFont;
                 else control.Font = largeFont;
@@ -249,7 +249,7 @@ public partial class MainForm : Form
         foreach (Control control in gameControls) control.Hide();
         foreach (Control control in endControls) control.Hide();
         foreach (Control control in youSureWannaQuitControls) control.Hide();
-        foreach (Control control in Controls) if (control.GetType() == typeof(Label)) control.ForeColor = Color.LightGreen;
+        foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.LightGreen;
     }
     private void playButton_Click(object sender, EventArgs e)
     {
@@ -322,17 +322,16 @@ public partial class MainForm : Form
         foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
         Invalidate();
     }
-    private void goToMenuInGameButton_Click(object sender, EventArgs e)
+    private void goToMenuInGameButton_Click(object sender, EventArgs e) => Quit();
+    public void Quit() 
     {
         game.countDownTimer.Stop();
-        
         UpdateStatsLabel();
         foreach (Control control in gameControls) control.Hide();
         foreach (Card c in game.playerHand) c.Hide();
         foreach (List<Card> subchain in game.playerChain)
-        {
             foreach (Card c in subchain) c.Hide();
-        }
+
         foreach (Control control in youSureWannaQuitControls)
         {
             control.Show();
@@ -476,6 +475,4 @@ public partial class MainForm : Form
             chainButton.Height = workingHeight / 10;
         }
     }
-    public void RemoveCardControl(Card c) => Controls.Remove(c);
-    public void AddCardControl(Card c) => Controls.Add(c);
 }

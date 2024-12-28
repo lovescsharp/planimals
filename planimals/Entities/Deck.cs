@@ -87,7 +87,7 @@ public partial class Deck : Stack<int>
                                 Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.jpg"),
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
-                                new Point(Card.cardWidth * game.playerHand.Count, game.form.workingHeight - Card.cardHeight),
+                                new Point(Card.cardWidth * game.playerHand.Count, game.form.workingHeight - game.form.ClientRectangle.Width / 10),
                                 false
                                 );
                             game.playerHand.Add(c);
@@ -97,16 +97,16 @@ public partial class Deck : Stack<int>
                     }
                     if (game.deck.Count > 0)
                     {
-                        Console.WriteLine($"{game.deck.Count}");
                         SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
                         removeCard.ExecuteNonQuery();
                     }
                     else
                     {
-                        Console.WriteLine($"the deck is empty, can't remove from Games.Deck in cards.mdf");
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
+                        if (!game.playerHand.IsHot()) game.form.Display("Hooray");
+                        
                     }
                     sqlConnection.Close();
 

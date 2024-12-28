@@ -131,7 +131,7 @@ public class Card : PictureBox
         }
         else if (inChain)
         {
-            Console.WriteLine("moving from chain");
+            //Console.WriteLine("moving from chain");
             for (int i = 0; i < game.cells.Count; i++)
             {
                 for (int j = 0; j < game.cells[i].Count; j++)
@@ -145,7 +145,7 @@ public class Card : PictureBox
                         //Console.WriteLine($"afte r : {playerChain[i].Count}");
                         if (game.playerChain[i].Count == 0)
                         {
-                            Console.WriteLine($"removing chain[{i}]");
+                            //Console.WriteLine($"removing chain[{i}]");
                             game.playerChain.RemoveAt(i);
                         }
                         game.playerHand.Add(this);

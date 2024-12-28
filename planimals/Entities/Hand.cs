@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.IO;
-using System.Windows.Forms;
 
 public class Hand : List<Card>
 {
@@ -19,7 +17,7 @@ public class Hand : List<Card>
     }
     public bool IsHot() 
     {
-        if (Count <= 1)
+        if (Count >= 1)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -30,20 +28,27 @@ public class Hand : List<Card>
                     {
                         if (i == j) continue;
                         checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{this[i]}' AND Consumed = '{this[j]}'", sqlConnection);
+                        Console.WriteLine(checkRelation.CommandText);
                         sqlConnection.Open();
-                        int b = (int)checkRelation.ExecuteScalar();
+                        int b = (int) checkRelation.ExecuteScalar();
                         if (b == 0)
                         {
                             sqlConnection.Close();
+                            Console.WriteLine("hand is playable");
                             return true;
                         }
                     }
                 }
                 sqlConnection.Close();
+                Console.WriteLine("hand isnt playable");
                 return false;
             }
         }
-        else return false;
+        else
+        {
+            Console.WriteLine("hand isnt playable");
+            return false;
+        }
     }
     public void LoadHand(SqlConnection sqlConnection)
     {
