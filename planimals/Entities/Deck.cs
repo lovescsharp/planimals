@@ -4,18 +4,21 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Windows.Forms.VisualStyles;
 
 public partial class Deck : Stack<int>
 {
     Game game;
     Random rnd;
     public StringBuilder sb;
+    private int size;
 
     public Deck(Game g) : base()
     {
         rnd = new Random();
         sb = new StringBuilder();
         game = g;
+        size = 10;
     }
     private int GetNumberOfOrganisms()
     {
@@ -35,7 +38,7 @@ public partial class Deck : Stack<int>
     {
         int randIdx;
         sb.Append(',');
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, GetNumberOfOrganisms() + 1);
             Push(randIdx);
@@ -97,8 +100,11 @@ public partial class Deck : Stack<int>
                     }
                     if (game.deck.Count > 0)
                     {
-                        SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
-                        removeCard.ExecuteNonQuery();
+                        if (game.username != string.Empty)
+                        {
+                            SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
+                            removeCard.ExecuteNonQuery();
+                        }
                     }
                     else
                     {
@@ -106,7 +112,7 @@ public partial class Deck : Stack<int>
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
                         if (!game.playerHand.IsHot()) game.form.Display("Hooray");
-                        
+
                     }
                     sqlConnection.Close();
 

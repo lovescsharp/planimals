@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 public class Card : PictureBox
 {
     private Game game;
+    private Timer t;
+    private Stopwatch s;
+
+    private bool isAnimating;
 
     public bool Picked;
-    public Point prevLocation;
-    public Point rectLocation;
-    private Point offset;
+    public Point prevLocation, rectLocation;
+    private Point offset, p, v;
     public bool inChain;
 
     public string ScientificName;
@@ -28,6 +33,12 @@ public class Card : PictureBox
         game = g;
         DoubleBuffered = true;
 
+        t = new Timer();
+        t.Interval = 10;
+        t.Tick += Tick;
+
+        s = new Stopwatch();
+
         ScientificName = scientific_name;
         CommonName = common_name;
         Description = description;
@@ -41,7 +52,7 @@ public class Card : PictureBox
         offset = new Point(cardWidth / 2, cardHeight / 2);
         try
         {
-            Image = Image.FromFile(path); //C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\assets\photos
+            Image = System.Drawing.Image.FromFile(path); //C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\assets\photos
         }
         catch
         {
@@ -52,7 +63,7 @@ public class Card : PictureBox
         Size = new Size(cardWidth, cardHeight);
         Location = position;
         prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
-        BackColor = System.Drawing.Color.Gray;
+        BackColor = Color.Gray;
         Picked = false;
 
         ContextMenu cm = new ContextMenu();
@@ -68,7 +79,7 @@ public class Card : PictureBox
     }
     protected void OnPaint(object sender, PaintEventArgs e)
     {
-        using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, System.Drawing.Brushes.Black, new Point(Width / 10, Height / 20));
+        using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
     }
     private void card_MouseDown(object sender, MouseEventArgs e)
     {
@@ -243,4 +254,29 @@ public class Card : PictureBox
     }
     private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
     private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
+    public void MoveCard() 
+    {
+        if (isAnimating) return;
+
+        v = new Point(prevLocation.X, prevLocation.Y);
+        p = Location;
+        t.Start();
+        s.Restart();
+        isAnimating = true;
+    }
+    private double f(double t) => Math.Sin(Math.PI * t / 2);
+    private void Tick(object sender, EventArgs e)
+    {
+        long currentTime = s.ElapsedMilliseconds;
+        double elapsedTime = currentTime / 1000.0;
+        if (elapsedTime > 0.6)
+        {
+            t.Stop();
+            isAnimating = false;
+            return;
+        }
+        double easingFactor = f(elapsedTime / 0.6);
+        int y = (int)((v.Y - p.Y) * easingFactor + p.Y);
+        Location = new Point((int)((v.X - p.X) * easingFactor + p.X), (int)((v.Y - p.Y) * easingFactor + p.Y));
+    }
 }

@@ -271,21 +271,24 @@ public partial class MainForm : Form
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
                 sqlConnection.Open();
                 int b = (int)cmd.ExecuteScalar();
+                sqlConnection.Close();
                 if (b == 1)
                 {
                     SqlCommand pullTimeHand = new SqlCommand($"SELECT Time, Deck FROM Games WHERE Username='{username}'", sqlConnection);
-                    using (SqlDataReader r = pullTimeHand.ExecuteReader()) 
+                    sqlConnection.Open();
+                    SqlDataReader r = pullTimeHand.ExecuteReader(); 
+                    while (r.Read())
                     {
-                        while (r.Read())
-                        {
-                            game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
-                            drawCardButton.Click += new EventHandler(game.deck.DrawCard);
-                            game.Load(sqlConnection);
-                        }
+                        Console.WriteLine(r["Time"]);
+                        game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
+                        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
+                        sqlConnection.Close();
+                        game.Load();
+                        return;
                     }
+                    sqlConnection.Close();
                 }
                 else MessageBox.Show("there is no saved game");
-                sqlConnection.Close();
             }
         }
         else Display("you are not logged in");

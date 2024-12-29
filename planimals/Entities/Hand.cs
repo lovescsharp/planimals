@@ -27,11 +27,11 @@ public class Hand : List<Card>
                     for (int j = 1; j < Count - 1; j++)
                     {
                         if (i == j) continue;
-                        checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{this[i]}' AND Consumed = '{this[j]}'", sqlConnection);
+                        checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{this[i].ScientificName}' AND Consumed = '{this[j].ScientificName}'", sqlConnection);
                         Console.WriteLine(checkRelation.CommandText);
                         sqlConnection.Open();
                         int b = (int) checkRelation.ExecuteScalar();
-                        if (b == 0)
+                        if (b == 1)
                         {
                             sqlConnection.Close();
                             Console.WriteLine("hand is playable");
@@ -50,15 +50,17 @@ public class Hand : List<Card>
             return false;
         }
     }
-    public void LoadHand(SqlConnection sqlConnection)
+    public void LoadHand()
     {
-        SqlCommand pullHand = new SqlCommand(
-                $"SELECT Hand.CardID, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description " +
-        $"FROM Hand " +
-                $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
-                $"WHERE Username='{game.username}'", sqlConnection);
-        using (SqlDataReader reader = pullHand.ExecuteReader())
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
+            SqlCommand pullHand = new SqlCommand(
+                    $"SELECT Hand.CardID, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description " +
+            $"FROM Hand " +
+                    $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
+                    $"WHERE Username='{game.username}'", sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader reader = pullHand.ExecuteReader();
             while (reader.Read())
             {
                 Card c = new Card(
@@ -75,6 +77,7 @@ public class Hand : List<Card>
                 Add(c);
                 game.form.Controls.Add(c);
             }
+            sqlConnection.Close();
         }
     }
 }

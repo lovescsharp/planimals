@@ -96,17 +96,18 @@ public class Chain : List<List<Card>>
                         if (b == 0)
                         {
                             game.form.Display("food chain is invalid");
-                            Console.WriteLine($"playerChain[{i}] is invalid as {lastOrganism} doesn't eat {this[i][this[i].Count - 1].CommonName}");
-                            Console.WriteLine($"Moving cards back to hand");
+                            //Console.WriteLine($"playerChain[{i}] is invalid as {lastOrganism} doesn't eat {this[i][this[i].Count - 1].CommonName}");
+                            //Console.WriteLine($"Moving cards back to hand");
                             for (int k = 0; k < Count; k++)
                             {
-                                Console.WriteLine($"row[{k}]");
+                                //Console.WriteLine($"row[{k}]");
                                 for (int j = 0; j < this[k].Count; j++)
                                 {
-                                    Console.WriteLine($"card[{k}][{j}]");
+                                    //Console.WriteLine($"card[{k}][{j}]");
                                     this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
-                                    Console.WriteLine($"{i} {j}");
-                                    this[k][j].Location = this[k][j].prevLocation;
+                                    //Console.WriteLine($"{i} {j}");
+                                    //this[k][j].Location = this[k][j].prevLocation;
+                                    this[k][j].MoveCard();
                                     this[k][j].Picked = false;
                                     this[k][j].inChain = false;
                                     this[k][j].BackColor = Color.Gray;
@@ -151,7 +152,8 @@ public class Chain : List<List<Card>>
                                     for (int j = 0; j < this[k].Count; j++)
                                     {
                                         Console.WriteLine($"card[{k}][{j}]");
-                                        this[k][j].Location = this[k][j].prevLocation;
+                                        //this[k][j].Location = this[k][j].prevLocation;
+                                        this[k][j].MoveCard();
                                         this[k][j].Picked = false;
                                         this[k][j].inChain = false;
                                         this[k][j].BackColor = Color.Gray;
@@ -188,30 +190,32 @@ public class Chain : List<List<Card>>
                         game.form.workingHeight - Card.cardHeight
                     );
                 }//updating cards locations in chain
-                foreach (List<Card> subchain in this) for (int i = 0; i < subchain.Count; i++) game.form.RemoveCardControl(subchain[i]);
+                foreach (List<Card> subchain in this) for (int i = 0; i < subchain.Count; i++) game.form.Controls.Remove(subchain[i]);
                 sqlConnection.Close();
                 Clear();
                 game.form.Display($"+{earned} points");
                 earned = 0;
                 game.UpdateCells();
                 game.form.Invalidate();
-                if (game.deck.Count == 0 && !game.playerHand.IsHot()) game.Stop();
+                if (!game.playerHand.IsHot()) game.Stop();
             }
         }
     }
-    public void LoadChain(SqlConnection sqlConnection) //update prevLocations
+    public void LoadChain() //update prevLocations
     {
-        SqlCommand loadChain = new SqlCommand(
-            "SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, FoodChainCards.PositionNo " +
-            "FROM FoodChainCards " +
-            "JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
-            "WHERE Username = @Username " +
-            "ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo;", sqlConnection);
-
-        loadChain.Parameters.AddWithValue("@Username", game.username);
-
-        using (SqlDataReader reader = loadChain.ExecuteReader())
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
+            SqlCommand loadChain = new SqlCommand(
+                "SELECT Organisms.Scientific_name, Organisms.Common_name, Organisms.Habitat, Organisms.Hierarchy, Organisms.Description, FoodChainCards.RowNo, FoodChainCards.PositionNo " +
+                "FROM FoodChainCards " +
+                "JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
+                "WHERE Username = @Username " +
+                "ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo;", sqlConnection);
+
+            loadChain.Parameters.AddWithValue("@Username", game.username);
+
+            sqlConnection.Open();
+            SqlDataReader reader = loadChain.ExecuteReader();
             while (reader.Read())
             {
                 string scientificName = reader.GetString(0);
@@ -232,7 +236,8 @@ public class Chain : List<List<Card>>
                     Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{scientificName}.jpg"),
                     hierarchy,
                     habitat,
-                    game.cells[rowNo][positionNo].Item1.Location,
+                    //game.cells[rowNo][positionNo].Item1.Location,
+                    new Point(0, 0),
                     true
                     );
                 //c.rectLocation = game.cells[rowNo][positionNo].Item1.Location;
@@ -240,8 +245,9 @@ public class Chain : List<List<Card>>
 
                 while (Count <= rowNo + 1) Add(new List<Card>());
                 this[rowNo].Add(c);
-                game.form.AddCardControl(c);
+                game.form.Controls.Remove(c);
             }
+            sqlConnection.Close();
         }
     }
 }
