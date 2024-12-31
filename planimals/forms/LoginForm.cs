@@ -115,7 +115,7 @@ namespace planimals
                 paramPasswd.ParameterName = "@password";
                 paramPasswd.Value = passwordInput.Text.Trim();
                 cmd.Parameters.Add(paramPasswd);
-                sqlConnection.Open();
+                sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
                 int b = (int) cmd.ExecuteScalar();
                 if (b == 1)
                 {
@@ -132,7 +132,7 @@ namespace planimals
                     label.Text = "Incorrect username or password";
                     passwordInput.Text = "";
                 }
-                sqlConnection.Close();
+                sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
             }
         }
         private void Cancel(object sender, EventArgs e) => Close();

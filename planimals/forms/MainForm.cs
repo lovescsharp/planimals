@@ -46,10 +46,8 @@ public partial class MainForm : Form
     public Label youSureWannaQuitLabel;
     
     public PictureBox drawCardButton;
-    public Image drawCardButtonBack;
     public Rectangle drawCardRectangle;
     public PictureBox chainButton;
-    public Image chainButtonBack;
     public Rectangle chainButtonRectangle;
 
     public List<Control> gameControls;
@@ -178,7 +176,6 @@ public partial class MainForm : Form
         Controls.Add(youSureWannaQuitLabel);
 
         drawCardButton = new PictureBox();
-        drawCardButtonBack = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "back.png"));
         drawCardButton.SizeMode = PictureBoxSizeMode.StretchImage;
         drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
         drawCardButton.Location = new Point(
@@ -188,13 +185,12 @@ public partial class MainForm : Form
             drawCardButton.Width - workingHeight / 100 * 5,
             workingHeight / 2 - drawCardButton.Height / 2);
         drawCardRectangle = new Rectangle(drawCardButton.Location.X, drawCardButton.Location.Y, drawCardButton.Width, drawCardButton.Height);
-        drawCardButton.Image = drawCardButtonBack;
+        drawCardButton.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "back.png"));
         Controls.Add(drawCardButton);
         drawCardButton.MouseEnter += drawCardButton_MouseEnter;
         drawCardButton.MouseLeave += drawCardButton_MouseLeave;
 
         chainButton = new PictureBox();
-        chainButtonBack = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "chain.png"));
         chainButton.SizeMode = PictureBoxSizeMode.StretchImage;
         chainButton.Size = new Size(workingWidth / 10, workingHeight / 10);
         chainButton.Location = new Point(
@@ -205,7 +201,7 @@ public partial class MainForm : Form
             workingHeight / 2 - drawCardButton.Height / 2,
             workingWidth / 10,
             workingHeight / 10);
-        chainButton.Image = chainButtonBack;
+        chainButton.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "chain.png"));
         Controls.Add(chainButton);
         chainButton.Click += new EventHandler(chainButton_Click);
         chainButton.MouseEnter += chainButton_MouseEnter;
@@ -417,7 +413,7 @@ public partial class MainForm : Form
     }
     public async void Display(string s) {
         label.Text = s;
-        await System.Threading.Tasks.Task.Delay(5000).ContinueWith(
+        await System.Threading.Tasks.Task.Delay(7883).ContinueWith(
             _ => Invoke(new MethodInvoker(() => label.Text = ""))
         );
     }

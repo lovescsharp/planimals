@@ -117,7 +117,7 @@ namespace planimals
                 username.Value = usernameInput.Text.Trim();
                 userExists.Parameters.Add(username);
 
-                sqlConnection.Open();
+                sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
                 int b = (int) userExists.ExecuteScalar();
                 userExists.Parameters.Remove(username);
                 MessageBox.Show(b.ToString());
@@ -146,7 +146,7 @@ namespace planimals
                     usernameInput.Text = "";
                     passwordInput.Text = "";
                 }
-                sqlConnection.Close();
+                sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
             }
         }
     }

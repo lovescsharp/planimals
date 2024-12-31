@@ -63,12 +63,12 @@ public class Chain : List<List<Card>>
         for (int i = 0; i < noOfCards; i++) score += i + 1;
         return score;
     }
-    public void CHAIN()
+    public bool CHAIN()
     {
         if (Count == 0)
         {
             game.form.Display("the chain must consist of at least to organisms");
-            return;
+            return false;
         }
         else
         {
@@ -91,22 +91,15 @@ public class Chain : List<List<Card>>
                     if (i != game.playerChain.longestChainIndex && this[i].Count != 0)
                     {
                         SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{lastOrganism}' AND Consumed = '{this[i][this[i].Count - 1].ScientificName}'", sqlConnection);
-                        //Console.WriteLine(sqlCommand.CommandText);
                         int b = (int)checkRelation.ExecuteScalar();
                         if (b == 0)
                         {
                             game.form.Display("food chain is invalid");
-                            //Console.WriteLine($"playerChain[{i}] is invalid as {lastOrganism} doesn't eat {this[i][this[i].Count - 1].CommonName}");
-                            //Console.WriteLine($"Moving cards back to hand");
                             for (int k = 0; k < Count; k++)
                             {
-                                //Console.WriteLine($"row[{k}]");
                                 for (int j = 0; j < this[k].Count; j++)
                                 {
-                                    //Console.WriteLine($"card[{k}][{j}]");
                                     this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
-                                    //Console.WriteLine($"{i} {j}");
-                                    //this[k][j].Location = this[k][j].prevLocation;
                                     this[k][j].MoveCard();
                                     this[k][j].Picked = false;
                                     this[k][j].inChain = false;
@@ -122,9 +115,9 @@ public class Chain : List<List<Card>>
                             if (game.form.loggedIn) disposeChain.ExecuteNonQuery();
                             game.UpdateCells();
                             game.form.Invalidate();
-                            sqlConnection.Close();
+                            sqlConnection.Close(); ;
                             Console.WriteLine("terminating as no common predator");
-                            return;
+                            return false;
                         }
                     }
                 }//checking the common predator
@@ -133,7 +126,8 @@ public class Chain : List<List<Card>>
                     if (this[index].Count < 2) //the subchain consists of one organism
                     {
                         game.form.Display("the chain must consist of at least two organisms.");
-                        return;
+                        sqlConnection.Close();
+                        return false;
                     }
                     else
                     {
@@ -152,7 +146,6 @@ public class Chain : List<List<Card>>
                                     for (int j = 0; j < this[k].Count; j++)
                                     {
                                         Console.WriteLine($"card[{k}][{j}]");
-                                        //this[k][j].Location = this[k][j].prevLocation;
                                         this[k][j].MoveCard();
                                         this[k][j].Picked = false;
                                         this[k][j].inChain = false;
@@ -169,7 +162,7 @@ public class Chain : List<List<Card>>
                                 Clear();
                                 game.UpdateCells();
                                 game.form.Invalidate();
-                                return;
+                                return false;
                             }
                         }
                         game.overallScore += CalcScore(this[index].Count); //lessgooo everything is okay
@@ -185,24 +178,29 @@ public class Chain : List<List<Card>>
                 }
                 for (int j = 0; j < game.playerHand.Count; j++)
                 {
-                    game.playerHand[j].Location = game.playerHand[j].prevLocation = new Point(
-                        Card.cardWidth * j,
-                        game.form.workingHeight - Card.cardHeight
-                    );
-                }//updating cards locations in chain
+                    game.playerHand[j].prevLocation =
+                        new Point(
+                            Card.cardWidth * j,
+                            game.form.workingHeight - Card.cardHeight
+                        ); //updating cards locations in chain
+                    game.playerHand[j].MoveCard();
+                }
                 foreach (List<Card> subchain in this) for (int i = 0; i < subchain.Count; i++) game.form.Controls.Remove(subchain[i]);
-                sqlConnection.Close();
+                sqlConnection.Close(); 
                 Clear();
                 game.form.Display($"+{earned} points");
                 earned = 0;
                 game.UpdateCells();
                 game.form.Invalidate();
                 if (!game.playerHand.IsHot()) game.Stop();
+                return true;
             }
         }
     }
-    public void LoadChain() //update prevLocations
+    public void LoadChain()
     {
+        int count = game.playerHand.Count;
+        Console.WriteLine($"total count : {count}");
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand loadChain = new SqlCommand(
@@ -210,9 +208,7 @@ public class Chain : List<List<Card>>
                 "FROM FoodChainCards " +
                 "JOIN Organisms ON FoodChainCards.CardID = Organisms.Scientific_name " +
                 "WHERE Username = @Username " +
-                "ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo;", sqlConnection);
-
-            loadChain.Parameters.AddWithValue("@Username", game.username);
+                "ORDER BY FoodChainCards.RowNo, FoodChainCards.PositionNo;", sqlConnection);  loadChain.Parameters.AddWithValue("@Username", game.username);
 
             sqlConnection.Open();
             SqlDataReader reader = loadChain.ExecuteReader();
@@ -226,26 +222,22 @@ public class Chain : List<List<Card>>
                 int rowNo = reader.GetInt32(5);
                 int positionNo = reader.GetInt32(6);
 
-                Console.WriteLine($"Adding {commonName} to cells[{rowNo}][{positionNo}]");
-
                 Card c = new Card(
                     game,
                     scientificName,
                     commonName,
                     description,
-                    Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{scientificName}.jpg"),
+                    Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{scientificName}.png"),
                     hierarchy,
                     habitat,
-                    //game.cells[rowNo][positionNo].Item1.Location,
-                    new Point(0, 0),
+                    new Point(game.form.workingWidth, game.form.workingHeight),
                     true
                     );
-                //c.rectLocation = game.cells[rowNo][positionNo].Item1.Location;
-                //card.prevLocation = new Point(card.Width * game.playerHand.Count, workingHeight - card.Height); //do something about it
-
-                while (Count <= rowNo + 1) Add(new List<Card>());
+                c.prevLocation = new Point(Card.cardWidth * count, game.form.workingHeight - Card.cardHeight);
+                count++;
+                while (Count < rowNo + 1) Add(new List<Card>());
                 this[rowNo].Add(c);
-                game.form.Controls.Remove(c);
+                game.form.Controls.Add(c);
             }
             sqlConnection.Close();
         }

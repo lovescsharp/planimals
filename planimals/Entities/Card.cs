@@ -4,7 +4,6 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
 
 public class Card : PictureBox
 {
@@ -189,10 +188,10 @@ public class Card : PictureBox
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
-            sqlConnection.Open();
+            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
             SqlCommand insert = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{ScientificName}')", sqlConnection);
             insert.ExecuteNonQuery();
-            sqlConnection.Close();
+            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     public void RemoveFromHand()
@@ -200,9 +199,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand removeCard = new SqlCommand($"DELETE FROM Hand Where Username='{game.username}' AND CardID='{ScientificName}'", sqlConnection);
-            sqlConnection.Open();
+            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
             removeCard.ExecuteNonQuery();
-            sqlConnection.Close();
+            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     public void PushToChain(int RowNo, int ColNo)
@@ -210,9 +209,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand pushCardToChain = new SqlCommand($"INSERT INTO FoodChainCards(Username, CardID, RowNo, PositionNo) VALUES ('{game.username}', '{ScientificName}', {RowNo}, {ColNo})", sqlConnection);
-            sqlConnection.Open();
+            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
             pushCardToChain.ExecuteNonQuery();
-            sqlConnection.Close();
+            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     public void RemoveFromChain(int RowNo, int ColNo)
@@ -220,9 +219,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);
-            sqlConnection.Open();
+            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
             deleteCardFromChain.ExecuteNonQuery();
-            sqlConnection.Close();
+            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     private void Drop(Card c)
@@ -258,7 +257,8 @@ public class Card : PictureBox
     {
         if (isAnimating) return;
 
-        v = new Point(prevLocation.X, prevLocation.Y);
+        if (inChain) v = new Point(rectLocation.X, rectLocation.Y);
+        else v = new Point(prevLocation.X, prevLocation.Y);
         p = Location;
         t.Start();
         s.Restart();

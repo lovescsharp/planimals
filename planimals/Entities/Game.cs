@@ -55,6 +55,7 @@ public class Game
         time = t;
 
         deck = new Deck(this);
+        deck.deckStr = d;
         playerHand = new Hand(this);
 
         playerChain = new Chain(this);
@@ -103,7 +104,10 @@ public class Game
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-            sqlConnection.Open(); test.ExecuteNonQuery(); sqlConnection.Close();
+            sqlConnection.Open(); 
+            test.ExecuteNonQuery(); 
+            sqlConnection.Close();
+            Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     public void CleanDb()
@@ -113,11 +117,11 @@ public class Game
             SqlCommand clearGame = new SqlCommand($"DELETE FROM Games WHERE Username='{username}'", sqlConnection);
             SqlCommand clearHand = new SqlCommand($"DELETE FROM Hand WHERE Username='{username}'", sqlConnection);
             SqlCommand clearChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{username}'", sqlConnection);
-            sqlConnection.Open();
+            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
             clearGame.ExecuteNonQuery();
             clearHand.ExecuteNonQuery();
             clearChain.ExecuteNonQuery();
-            sqlConnection.Close();
+            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
         }
     }
     public void countDownTimer_Tick(object sender, EventArgs e)
@@ -127,10 +131,10 @@ public class Game
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand updateTimer = new SqlCommand($"UPDATE Games SET Time='{time}' WHERE Username='{username}'", sqlConnection);
-                sqlConnection.Open();
+                sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
                 if (time >= 0) updateTimer.ExecuteNonQuery();
                 else Stop();
-                sqlConnection.Close();
+                sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
             }
         }
         else //otherwise just wait 'til timer is 0
@@ -178,11 +182,9 @@ public class Game
                 form.drawCardButton.Hide();
             }
             foreach (Control control in form.endControls) { control.Enabled = false; control.Hide(); }
-            foreach (List<Card> chain in playerChain)
-            {
-                foreach (Card c in chain) c.Show();
-            }
+            foreach (List<Card> chain in playerChain) foreach (Card c in chain) c.Show();
             foreach (Card c in playerHand) c.Show();
+            fancyDealership();
             countDownTimer.Start();
             form.Invalidate();
         }
@@ -207,13 +209,13 @@ public class Game
         form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
         if (form.loggedIn)
         {
+            CleanDb();
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                CleanDb();
-                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', {time}, '{deck.sb.ToString()}')", sqlConnection);
-                sqlConnection.Open();
+                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', {time}, '{deck.deckStr}')", sqlConnection);
+                sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
                 createGame.ExecuteNonQuery();
-                sqlConnection.Close();
+                sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
             }
         }
         if (imageIndex == 3)
@@ -234,11 +236,7 @@ public class Game
             }
             readySteadyGoTimer.Start();
         }
-        else
-        {
-            //Console.WriteLine("the game started");
-            readySteadyGoTimer.Start();
-        }
+        else readySteadyGoTimer.Start();
     }
     public void Load()
     {
@@ -254,19 +252,22 @@ public class Game
         form.readySteadyGo.Enabled = true;
         try
         {
-            int indx = imageIndex;
-            form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", indx.ToString() + ".png"));
+            form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
         }
-        catch (Exception ex) { MessageBox.Show("Failed to load image: " + ex.Message); }
+        catch (Exception ex) 
+        {
+            MessageBox.Show("Failed to load image: " + ex.Message); 
+        }
 
         playerHand.LoadHand();
         playerChain.LoadChain();
         UpdateCells();
         for (int i = 0; i < playerChain.Count; i++)
             for (int j = 0; j < playerChain[i].Count; j++)
-                playerChain[i][j].Location = playerChain[i][j].rectLocation = cells[i][j].Item1.Location;
-        for (int i = 0; i < playerChain.Count; i++) for (int j = 0; j < playerChain[i].Count; j++) playerChain[i][j].rectLocation = cells[i][j].Item1.Location;
-
+            {
+                Console.WriteLine($"card.rectLocation[{i}][{j}] = {cells[i][j].Item1.Location}");
+                playerChain[i][j].rectLocation = cells[i][j].Item1.Location;
+            }
         foreach (List<Card> chain in playerChain) foreach (Card c in chain) c.Hide();
         foreach (Card c in playerHand) c.Hide();
         readySteadyGoTimer.Start();
@@ -323,5 +324,10 @@ public class Game
         playerChain = null;
 
         deck = null;
+    }
+    void fancyDealership()
+    {
+        foreach (Card c in playerHand) c.MoveCard();
+        foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard();
     }
 }

@@ -17,38 +17,33 @@ public class Hand : List<Card>
     }
     public bool IsHot() 
     {
-        if (Count >= 1)
+        if (Count > 1 && game.playerChain.Count != 0 && game.playerHand.Count != 0)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand checkRelation;
+                sqlConnection.Open();
                 for (int i = 0; i < Count; i++)
                 {
-                    for (int j = 1; j < Count - 1; j++)
+                    for (int j = 0; j < Count - 1; j++)
                     {
                         if (i == j) continue;
                         checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer = '{this[i].ScientificName}' AND Consumed = '{this[j].ScientificName}'", sqlConnection);
-                        Console.WriteLine(checkRelation.CommandText);
-                        sqlConnection.Open();
-                        int b = (int) checkRelation.ExecuteScalar();
+                        int b = (int)checkRelation.ExecuteScalar();
                         if (b == 1)
                         {
                             sqlConnection.Close();
-                            Console.WriteLine("hand is playable");
                             return true;
                         }
                     }
                 }
                 sqlConnection.Close();
-                Console.WriteLine("hand isnt playable");
                 return false;
             }
         }
-        else
-        {
-            Console.WriteLine("hand isnt playable");
-            return false;
-        }
+        else if (game.playerChain.Count != 0) return true;
+        else if (game.deck.Count != 0) return true;
+        else return false;
     }
     public void LoadHand()
     {
@@ -59,7 +54,7 @@ public class Hand : List<Card>
             $"FROM Hand " +
                     $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
                     $"WHERE Username='{game.username}'", sqlConnection);
-            sqlConnection.Open();
+            sqlConnection.Open();;
             SqlDataReader reader = pullHand.ExecuteReader();
             while (reader.Read())
             {
@@ -68,16 +63,17 @@ public class Hand : List<Card>
                     reader["CardID"].ToString(),
                     reader["Common_name"].ToString(),
                     reader["Description"].ToString(),
-                    Path.Combine(Environment.CurrentDirectory, "assets", "photos", reader["CardID"].ToString() + ".jpg"),
+                    Path.Combine(Environment.CurrentDirectory, "assets", "photos", reader["CardID"].ToString() + ".png"),
                     (int)reader["Hierarchy"],
                     reader["Habitat"].ToString(),
-                    new Point(Card.cardWidth * Count, game.form.Height - game.form.workingWidth / 10),
+                    game.form.drawCardButton.Location,
                     false
                     );
+                c.prevLocation = new Point(Card.cardWidth * Count, game.form.workingHeight - game.form.workingWidth / 10);
                 Add(c);
                 game.form.Controls.Add(c);
             }
-            sqlConnection.Close();
+            sqlConnection.Close(); 
         }
     }
 }

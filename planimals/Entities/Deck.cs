@@ -3,48 +3,43 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Windows.Forms.VisualStyles;
 
 public partial class Deck : Stack<int>
 {
     Game game;
     Random rnd;
-    public StringBuilder sb;
-    private int size;
+    public string deckStr;
+    int size;
 
     public Deck(Game g) : base()
     {
         rnd = new Random();
-        sb = new StringBuilder();
+        deckStr = "";
         game = g;
-        size = 10;
+        size = 15;
     }
     private int GetNumberOfOrganisms()
     {
-        int count = 0;
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
-            SqlCommand sqlCommand = new SqlCommand("SELECT COUNT(*) AS num FROM Organisms", sqlConnection);
+            SqlCommand sqlCommand = new SqlCommand("SELECT COUNT(*) FROM Organisms", sqlConnection);
             sqlConnection.Open();
-            using (var reader = sqlCommand.ExecuteReader())
-            {
-                while (reader.Read()) count = int.Parse(reader["num"].ToString());
-            }
+            int b = (int)sqlCommand.ExecuteScalar();
+            sqlConnection.Close();
+            return b;
         }
-        return count;
     }
     public void GenerateDeck()
     {
         int randIdx;
-        sb.Append(',');
+        int upperBound = GetNumberOfOrganisms() + 1;
         for (int i = 0; i < size; i++)
         {
-            randIdx = rnd.Next(1, GetNumberOfOrganisms() + 1);
+            randIdx = rnd.Next(1, upperBound);
             Push(randIdx);
-            if (i != 14) sb.Append(randIdx + ",");
-            else sb.Append(randIdx);
+            deckStr += randIdx + ",";
         }
+        Console.WriteLine(deckStr);
     }
     public string GetScientificNameFromDeck()
     {
@@ -52,23 +47,24 @@ public partial class Deck : Stack<int>
         {
             if (Count != 0)
             {
-                SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS ( SELECT Scientific_name, Common_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms ) SELECT Scientific_name, Common_name FROM NumberedRows WHERE RowNum = {game.deck.Pop()};", sqlConnection);
+                int i = Pop();
+                Console.WriteLine($"deckStr.Lenght - 1 = {deckStr.Length - 1}");
+                deckStr = deckStr.Remove(deckStr.Length - 1);
+                Console.WriteLine((int)Math.Floor(Math.Log10(i)));
+                for (int j = 0; j < (int)Math.Floor(Math.Log10(i)); j++) deckStr = deckStr.Remove(deckStr.Length - 1); 
+                Console.WriteLine(deckStr);
+                SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS(SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {i};", sqlConnection);
                 sqlConnection.Open();
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        return reader["Scientific_name"].ToString();
-                    }
-                }
+                string name = (string) cmd.ExecuteScalar();
                 sqlConnection.Close();
+                return name;
             }
         }
         return null;
     }
     public void DrawCard(object sender, EventArgs e)
     {
-        if (game.playerHand.Count + game.playerChain.CountAll() < 15)
+        if (game.playerHand.Count + game.playerChain.CountAll() < 10)
         {
             string sciname;
             for (int i = 0; i < 3; i++)
@@ -87,7 +83,7 @@ public partial class Deck : Stack<int>
                                 sciname,
                                 reader["Common_name"].ToString(),
                                 reader["Description"].ToString(),
-                                Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.jpg"),
+                                Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.png"),
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
                                 new Point(Card.cardWidth * game.playerHand.Count, game.form.workingHeight - game.form.ClientRectangle.Width / 10),
@@ -98,12 +94,15 @@ public partial class Deck : Stack<int>
                             game.form.Controls.Add(c);
                         }
                     }
+                    sqlConnection.Close();
                     if (game.deck.Count > 0)
                     {
                         if (game.username != string.Empty)
                         {
                             SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
+                            sqlConnection.Open();
                             removeCard.ExecuteNonQuery();
+                            sqlConnection.Close();
                         }
                     }
                     else
@@ -114,7 +113,6 @@ public partial class Deck : Stack<int>
                         if (!game.playerHand.IsHot()) game.form.Display("Hooray");
 
                     }
-                    sqlConnection.Close();
 
                     //TODO! update prevLocations of cards in Chain and Hand
                 }
