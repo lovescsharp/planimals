@@ -121,7 +121,6 @@ namespace planimals
                 {
                     //log in, and assign username in form1
                     form.username = usernameInput.Text.Trim();
-                    form.loggedIn = true;
                     label.Text = "Login successful";
                     Close();
                     form.stats.Text = $"hey, {usernameInput.Text}!";
@@ -143,19 +142,6 @@ namespace planimals
             createAccountForm.Show();
             createAccountForm.BringToFront();
             
-        }
-        public static string Hash(string password)
-        {
-            //probably gonna use md5 for hashing
-            StringBuilder sb = new StringBuilder();
-            
-
-            
-            return sb.ToString();
-        }
-        private void LoginForm_Load(object sender, EventArgs e)
-        {
-
-        }
+        }           
     }
 }

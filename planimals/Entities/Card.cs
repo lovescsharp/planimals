@@ -51,7 +51,7 @@ public class Card : PictureBox
         offset = new Point(cardWidth / 2, cardHeight / 2);
         try
         {
-            Image = System.Drawing.Image.FromFile(path); //C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\assets\photos
+            Image = Image.FromFile(path); //C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\assets\photos
         }
         catch
         {
@@ -115,7 +115,7 @@ public class Card : PictureBox
                             game.playerHand.Remove(this);
                             prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
                             game.playerChain[i].Add(this);
-                            if (game.form.loggedIn)
+                            if (game.username != string.Empty)
                             {
                                 RemoveFromHand();
                                 PushToChain(i, j);
@@ -159,7 +159,7 @@ public class Card : PictureBox
                             game.playerChain.RemoveAt(i);
                         }
                         game.playerHand.Add(this);
-                        if (game.form.loggedIn)
+                        if (game.username != string.Empty)
                         {
                             RemoveFromChain(i, j);
                             PushToHand();
@@ -188,10 +188,10 @@ public class Card : PictureBox
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
-            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
+            sqlConnection.Open();
             SqlCommand insert = new SqlCommand($"INSERT INTO Hand(Username, CardID) VALUES ('{game.username}', '{ScientificName}')", sqlConnection);
             insert.ExecuteNonQuery();
-            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
+            sqlConnection.Close();
         }
     }
     public void RemoveFromHand()
@@ -199,9 +199,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand removeCard = new SqlCommand($"DELETE FROM Hand Where Username='{game.username}' AND CardID='{ScientificName}'", sqlConnection);
-            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
+            sqlConnection.Open();            
             removeCard.ExecuteNonQuery();
-            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
+            sqlConnection.Close(); 
         }
     }
     public void PushToChain(int RowNo, int ColNo)
@@ -209,9 +209,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand pushCardToChain = new SqlCommand($"INSERT INTO FoodChainCards(Username, CardID, RowNo, PositionNo) VALUES ('{game.username}', '{ScientificName}', {RowNo}, {ColNo})", sqlConnection);
-            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
+            sqlConnection.Open();            
             pushCardToChain.ExecuteNonQuery();
-            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
+            sqlConnection.Close();
         }
     }
     public void RemoveFromChain(int RowNo, int ColNo)
@@ -219,9 +219,9 @@ public class Card : PictureBox
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);
-            sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
+            sqlConnection.Open(); 
             deleteCardFromChain.ExecuteNonQuery();
-            sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
+            sqlConnection.Close();
         }
     }
     private void Drop(Card c)

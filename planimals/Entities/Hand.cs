@@ -17,7 +17,8 @@ public class Hand : List<Card>
     }
     public bool IsHot() 
     {
-        if (Count > 1 && game.playerChain.Count != 0 && game.playerHand.Count != 0)
+        if (game.deck.Count != 0) return true;
+        else if (Count > 1 && game.playerChain.Count == 0)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -41,8 +42,6 @@ public class Hand : List<Card>
                 return false;
             }
         }
-        else if (game.playerChain.Count != 0) return true;
-        else if (game.deck.Count != 0) return true;
         else return false;
     }
     public void LoadHand()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Net;
 
 public partial class Deck : Stack<int>
 {
@@ -17,6 +18,15 @@ public partial class Deck : Stack<int>
         deckStr = "";
         game = g;
         size = 15;
+        GenerateDeck();
+    }
+    public Deck(Game g, string d) 
+    {
+        rnd = new Random();
+        deckStr = d;
+        game = g;
+        LoadDeck();
+        size = Count;
     }
     private int GetNumberOfOrganisms()
     {
@@ -39,7 +49,14 @@ public partial class Deck : Stack<int>
             Push(randIdx);
             deckStr += randIdx + ",";
         }
-        Console.WriteLine(deckStr);
+        if (game.username != string.Empty) pushDeck();
+    }
+    private void pushDeck() 
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+        {
+            SqlCommand pushDeck = new SqlCommand();    
+        }
     }
     public string GetScientificNameFromDeck()
     {
@@ -48,10 +65,7 @@ public partial class Deck : Stack<int>
             if (Count != 0)
             {
                 int i = Pop();
-                Console.WriteLine($"deckStr.Lenght - 1 = {deckStr.Length - 1}");
-                deckStr = deckStr.Remove(deckStr.Length - 1);
-                Console.WriteLine((int)Math.Floor(Math.Log10(i)));
-                for (int j = 0; j < (int)Math.Floor(Math.Log10(i)); j++) deckStr = deckStr.Remove(deckStr.Length - 1); 
+                for (int j = 0; j < (int)Math.Floor(Math.Log10(i)) + 1; j++) deckStr = deckStr.Remove(deckStr.Length - 1); 
                 Console.WriteLine(deckStr);
                 SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS(SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {i};", sqlConnection);
                 sqlConnection.Open();
@@ -90,15 +104,16 @@ public partial class Deck : Stack<int>
                                 false
                                 );
                             game.playerHand.Add(c);
-                            if (game.username != "") c.PushToHand();
+                            if (game.username != string.Empty) c.PushToHand();
                             game.form.Controls.Add(c);
                         }
                     }
                     sqlConnection.Close();
-                    if (game.deck.Count > 0)
-                    {
+                    Console.WriteLine($"game.deck.Count = {game.deck.Count}");
+                    if (Count > 0)                    {
                         if (game.username != string.Empty)
                         {
+                            //delete comma AND number of digits not just 2
                             SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
                             sqlConnection.Open();
                             removeCard.ExecuteNonQuery();
@@ -110,11 +125,7 @@ public partial class Deck : Stack<int>
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
-                        if (!game.playerHand.IsHot()) game.form.Display("Hooray");
-
                     }
-
-                    //TODO! update prevLocations of cards in Chain and Hand
                 }
             }
         }
@@ -122,5 +133,11 @@ public partial class Deck : Stack<int>
         {
             if (game.playerHand.IsHot()) game.form.Display("i think you can build a chain out of cards on your hand");
         }
+    }
+    public void LoadDeck()
+    {
+        string[] nums = deckStr.Split(',');
+        Console.WriteLine(deckStr);
+        for (int i = 0; i < nums.Length; i++) Push(int.Parse(nums[i].Trim()));
     }
 }

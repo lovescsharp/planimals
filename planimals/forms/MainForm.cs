@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-//do somehthing about card locations
 
 //https://stackoverflow.com/questions/51567681/how-to-do-task-continewith-using-a-delay-before-the-continuewith-in-c
 //allows to asynchronously change label.Text, looks cool 8) 
@@ -255,17 +254,43 @@ public partial class MainForm : Form
             control.Hide();
         }
         game = new Game(this, username);
-        drawCardButton.Click += new EventHandler(game.deck.DrawCard);
-        game.Start();
     }
     private void continueButton_Click(object sender, EventArgs e)
     {
-        if (loggedIn)
+        if (username != string.Empty)
         {
             using (SqlConnection sqlConnection = new SqlConnection(CONNECTION_STRING))
             {
+                /* testing load feature */
+                /*
+                delete from FoodChainCards where Username='player1'
+                delete from Games where Username='player1'
+                delete from Hand where Username='player1'
+                insert into Games(Username, Time, Deck) values
+                ('player1', 36, '1,1,1,1,1,1,1,1,')
+
+                insert into Hand(Username, CardID) values
+                ('player1', 'Omocestus viridulus'),
+                ('player1', 'Omocestus viridulus'),
+                ('player1', 'Omocestus viridulus');
+
+                Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
+                ('player1', 'Poa pratensis', 0, 0),
+                ('player1', 'Omocestus viridulus', 0, 1),
+                ('player1', 'Turdus merula', 0, 2),
+                ('player1', 'Pantherophis obsoletus', 0, 3),
+                ('player1', 'Tyto alba', 0, 4),
+                ('player1', 'Poa pratensis', 1, 0),
+                ('player1', 'Microtus arvalis', 1, 1); 
+                */
+
+                ///
+                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, ',1,1,1,1,1,1,1,1')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
+                sqlConnection.Open(); 
+                test.ExecuteNonQuery(); 
+                ///
+
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
-                sqlConnection.Open();
                 int b = (int)cmd.ExecuteScalar();
                 sqlConnection.Close();
                 if (b == 1)
@@ -279,7 +304,6 @@ public partial class MainForm : Form
                         game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
                         drawCardButton.Click += new EventHandler(game.deck.DrawCard);
                         sqlConnection.Close();
-                        game.Load();
                         return;
                     }
                     sqlConnection.Close();
@@ -306,7 +330,7 @@ public partial class MainForm : Form
             control.Enabled = false;
             control.Hide();
         }
-        game.Start();
+        game = new Game(this,username);
     }
     private void goToMenuButton_Click(object sender, EventArgs e)
     {
@@ -326,11 +350,14 @@ public partial class MainForm : Form
     {
         game.countDownTimer.Stop();
         UpdateStatsLabel();
+        List<Control> controls = new List<Control>(); 
+        for (int i = 0; i < Controls.Count; i++) if (Controls[i] is Card) controls.Add(Controls[i]);
+        foreach (Control c in controls) Controls.Remove(c);
+        game.playerHand.Clear();
+        game.playerChain.Clear();
+        game.cells.Clear();
         foreach (Control control in gameControls) control.Hide();
-        foreach (Card c in game.playerHand) c.Hide();
-        foreach (List<Card> subchain in game.playerChain)
-            foreach (Card c in subchain) c.Hide();
-
+        
         foreach (Control control in youSureWannaQuitControls)
         {
             control.Show();
@@ -456,8 +483,8 @@ public partial class MainForm : Form
             loginButton.Text = "log in";
         }
     }
-    public void UpdateStatsLabel() 
-    { 
+    public void UpdateStatsLabel()
+    {
         if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {game.totalPoints}";
     }
     private void chainButton_Click(object sender, EventArgs e) => game.playerChain.CHAIN(); //   \(0o0)/

@@ -112,7 +112,7 @@ public class Chain : List<List<Card>>
                             }
                             earned = 0;
                             Clear();
-                            if (game.form.loggedIn) disposeChain.ExecuteNonQuery();
+                            if (game.username != string.Empty) disposeChain.ExecuteNonQuery();
                             game.UpdateCells();
                             game.form.Invalidate();
                             sqlConnection.Close(); ;
@@ -157,7 +157,7 @@ public class Chain : List<List<Card>>
                                     }
                                 }
                                 earned = 0;
-                                if (game.form.loggedIn) disposeChain.ExecuteNonQuery();
+                                if (game.username != string.Empty) disposeChain.ExecuteNonQuery();
                                 sqlConnection.Close();
                                 Clear();
                                 game.UpdateCells();
@@ -169,7 +169,7 @@ public class Chain : List<List<Card>>
                         earned += CalcScore(this[index].Count);
                     }
                 }//iterating through the chain
-                if (game.form.loggedIn)
+                if (game.username != string.Empty)
                 {
                     game.totalPoints += game.overallScore;
                     SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.totalPoints} WHERE Username='{game.username}'", sqlConnection);
@@ -235,7 +235,7 @@ public class Chain : List<List<Card>>
                     );
                 c.prevLocation = new Point(Card.cardWidth * count, game.form.workingHeight - Card.cardHeight);
                 count++;
-                while (Count < rowNo + 1) Add(new List<Card>());
+                while (Count <= rowNo) Add(new List<Card>());
                 this[rowNo].Add(c);
                 game.form.Controls.Add(c);
             }

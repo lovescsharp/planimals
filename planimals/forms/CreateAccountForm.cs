@@ -134,7 +134,7 @@ namespace planimals
 
                     SqlParameter password = new SqlParameter();
                     password.ParameterName = "password";
-                    password.Value = LoginForm.Hash(passwordInput.Text);
+                    password.Value = passwordInput.Text;
                     createUser.Parameters.Add(password);
 
                     form.username = usernameInput.Text.Trim();
