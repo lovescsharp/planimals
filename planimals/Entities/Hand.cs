@@ -8,17 +8,9 @@ public class Hand : List<Card>
 {
     private Game game;
     public Hand(Game g) : base() => game = g;
-    public void ShiftCards()
-    {
-        for (int i = 0; i < Count; i++)
-        this[i].Location =
-        this[i].prevLocation = 
-        new Point(Card.cardWidth * i, game.form.workingHeight - Card.cardHeight);
-    }
     public bool IsHot() 
     {
-        if (game.deck.Count != 0) return true;
-        else if (Count > 1 && game.playerChain.Count == 0)
+        if (Count > 1 && game.playerChain.Count == 0)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -53,7 +45,7 @@ public class Hand : List<Card>
             $"FROM Hand " +
                     $"JOIN Organisms ON Hand.CardID = Organisms.Scientific_name " +
                     $"WHERE Username='{game.username}'", sqlConnection);
-            sqlConnection.Open();;
+            sqlConnection.Open();
             SqlDataReader reader = pullHand.ExecuteReader();
             while (reader.Read())
             {
@@ -74,5 +66,13 @@ public class Hand : List<Card>
             }
             sqlConnection.Close(); 
         }
+    }
+    public void ShiftCards()
+    {
+        for (int i = 0; i < Count; i++)
+            this[i].MoveCard(
+                this[i].prevLocation =
+                new Point(Card.cardWidth * i, game.form.workingHeight - Card.cardHeight)
+        );
     }
 }

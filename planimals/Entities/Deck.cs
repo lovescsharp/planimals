@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.Net;
 
 public partial class Deck : Stack<int>
 {
@@ -12,15 +11,15 @@ public partial class Deck : Stack<int>
     public string deckStr;
     int size;
 
-    public Deck(Game g) : base()
+    public Deck(Game g) : base() // starter
     {
         rnd = new Random();
         deckStr = "";
         game = g;
-        size = 15;
+        size = 7;
         GenerateDeck();
     }
-    public Deck(Game g, string d) 
+    public Deck(Game g, string d) : base() // loader
     {
         rnd = new Random();
         deckStr = d;
@@ -41,40 +40,34 @@ public partial class Deck : Stack<int>
     }
     public void GenerateDeck()
     {
+        Console.WriteLine($"size = {size}");
         int randIdx;
         int upperBound = GetNumberOfOrganisms() + 1;
         for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, upperBound);
+            Console.WriteLine(randIdx);
             Push(randIdx);
             deckStr += randIdx + ",";
-        }
-        if (game.username != string.Empty) pushDeck();
-    }
-    private void pushDeck() 
-    {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
-        {
-            SqlCommand pushDeck = new SqlCommand();    
         }
     }
     public string GetScientificNameFromDeck()
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
-            if (Count != 0)
-            {
-                int i = Pop();
-                for (int j = 0; j < (int)Math.Floor(Math.Log10(i)) + 1; j++) deckStr = deckStr.Remove(deckStr.Length - 1); 
-                Console.WriteLine(deckStr);
-                SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS(SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {i};", sqlConnection);
-                sqlConnection.Open();
-                string name = (string) cmd.ExecuteScalar();
-                sqlConnection.Close();
-                return name;
-            }
+            int i = Pop();
+            Console.WriteLine(i);
+            deckStr = deckStr.Remove(deckStr.Length - 1);
+            Console.WriteLine((int)Math.Log10(i) + 1);
+            for (int j = 0; j < (int)Math.Floor(Math.Log10(i)) + 1; j++) deckStr = deckStr.Remove(deckStr.Length - 1);
+            Console.WriteLine(deckStr);
+            Console.WriteLine("--");
+            SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS(SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {i};", sqlConnection);
+            sqlConnection.Open();
+            string name = (string) cmd.ExecuteScalar();
+            sqlConnection.Close();
+            return name;
         }
-        return null;
     }
     public void DrawCard(object sender, EventArgs e)
     {
@@ -109,12 +102,12 @@ public partial class Deck : Stack<int>
                         }
                     }
                     sqlConnection.Close();
-                    Console.WriteLine($"game.deck.Count = {game.deck.Count}");
-                    if (Count > 0)                    {
+                    if (Count > 0)                    
+                    {
                         if (game.username != string.Empty)
                         {
-                            //delete comma AND number of digits not just 2
-                            SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck=LEFT(Deck, LEN(DECK) - 2) WHERE Username='{game.username}'", sqlConnection);
+                            //delete comma AND number of digits, not just 2
+                            SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck='{deckStr}' WHERE Username='{game.username}'", sqlConnection);
                             sqlConnection.Open();
                             removeCard.ExecuteNonQuery();
                             sqlConnection.Close();
@@ -122,9 +115,19 @@ public partial class Deck : Stack<int>
                     }
                     else
                     {
+                        if (game.username != string.Empty)
+                        {
+                            //delete comma AND number of digits, not just 2
+                            SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck='{deckStr}' WHERE Username='{game.username}'", sqlConnection);
+                            sqlConnection.Open();
+                            removeCard.ExecuteNonQuery();
+                            sqlConnection.Close();
+                        }
+
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
+                        return;
                     }
                 }
             }
@@ -136,8 +139,8 @@ public partial class Deck : Stack<int>
     }
     public void LoadDeck()
     {
-        string[] nums = deckStr.Split(',');
-        Console.WriteLine(deckStr);
-        for (int i = 0; i < nums.Length; i++) Push(int.Parse(nums[i].Trim()));
+        if (deckStr == string.Empty) return;
+        string[] nums = deckStr.Trim(',').Split(',');
+        for (int i = 0; i < nums.Length; i++) Push(int.Parse(nums[i]));
     }
 }

@@ -11,6 +11,7 @@ public class Game
 
     public string username;
     private int time;
+
     public Timer countDownTimer;
     private int imageIndex;
     public Timer readySteadyGoTimer;
@@ -42,19 +43,11 @@ public class Game
 
         deck = new Deck(this);
         playerHand = new Hand(this);
-
         playerChain = new Chain(this);
         cells = new List<List<(Rectangle, bool)>>();
         cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
         
-        List<Control> controls = new List<Control>(); 
-        for (int i = 0; i < form.Controls.Count; i++) if (form.Controls[i] is Card) controls.Add(form.Controls[i]);
-        foreach (Control c in controls) form.Controls.Remove(c);
-        playerHand.Clear();
-        playerChain.Clear();
-        cells.Clear();
         UpdateCells();
-        deck.GenerateDeck();
         imageIndex = 3;
         time = 120;
         form.labelTimer.Show();
@@ -74,25 +67,13 @@ public class Game
                 sqlConnection.Close(); 
             }
         }
-        if (imageIndex == 3)
-        {
-            form.readySteadyGo.Show();
-            form.readySteadyGo.Enabled = true;
-            try
-            {
-                int indx = imageIndex;
-                form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory,
-                                                                       "assets",
-                                                                       "photos",
-                                                                       indx.ToString() + ".png"));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to load image: " + ex.Message);
-            }
-            readySteadyGoTimer.Start();
-        }
-        else readySteadyGoTimer.Start();
+        form.readySteadyGo.Show();
+        form.readySteadyGo.Enabled = true;
+        int indx = imageIndex;
+        form.readySteadyGo.Image = Image.FromFile(
+            Path.Combine(
+                Environment.CurrentDirectory, "assets", "photos", indx.ToString() + ".png"));
+        readySteadyGoTimer.Start();
 
     }
     public Game(MainForm f, string u, int t, string d) //loader
@@ -105,18 +86,13 @@ public class Game
 
         playerHand = new Hand(this);
         playerHand.LoadHand();
+        foreach (Card c in playerHand) Console.WriteLine(c.CommonName);
         
         playerChain = new Chain(this);
         playerChain.LoadChain();
 
         cells = new List<List<(Rectangle, bool)>>();
         cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
-
-        for (int i = 0; i < d.Length; i++)
-        {
-            if (d[i] == ',') continue;
-            deck.Push(d[i]);
-        }
 
         countDownTimer = new Timer();
         countDownTimer.Interval = 1000;
@@ -128,7 +104,6 @@ public class Game
         readySteadyGoTimer.Interval = 1000;
         readySteadyGoTimer.Tick += readySteadyGoTimer_Tick;
         
-        foreach (Control control in form.menuControls) control.Hide();
         imageIndex = 3;
         form.labelTimer.Show();
         form.labelTimer.Text = "";
@@ -137,17 +112,7 @@ public class Game
         form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
         form.readySteadyGo.Show();
         form.readySteadyGo.Enabled = true;
-        try
-        {
-            form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
-        }
-        catch (Exception ex) 
-        {
-            MessageBox.Show("Failed to load image: " + ex.Message); 
-        }
-
-        playerHand.LoadHand();
-        playerChain.LoadChain();
+                    form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
         UpdateCells();
         for (int i = 0; i < playerChain.Count; i++)
             for (int j = 0; j < playerChain[i].Count; j++)
@@ -198,7 +163,6 @@ public class Game
         }
         else
         {
-            //Console.WriteLine("\nthe game started");
             readySteadyGoTimer.Stop();
             form.readySteadyGo.Hide();
             foreach (Control control in form.gameControls)
@@ -214,8 +178,8 @@ public class Game
             foreach (Control control in form.endControls) { control.Enabled = false; control.Hide(); }
             foreach (List<Card> chain in playerChain) foreach (Card c in chain) c.Show();
             foreach (Card c in playerHand) c.Show();
-            foreach (Card c in playerHand) c.MoveCard();
-            foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard();
+            foreach (Card c in playerHand) c.MoveCard(c.prevLocation);
+            foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard(c.rectLocation);
             countDownTimer.Start();
             form.Invalidate();
         }
@@ -223,6 +187,7 @@ public class Game
     public void Stop()
     {
         countDownTimer.Stop();
+        if (username != string.Empty) CleanDb();
         form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
         form.label.Font = form.largeFont;
         form.label.Text = "Score: " + overallScore.ToString();
@@ -231,8 +196,10 @@ public class Game
             control.Enabled = true;
             control.Show();
         }
-        foreach (Control control in form.gameControls) control.Enabled = false;
-        foreach (Card c in playerHand) c.Enabled = false;
+        foreach (Control control in form.gameControls) 
+            control.Enabled = false;
+        foreach (Card c in playerHand) 
+            c.Enabled = false;
         foreach (List<Card> subchain in playerChain)
             foreach (Card card in subchain) card.Enabled = false;
     }
@@ -280,7 +247,7 @@ public class Game
     }
     void fancyDealership()
     {
-        foreach (Card c in playerHand) c.MoveCard();
-        foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard();
+        foreach (Card c in playerHand) c.MoveCard(c.prevLocation);
+        foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard(c.rectLocation);
     }
 }

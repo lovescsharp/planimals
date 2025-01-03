@@ -100,7 +100,7 @@ public class Chain : List<List<Card>>
                                 for (int j = 0; j < this[k].Count; j++)
                                 {
                                     this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
-                                    this[k][j].MoveCard();
+                                    this[k][j].MoveCard(this[k][j].prevLocation);
                                     this[k][j].Picked = false;
                                     this[k][j].inChain = false;
                                     this[k][j].BackColor = Color.Gray;
@@ -145,8 +145,8 @@ public class Chain : List<List<Card>>
                                 {
                                     for (int j = 0; j < this[k].Count; j++)
                                     {
-                                        Console.WriteLine($"card[{k}][{j}]");
-                                        this[k][j].MoveCard();
+                                        this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
+                                        this[k][j].MoveCard(this[k][j].prevLocation);
                                         this[k][j].Picked = false;
                                         this[k][j].inChain = false;
                                         this[k][j].BackColor = Color.Gray;
@@ -178,14 +178,18 @@ public class Chain : List<List<Card>>
                 }
                 for (int j = 0; j < game.playerHand.Count; j++)
                 {
-                    game.playerHand[j].prevLocation =
-                        new Point(
-                            Card.cardWidth * j,
-                            game.form.workingHeight - Card.cardHeight
-                        ); //updating cards locations in chain
-                    game.playerHand[j].MoveCard();
+                    game.playerHand[j].MoveCard(
+                        game.playerHand[j].prevLocation =
+                            new Point(
+                                Card.cardWidth * j,
+                                game.form.workingHeight - Card.cardHeight
+                        )
+                    );//updating cards locations in chain
+                   
                 }
-                foreach (List<Card> subchain in this) for (int i = 0; i < subchain.Count; i++) game.form.Controls.Remove(subchain[i]);
+                foreach (List<Card> subchain in this) 
+                    for (int i = 0; i < subchain.Count; i++) 
+                        game.form.Controls.Remove(subchain[i]);
                 sqlConnection.Close(); 
                 Clear();
                 game.form.Display($"+{earned} points");
@@ -197,10 +201,16 @@ public class Chain : List<List<Card>>
             }
         }
     }
+    public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
+    {
+        for (int i = 0; i < game.playerChain.Count; i++)
+            for (int j = 0; j < game.playerChain[i].Count; j++)
+                game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation =
+                game.cells[i][j].Item1.Location);
+    }
     public void LoadChain()
     {
         int count = game.playerHand.Count;
-        Console.WriteLine($"total count : {count}");
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand loadChain = new SqlCommand(

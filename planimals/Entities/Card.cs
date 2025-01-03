@@ -122,7 +122,7 @@ public class Card : PictureBox
                             }
                             game.UpdateCells();
                             game.playerHand.ShiftCards();
-                            ShiftCards();
+                            game.playerChain.ShiftCards();
                             FindForm().Invalidate();
                             rectLocation = Location;
                             return;
@@ -166,7 +166,7 @@ public class Card : PictureBox
                         }
                         game.UpdateCells();
                         game.playerHand.ShiftCards();
-                        ShiftCards();
+                        game.playerChain.ShiftCards();
                         Drop(this);
                         Location = prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
                         rectLocation = new Point(0, 0);
@@ -176,13 +176,6 @@ public class Card : PictureBox
                 }
             }
         }
-    }
-    public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
-    {
-        for (int i = 0; i < game.playerChain.Count; i++)
-            for (int j = 0; j < game.playerChain[i].Count; j++)
-                game.playerChain[i][j].Location = game.playerChain[i][j].rectLocation =
-                game.cells[i][j].Item1.Location;
     }
     public void PushToHand()
     {
@@ -241,6 +234,7 @@ public class Card : PictureBox
     {
         game.countDownTimer.Stop();
         MessageBox.Show($"{Description}\nprimarily lives in {Habitat} and is {Hierarchy} in the foodchain");
+        game.countDownTimer.Start();
     }
     private void card_MouseMove(object sender, MouseEventArgs e)
     {
@@ -253,12 +247,11 @@ public class Card : PictureBox
     }
     private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
     private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
-    public void MoveCard() 
+    public void MoveCard(Point u) 
     {
         if (isAnimating) return;
 
-        if (inChain) v = new Point(rectLocation.X, rectLocation.Y);
-        else v = new Point(prevLocation.X, prevLocation.Y);
+        v = u;
         p = Location;
         t.Start();
         s.Restart();
