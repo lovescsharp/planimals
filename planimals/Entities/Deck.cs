@@ -16,7 +16,7 @@ public partial class Deck : Stack<int>
         rnd = new Random();
         deckStr = "";
         game = g;
-        size = 7;
+        size = 20;
         GenerateDeck();
     }
     public Deck(Game g, string d) : base() // loader

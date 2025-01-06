@@ -3,24 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\entities\\hand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\hand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,92 +22,60 @@
       "DocumentGroups": [
         {
           "DockedWidth": 161,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            }
-          ]
-        },
-        {
-          "DockedWidth": 349,
-          "SelectedChildIndex": 1,
-          "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MainForm.cs",
               "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
               "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAnwBUBAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAACABAAAAAAAAAAAAACIBAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-02T01:37:20.953Z",
+              "WhenOpened": "2025-01-06T21:37:40.743Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Game.cs",
               "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Game.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Game.cs",
               "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Game.cs",
               "RelativeToolTip": "planimals\\Entities\\Game.cs",
-              "ViewState": "AgIAAGYAAAAAAAAAAAAAAMkAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-01T22:57:18.667Z",
+              "WhenOpened": "2025-01-06T21:37:36.288Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Deck.cs",
+              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Deck.cs",
+              "RelativeDocumentMoniker": "planimals\\Entities\\Deck.cs",
+              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Deck.cs",
+              "RelativeToolTip": "planimals\\Entities\\Deck.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-06T21:37:15.298Z",
               "EditorCaption": ""
             }
           ]
         },
         {
           "DockedWidth": 368,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": -1,
           "Children": [
             {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Chain.cs",
-              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Chain.cs",
-              "RelativeDocumentMoniker": "planimals\\Entities\\Chain.cs",
-              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Chain.cs",
-              "RelativeToolTip": "planimals\\Entities\\Chain.cs",
-              "ViewState": "AgIAAI0AAAAAAAAAAAAwwMYAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-27T16:37:27.806Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Hand.cs",
-              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Hand.cs",
-              "RelativeDocumentMoniker": "planimals\\Entities\\Hand.cs",
-              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Hand.cs",
-              "RelativeToolTip": "planimals\\Entities\\Hand.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEkAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-29T01:13:36.655Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Deck.cs",
-              "DocumentMoniker": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Deck.cs",
-              "RelativeDocumentMoniker": "planimals\\Entities\\Deck.cs",
-              "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\planimals\\Entities\\Deck.cs",
-              "RelativeToolTip": "planimals\\Entities\\Deck.cs",
-              "ViewState": "AgIAAF4AAAAAAAAAAAAAABIAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-28T16:16:59.608Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             }
           ]
         }

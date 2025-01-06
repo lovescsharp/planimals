@@ -287,7 +287,8 @@ public partial class MainForm : Form
             playButton,
             loadButton,
             stats,
-            title
+            title,
+            label
         };
         endControls = new List<Control>()
         {
