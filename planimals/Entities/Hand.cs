@@ -26,11 +26,14 @@ public class Hand : List<Card>
                         if (b == 1)
                         {
                             sqlConnection.Close();
+                            Console.WriteLine("hand is hot");
                             return true;
                         }
                     }
                 }
                 sqlConnection.Close();
+
+                Console.WriteLine("hand is NOT hot");
                 return false;
             }
         }

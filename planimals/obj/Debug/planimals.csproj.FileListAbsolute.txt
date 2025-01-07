@@ -18,15 +18,10 @@ C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debu
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.csproj.CoreCompileInputs.cache
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.exe
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.pdb
-\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\planimals.exe.config
-\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\planimals.exe
-\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\planimals.pdb
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.csproj.AssemblyReference.cache
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.Properties.Resources.resources
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.csproj.GenerateResource.cache
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.csproj.CoreCompileInputs.cache
-\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.exe
-\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.pdb
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\planimals.exe.config
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\planimals.exe
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\bin\Debug\planimals.pdb
@@ -40,3 +35,8 @@ C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimal
 \\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\MainForm.resources
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\obj\Debug\planimals.LoginForm.resources
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimals\obj\Debug\MainForm.resources
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\w.exe.config
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\w.exe
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\bin\Debug\w.pdb
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\w.exe
+\\esher.ac.uk\home\students\2023\233542\Visual Studio 2022\projects\planimals\planimals\obj\Debug\w.pdb

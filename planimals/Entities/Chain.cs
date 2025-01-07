@@ -22,12 +22,7 @@ public class Chain : List<List<Card>>
     {
         int count = 0;
         for (int i = 0; i < Count; i++)
-        {
-            for (int j = 0; j < this[i].Count; j++)
-            { 
-                count++;
-            }
-        }
+            for (int j = 0; j < this[i].Count; j++) count++;
         return count;
     }
     public void lastLink()
@@ -196,7 +191,7 @@ public class Chain : List<List<Card>>
                 earned = 0;
                 game.UpdateCells();
                 game.form.Invalidate();
-                if (!game.playerHand.IsHot()) game.Stop();
+                if (!game.playerHand.IsHot() && game.deck.Count == 0) game.Stop();
                 return true;
             }
         }

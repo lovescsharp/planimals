@@ -8,10 +8,10 @@ using System.Windows.Forms;
 public class Card : PictureBox
 {
     private Game game;
-    private Timer t;
-    private Stopwatch s;
 
     private bool isAnimating;
+    private Timer t;
+    private Stopwatch s;
 
     public bool Picked;
     public Point prevLocation, rectLocation;

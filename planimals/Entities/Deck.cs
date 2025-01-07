@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.IO.Ports;
 
 public partial class Deck : Stack<int>
 {
@@ -106,7 +107,6 @@ public partial class Deck : Stack<int>
                     {
                         if (game.username != string.Empty)
                         {
-                            //delete comma AND number of digits, not just 2
                             SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck='{deckStr}' WHERE Username='{game.username}'", sqlConnection);
                             sqlConnection.Open();
                             removeCard.ExecuteNonQuery();
@@ -117,13 +117,13 @@ public partial class Deck : Stack<int>
                     {
                         if (game.username != string.Empty)
                         {
-                            //delete comma AND number of digits, not just 2
                             SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck='{deckStr}' WHERE Username='{game.username}'", sqlConnection);
                             sqlConnection.Open();
                             removeCard.ExecuteNonQuery();
                             sqlConnection.Close();
                         }
 
+                        if (!game.playerHand.IsHot()) game.Stop();
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();

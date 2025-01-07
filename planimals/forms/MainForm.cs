@@ -302,20 +302,13 @@ public partial class MainForm : Form
             youSureWannaQuitLabel
         };
 
-        foreach (Control control in gameControls)
+        foreach (Control c in Controls)
         {
-            control.Hide();
-            control.Enabled = false;
-        }
-        foreach (Control control in endControls)
-        {
-            control.Enabled = false;
-            control.Hide();
-        }
-        foreach (Control control in youSureWannaQuitControls)
-        {
-            control.Hide();
-            control.Enabled = false;
+            if (gameControls.Contains(c) || endControls.Contains(c) || youSureWannaQuitControls.Contains(c)) 
+            {
+                c.Hide();
+                c.Enabled = false;
+            }
         }
         foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.LightGreen;
     }
@@ -359,7 +352,7 @@ public partial class MainForm : Form
 
                 /*//
                 SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-                sqlConnection.Open(); 
+                //sqlConnection.Open(); 
                 test.ExecuteNonQuery(); 
                 *///
 
@@ -395,20 +388,13 @@ public partial class MainForm : Form
     }
     private void retryButton_Click(object sender, EventArgs e)
     {
-        foreach (Control control in menuControls)
+        foreach (Control c in Controls)
         {
-            control.Enabled = false;
-            control.Hide();
-        }
-        foreach (Control control in endControls)
-        {
-            control.Enabled = false;
-            control.Hide();
-        }
-        foreach (Control control in gameControls)
-        {
-            control.Enabled = false;
-            control.Hide();
+            if (menuControls.Contains(c) || endControls.Contains(c) || gameControls.Contains(c)) 
+            {
+                c.Enabled = false;
+                c.Hide();
+            }
         }
         DisposeCards();
         game = new Game(this, username);
@@ -417,10 +403,19 @@ public partial class MainForm : Form
     {
         label.Hide();
         labelTimer.Hide();
-        foreach (Control control in gameControls) { control.Enabled = false; control.Hide(); }
-        foreach (Control control in endControls) { control.Enabled = false; control.Hide(); }
-        foreach (Control control in menuControls) { control.Enabled = true; control.Show(); }
-        foreach (Control control in youSureWannaQuitControls) { control.Hide(); control.Enabled = false; }
+        foreach (Control c in Controls)
+        {
+            if (endControls.Contains(c) || gameControls.Contains(c) || youSureWannaQuitControls.Contains(c))
+            {
+                c.Enabled = false;
+                c.Hide();
+            }
+            else if (menuControls.Contains(c)) 
+            {
+                c.Enabled = true; 
+                c.Show();
+            }
+        }
         DisposeCards();
         game = null;
         Invalidate();
@@ -429,31 +424,39 @@ public partial class MainForm : Form
     {
         game.countDownTimer.Stop();
         UpdateStatsLabel();
-        DisposeCards(); 
-        game = null;
-        foreach (Control control in gameControls)
+        foreach (Control c in Controls)
         {
-            control.Enabled = false;
-            control.Hide();
-        }
-        foreach (Control control in youSureWannaQuitControls)
-        {
-            control.Show();
-            control.Enabled = true;
+            if (gameControls.Contains(c) || c is Card)
+            {
+                c.Enabled = false;
+                c.Hide();
+            }
+            else if (youSureWannaQuitControls.Contains(c))
+            {
+                c.Show();
+                c.Enabled = true;
+            }
         }
         Invalidate();
     }
     private void yesButton_Click(object sender, EventArgs e) => goToMenuButton_Click(sender, e);
     private void noButton_Click(object sender, EventArgs e)
     {
-        foreach (Control control in youSureWannaQuitControls) control.Hide();
-        foreach (Control control in gameControls) control.Show();
-        foreach (Card c in game.playerHand) c.Show();
-        foreach (List<Card> subchain in game.playerChain)
+        foreach (Control c in Controls)
         {
-            foreach (Card c in subchain) c.Show();
+            if (gameControls.Contains(c) || c is Card)
+            {
+                c.Enabled = true;
+                c.Show();
+            }
+            else if (youSureWannaQuitControls.Contains(c))
+            {
+                c.Hide();
+                c.Enabled = false;
+            }
         }
         game.countDownTimer.Start();
+        Invalidate();
     }
     private void OnResize(object sender, EventArgs e)
     {
@@ -516,6 +519,7 @@ public partial class MainForm : Form
                         foreach ((Rectangle, bool) tuple in tuples) e.Graphics.DrawRectangle(pen, tuple.Item1);
     }
     public async void Display(string s) {
+        if (this == null) return;
         label.Text = s;
         await System.Threading.Tasks.Task.Delay(7883).ContinueWith(
             _ => Invoke(new MethodInvoker(() => label.Text = ""))
