@@ -1,4 +1,5 @@
 ﻿using planimals;
+using planimals.Forms;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -23,6 +24,8 @@ public partial class MainForm : Form
     public Button playButton;
     public Button loadButton;
     public Button loginButton;
+
+    public Button openEditorButton;
 
     public Label title;
     public Label label;
@@ -119,6 +122,16 @@ public partial class MainForm : Form
                 workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - loginButton.Height / 2);
         Controls.Add(loginButton);
         loginButton.Click += Login;
+
+        openEditorButton = new Button()
+        {
+            Text = "editor",
+            BackColor = Color.White,
+            Size = new Size(50, 30),
+        };
+        openEditorButton.Location = new Point(workingWidth / 2 - openEditorButton.Width / 2, workingHeight / 2 - openEditorButton.Height / 2 + 30);
+        Controls.Add(openEditorButton);
+        openEditorButton.Click += openEditorButton_Click;
 
         title = new Label()
         { Text = "Planimals",
@@ -288,7 +301,8 @@ public partial class MainForm : Form
             loadButton,
             stats,
             title,
-            label
+            label,
+            openEditorButton
         };
         endControls = new List<Control>()
         {
@@ -312,6 +326,13 @@ public partial class MainForm : Form
         }
         foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.LightGreen;
     }
+
+    private void openEditorButton_Click(object sender, EventArgs e)
+    {
+        Editor editor = new Editor();
+        editor.ShowDialog();
+    }
+
     private void playButton_Click(object sender, EventArgs e)
     {
         foreach (Control control in menuControls)
