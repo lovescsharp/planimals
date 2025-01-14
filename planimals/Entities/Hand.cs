@@ -75,7 +75,7 @@ public class Hand : List<Card>
         for (int i = 0; i < Count; i++)
             this[i].MoveCard(
                 this[i].prevLocation =
-                new Point(Card.cardWidth * i, game.form.workingHeight - Card.cardHeight)
+                new Point(this[i].Width * i, game.form.workingHeight - this[i].Height)
         );
     }
 }

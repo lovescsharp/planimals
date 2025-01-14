@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.IO.Ports;
 
 public partial class Deck : Stack<int>
 {
@@ -11,6 +10,7 @@ public partial class Deck : Stack<int>
     Random rnd;
     public string deckStr;
     int size;
+    List<string> organisms;
 
     public Deck(Game g) : base() // starter
     {
@@ -18,6 +18,9 @@ public partial class Deck : Stack<int>
         deckStr = "";
         game = g;
         size = 20;
+        organisms = new List<string> ();
+        GetOrganisms();
+        Console.WriteLine($"# of organisms = {organisms.Count}");
         GenerateDeck();
     }
     public Deck(Game g, string d) : base() // loader
@@ -28,22 +31,23 @@ public partial class Deck : Stack<int>
         LoadDeck();
         size = Count;
     }
-    private int GetNumberOfOrganisms()
+    private void GetOrganisms() 
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING)) 
         {
-            SqlCommand sqlCommand = new SqlCommand("SELECT COUNT(*) FROM Organisms", sqlConnection);
+            SqlCommand get = new SqlCommand("SELECT Scientific_name FROM Organisms ORDER BY Scientific_name", sqlConnection);
             sqlConnection.Open();
-            int b = (int)sqlCommand.ExecuteScalar();
+            using (SqlDataReader r = get.ExecuteReader()) 
+            {
+                while (r.Read()) organisms.Add(r["Scientific_name"].ToString());
+            }
             sqlConnection.Close();
-            return b;
         }
     }
     public void GenerateDeck()
     {
-        Console.WriteLine($"size = {size}");
         int randIdx;
-        int upperBound = GetNumberOfOrganisms() + 1;
+        int upperBound = organisms.Count;
         for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, upperBound);
@@ -54,24 +58,15 @@ public partial class Deck : Stack<int>
     }
     public string GetScientificNameFromDeck()
     {
-        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
-        {
-            int i = Pop();
-            Console.WriteLine(i);
-            deckStr = deckStr.Remove(deckStr.Length - 1);
-            Console.WriteLine((int)Math.Log10(i) + 1);
-            for (int j = 0; j < (int)Math.Floor(Math.Log10(i)) + 1; j++) deckStr = deckStr.Remove(deckStr.Length - 1);
-            Console.WriteLine(deckStr);
-            Console.WriteLine("--");
-            SqlCommand cmd = new SqlCommand($"WITH NumberedRows AS(SELECT Scientific_name, ROW_NUMBER() OVER(ORDER BY Scientific_name) AS RowNum FROM Organisms) SELECT Scientific_name FROM NumberedRows WHERE RowNum = {i};", sqlConnection);
-            sqlConnection.Open();
-            string name = (string) cmd.ExecuteScalar();
-            sqlConnection.Close();
-            return name;
-        }
+        int i = Pop();
+        deckStr = deckStr.Remove(deckStr.Length - 1);
+        for (int j = 0; j < (int)Math.Floor(Math.Log10(i)) + 1; j++) deckStr = deckStr.Remove(deckStr.Length - 1);
+        
+        return organisms[i];
     }
     public void DrawCard(object sender, EventArgs e)
     {
+        Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
         if (game.playerHand.Count + game.playerChain.CountAll() < 10)
         {
             string sciname;
@@ -127,7 +122,14 @@ public partial class Deck : Stack<int>
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
-                        return;
+                    /*
+                        if (game.playerHand.Count > 10)
+                        {
+                            foreach (Card c in game.playerHand) c.ScaleDown();
+                            game.playerHand.ShiftCards();
+                        }
+                    */
+                    return;
                     }
                 }
             }
@@ -135,6 +137,10 @@ public partial class Deck : Stack<int>
         else
         {
             if (game.playerHand.IsHot()) game.form.Display("i think you can build a chain out of cards on your hand");
+            /*else 
+            {
+            foreach (Card c in game.playerHand) c.ScaleDown();
+            }*/
         }
     }
     public void LoadDeck()

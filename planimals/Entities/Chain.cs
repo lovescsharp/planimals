@@ -43,7 +43,6 @@ public class Chain : List<List<Card>>
     {
         for (int i = 0; i < chain.Count - 1; i++)
         {
-            //MessageBox.Show($"{this[i].common_name} at {this[i].Location.X.ToString()} and {chain[i+1].common_name} at {chain[i+1].Location.X.ToString()}");
             if (chain[i].Location.X > chain[i + 1].Location.X)
             {
                 Card temp = chain[i];
@@ -67,15 +66,6 @@ public class Chain : List<List<Card>>
         }
         else
         {
-            /*
-            string str = "";
-            foreach (List<Card> subchain in chain)
-            {
-                str += $"   chain {IndexOf(subchain).ToString()}\n";
-                foreach (Card c in subchain) str += "        " + $"{c.CommonName}" + '\n';
-            }
-            Console.WriteLine("current chain:\n" + str);
-            */
             lastLink();
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -179,9 +169,8 @@ public class Chain : List<List<Card>>
                                 Card.cardWidth * j,
                                 game.form.workingHeight - Card.cardHeight
                         )
-                    );//updating cards locations in chain
-                   
-                }
+                    );
+                }//updating cards locations in chain
                 foreach (List<Card> subchain in this) 
                     for (int i = 0; i < subchain.Count; i++) 
                         game.form.Controls.Remove(subchain[i]);

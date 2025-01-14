@@ -74,7 +74,6 @@ public partial class MainForm : Form
 
         //static size
         FormBorderStyle = FormBorderStyle.Fixed3D;
-        MinimizeBox = false;
         //Size = new Size(1366, 768);
         Size = new Size(1600, 900);
         workingHeight = ClientRectangle.Height;
@@ -329,7 +328,7 @@ public partial class MainForm : Form
 
     private void openEditorButton_Click(object sender, EventArgs e)
     {
-        Editor editor = new Editor();
+        Editor editor = new Editor(this);
         editor.ShowDialog();
     }
 

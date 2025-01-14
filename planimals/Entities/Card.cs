@@ -70,7 +70,7 @@ public class Card : PictureBox
         ContextMenu = cm;
 
         MouseDown += card_MouseDown;
-        MouseUp += card_Mouseup;
+        MouseUp += card_MouseUp;
         MouseMove += card_MouseMove;
         //MouseEnter += card_MouseEnter;
         //MouseLeave += card_MouseLeave;
@@ -80,6 +80,8 @@ public class Card : PictureBox
     {
         using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
     }
+    public void ScaleUp() => Size = new Size(cardWidth, cardHeight);
+    public void ScaleDown() => Size = new Size((int) (cardWidth * 0.8), (int) (cardHeight * 0.8));
     private void card_MouseDown(object sender, MouseEventArgs e)
     {
         for (int i = 0; i < game.playerHand.Count; i++)
@@ -93,7 +95,7 @@ public class Card : PictureBox
         Pick(this);
         //Console.WriteLine($"picked {CommonName}");
     }
-    private void card_Mouseup(object sender, MouseEventArgs e)
+    private void card_MouseUp(object sender, MouseEventArgs e)
     {
         if (!inChain)
         {
@@ -108,6 +110,7 @@ public class Card : PictureBox
                         {
                             if (game.cells[i].Count == 1) game.playerChain.Add(new List<Card>());
                             Drop(this);
+                            ScaleUp();
                             Location = game.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (game.cells[i][j].Item1, true);
                             game.cells[i][j] = tuple;
@@ -169,6 +172,7 @@ public class Card : PictureBox
                         game.playerChain.ShiftCards();
                         Drop(this);
                         Location = prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                        if (game.playerHand.Count > 10) ScaleDown();
                         rectLocation = new Point(0, 0);
                         inChain = false;
                         return;
