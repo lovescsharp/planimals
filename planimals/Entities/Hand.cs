@@ -8,7 +8,7 @@ public class Hand : List<Card>
 {
     private Game game;
     public Hand(Game g) : base() => game = g;
-    public bool IsHot() 
+    public bool IsHot()
     {
         if (Count > 1 && game.playerChain.Count == 0)
         {
@@ -67,7 +67,7 @@ public class Hand : List<Card>
                 Add(c);
                 game.form.Controls.Add(c);
             }
-            sqlConnection.Close(); 
+            sqlConnection.Close();
         }
     }
     public void ShiftCards()
@@ -77,5 +77,20 @@ public class Hand : List<Card>
                 this[i].prevLocation =
                 new Point(this[i].Width * i, game.form.workingHeight - this[i].Height)
         );
+    }
+    public override string ToString() {
+        string s = "[ ";
+        for (int i = 0; i < Count; i++) {
+
+            if (i == Count - 1)
+            {
+                s += this[i].CommonName;
+                continue;
+            }
+            s += this[i].CommonName;
+            s += ", ";
+        }
+        s += " ]";
+        return s;
     }
 }

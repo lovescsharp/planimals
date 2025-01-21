@@ -18,6 +18,42 @@ public class Chain : List<List<Card>>
         lastOrganism = String.Empty;
         longestChainIndex = -1;
     }
+    public override string ToString()
+    {
+        string s = "[\n";
+        for (int i = 0; i < Count; i++) 
+        {
+            if (i == Count - 1)
+            {
+                s += "    ";
+                s += subchainToString(this[i]);
+                s += "\n";
+                continue;
+            }
+            s += "    ";
+            s += subchainToString(this[i]);
+            s += ",\n";
+        }
+        s += "]";
+        return s;
+    }
+    private string subchainToString(List<Card> ch) 
+    {
+        string s = "[ ";
+        for (int i = 0; i < ch.Count; i++)
+        {
+
+            if (i == ch.Count - 1)
+            {
+                s += ch[i].CommonName;
+                continue;
+            }
+            s += ch[i].CommonName;
+            s += ", ";
+        }
+        s += " ]";
+        return s;
+    }
     public int CountAll()
     {
         int count = 0;

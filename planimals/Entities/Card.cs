@@ -128,12 +128,16 @@ public class Card : PictureBox
                             game.playerChain.ShiftCards();
                             FindForm().Invalidate();
                             rectLocation = Location;
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                         else
                         {
                             Drop(this);
                             Location = prevLocation;
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                     }
@@ -141,6 +145,8 @@ public class Card : PictureBox
             }
             Drop(this);
             Location = prevLocation;
+            Console.WriteLine(game.playerHand.ToString());
+            Console.WriteLine(game.playerChain.ToString());
         }
         else if (inChain)
         {
@@ -175,6 +181,8 @@ public class Card : PictureBox
                         if (game.playerHand.Count > 10) ScaleDown();
                         rectLocation = new Point(0, 0);
                         inChain = false;
+                        Console.WriteLine(game.playerHand.ToString());
+                        Console.WriteLine(game.playerChain.ToString());
                         return;
                     }
                 }
