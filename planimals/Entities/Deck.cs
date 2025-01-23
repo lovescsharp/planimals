@@ -30,6 +30,8 @@ public partial class Deck : Stack<int>
         game = g;
         LoadDeck();
         size = Count;
+        organisms = new List<string>();
+        GetOrganisms();
     }
     private void GetOrganisms() 
     {

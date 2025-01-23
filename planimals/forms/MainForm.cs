@@ -15,7 +15,8 @@ using System.Windows.Forms;
 public partial class MainForm : Form
 {
     public string username = "";
-    public bool loggedIn;
+    public int totalPoints; //total points the player has on their account
+
     Game game;
     private static string dbPath = Path.Combine(Environment.CurrentDirectory, "cards.mdf");
     public static string CONNECTION_STRING = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
@@ -289,6 +290,7 @@ public partial class MainForm : Form
         //Resize += new EventHandler(OnResize);
         gameControls = new List<Control>()
         {
+            label,
             drawCardButton,
             chainButton,
             goToMenuInGameButton
@@ -300,7 +302,6 @@ public partial class MainForm : Form
             loadButton,
             stats,
             title,
-            label,
             openEditorButton
         };
         endControls = new List<Control>()
@@ -389,13 +390,12 @@ public partial class MainForm : Form
                         control.Hide();
                     }
 
-                    SqlCommand pullTimeHand = new SqlCommand($"SELECT Time, Deck FROM Games WHERE Username='{username}'", sqlConnection);
+                    SqlCommand pullTimeHand = new SqlCommand($"SELECT Time, Deck, Score FROM Games WHERE Username='{username}'", sqlConnection);
                     sqlConnection.Open();
                     SqlDataReader r = pullTimeHand.ExecuteReader();
                     while (r.Read())
                     {
-                        Console.WriteLine(r["Time"]);
-                        game = new Game(this, username, (int)r["Time"], r["Deck"].ToString());
+                        game = new Game(this, username, (int)r["Time"], r["Deck"].ToString(), totalPoints, int.Parse(r["Score"].ToString()));
                         sqlConnection.Close();
                         return;
                     }
@@ -572,7 +572,7 @@ public partial class MainForm : Form
     }
     private void Login(object sender, EventArgs e)
     {
-        if (!loggedIn)
+        if (username == string.Empty)
         {
             LoginForm loginForm = new LoginForm(this);
             loginForm.ShowDialog();
@@ -581,13 +581,12 @@ public partial class MainForm : Form
         {
             username = "";
             stats.Text = "";
-            loggedIn = false;
             loginButton.Text = "log in";
         }
     }
     public void UpdateStatsLabel()
     {
-        if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {game.totalPoints}";
+        if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
     }
     private void chainButton_Click(object sender, EventArgs e) => game.playerChain.CHAIN(); //   \(0o0)/
     private void chainButton_MouseMove(object sender, MouseEventArgs e)

@@ -105,7 +105,6 @@ namespace planimals
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand cmd = new SqlCommand("SELECT Count(*) FROM Players WHERE Username=@username AND Password=@password", sqlConnection);
-                
                 SqlParameter paramUser = new SqlParameter();
                 paramUser.ParameterName = "@username";
                 paramUser.Value = usernameInput.Text.Trim();
@@ -120,10 +119,13 @@ namespace planimals
                 if (b == 1)
                 {
                     //log in, and assign username in form1
+                    SqlCommand getPoints = new SqlCommand($"SELECT Points FROM Players", sqlConnection);
+                    int p = int.Parse(getPoints.ExecuteScalar().ToString());
                     form.username = usernameInput.Text.Trim();
+                    form.totalPoints = p;
                     label.Text = "Login successful";
                     Close();
-                    form.stats.Text = $"hey, {usernameInput.Text}!";
+                    form.stats.Text = $"hey, {usernameInput.Text}!\npoints: {p}";
                     form.loginButton.Text = "log out";
                 }
                 else

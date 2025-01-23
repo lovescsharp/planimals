@@ -192,8 +192,8 @@ public class Chain : List<List<Card>>
                 }//iterating through the chain
                 if (game.username != string.Empty)
                 {
-                    game.totalPoints += game.overallScore;
-                    SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.totalPoints} WHERE Username='{game.username}'", sqlConnection);
+                    game.form.totalPoints += game.overallScore;
+                    SqlCommand updatePoints = new SqlCommand($"UPDATE Players SET Points={game.form.totalPoints} WHERE Username='{game.username}'", sqlConnection);
                     updatePoints.ExecuteNonQuery();
                     disposeChain.ExecuteNonQuery();
                 }
@@ -228,7 +228,7 @@ public class Chain : List<List<Card>>
                 game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation =
                 game.cells[i][j].Item1.Location);
     }
-    public void LoadChain()
+    public void Load()
     {
         int count = game.playerHand.Count;
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))

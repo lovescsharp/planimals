@@ -15,7 +15,7 @@ public class Card : PictureBox
 
     public bool Picked;
     public Point prevLocation, rectLocation;
-    private Point offset, p, v;
+    private Point offset, p, v, pv;
     public bool inChain;
 
     public string ScientificName;
@@ -265,23 +265,28 @@ public class Card : PictureBox
 
         v = u;
         p = Location;
+        pv = new Point(v.X - p.X, v.Y - p.Y); //direction vector pv
         t.Start();
         s.Restart();
         isAnimating = true;
     }
-    private double f(double t) => Math.Sin(Math.PI * t / 2);
+    private double f(double t) => Math.Sin(Math.PI * t / 2); //example of ease out function
     private void Tick(object sender, EventArgs e)
     {
-        long currentTime = s.ElapsedMilliseconds;
-        double elapsedTime = currentTime / 1000.0;
-        if (elapsedTime > 0.6)
+        double elapsed = s.ElapsedMilliseconds / 1000.0; //divding by a 1000 converts to seconds
+        
+        if (elapsed > 0.6) //the card moves o.6 seconds 
         {
             t.Stop();
             isAnimating = false;
             return;
         }
-        double easingFactor = f(elapsedTime / 0.6);
-        int y = (int)((v.Y - p.Y) * easingFactor + p.Y);
-        Location = new Point((int)((v.X - p.X) * easingFactor + p.X), (int)((v.Y - p.Y) * easingFactor + p.Y));
+
+        double easingFactor = f(elapsed / 0.6);
+
+        Location = new Point(
+            (int)(pv.X * easingFactor + p.X), //move in x direction of pv from the current x coordinate
+            (int)(pv.Y * easingFactor + p.Y)  //move in y directon of pv from the current y coordinate
+        );
     }
 }

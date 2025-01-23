@@ -39,7 +39,7 @@ public class Hand : List<Card>
         }
         else return false;
     }
-    public void LoadHand()
+    public void Load()
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {

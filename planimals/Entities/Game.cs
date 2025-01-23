@@ -24,7 +24,6 @@ public class Game
     public Rectangle liRectangle;
 
     public int overallScore; //points earned in this round
-    public int totalPoints; //total points the player has on their account
 
     public Game(MainForm f, string u) //starter
     {
@@ -61,9 +60,10 @@ public class Game
             CleanDb();
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck) VALUES ('{username}', {time}, '{deck.deckStr}')", sqlConnection);
+                SqlCommand createGame = new SqlCommand($"INSERT INTO Games(Username, Time, Deck, Score) VALUES ('{username}', {time}, '{deck.deckStr}', 0)", sqlConnection);
                 sqlConnection.Open();                
                 createGame.ExecuteNonQuery();
+                overallScore = 0;
                 sqlConnection.Close(); 
             }
         }
@@ -76,20 +76,20 @@ public class Game
         readySteadyGoTimer.Start();
 
     }
-    public Game(MainForm f, string u, int t, string d) //loader
+    public Game(MainForm f, string u, int t, string d, int p, int s) //loader
     {
         form = f;
         username = u;
         time = t;
+        overallScore = s;
 
         deck = new Deck(this, d);
 
         playerHand = new Hand(this);
-        playerHand.LoadHand();
-        foreach (Card c in playerHand) Console.WriteLine(c.CommonName);
+        playerHand.Load();
         
         playerChain = new Chain(this);
-        playerChain.LoadChain();
+        playerChain.Load();
 
         cells = new List<List<(Rectangle, bool)>>();
         cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
@@ -187,7 +187,9 @@ public class Game
     public void Stop()
     {
         countDownTimer.Stop();
-        if (username != string.Empty) CleanDb();
+        if (username != string.Empty) {
+            CleanDb();
+        };
         form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
         form.label.Font = form.largeFont;
         form.label.Text = "Score: " + overallScore.ToString();
