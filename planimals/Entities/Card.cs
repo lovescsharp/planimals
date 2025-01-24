@@ -16,6 +16,7 @@ public class Card : PictureBox
     public bool Picked;
     public Point prevLocation, rectLocation;
     private Point offset, p, v, pv;
+    private double animationTime = 0.6;
     public bool inChain;
 
     public string ScientificName;
@@ -33,7 +34,7 @@ public class Card : PictureBox
         DoubleBuffered = true;
 
         t = new Timer();
-        t.Interval = 10;
+        t.Interval = 6;
         t.Tick += Tick;
 
         s = new Stopwatch();
@@ -128,16 +129,16 @@ public class Card : PictureBox
                             game.playerChain.ShiftCards();
                             FindForm().Invalidate();
                             rectLocation = Location;
-                            Console.WriteLine(game.playerHand.ToString());
-                            Console.WriteLine(game.playerChain.ToString());
+                            //Console.WriteLine(game.playerHand.ToString());
+                            //Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                         else
                         {
                             Drop(this);
                             Location = prevLocation;
-                            Console.WriteLine(game.playerHand.ToString());
-                            Console.WriteLine(game.playerChain.ToString());
+                            //Console.WriteLine(game.playerHand.ToString());
+                            //Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                     }
@@ -145,8 +146,8 @@ public class Card : PictureBox
             }
             Drop(this);
             Location = prevLocation;
-            Console.WriteLine(game.playerHand.ToString());
-            Console.WriteLine(game.playerChain.ToString());
+            //Console.WriteLine(game.playerHand.ToString());
+            //Console.WriteLine(game.playerChain.ToString());
         }
         else if (inChain)
         {
@@ -263,8 +264,8 @@ public class Card : PictureBox
     {
         if (isAnimating) return;
 
-        v = u;
-        p = Location;
+        v = u; //destination
+        p = Location; //starting point
         pv = new Point(v.X - p.X, v.Y - p.Y); //direction vector pv
         t.Start();
         s.Restart();
@@ -275,14 +276,14 @@ public class Card : PictureBox
     {
         double elapsed = s.ElapsedMilliseconds / 1000.0; //divding by a 1000 converts to seconds
         
-        if (elapsed > 0.6) //the card moves o.6 seconds 
+        if (elapsed > animationTime) //the card moves o.6 seconds 
         {
             t.Stop();
             isAnimating = false;
             return;
         }
 
-        double easingFactor = f(elapsed / 0.6);
+        double easingFactor = f(elapsed / animationTime); //normalizing the value passed, so that it is in range [0, 1]
 
         Location = new Point(
             (int)(pv.X * easingFactor + p.X), //move in x direction of pv from the current x coordinate

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace planimals
@@ -16,6 +15,7 @@ namespace planimals
         private Button loginButton;
         private Button signUpButton;
         private Button cancelButton;
+        private Button resestPasswdButton;
 
         private TextBox usernameInput;
         private TextBox passwordInput;
@@ -86,25 +86,41 @@ namespace planimals
 
             signUpButton = new Button();
             signUpButton.Size = new Size(90, 25);
-            signUpButton.Location = new Point(workingWidth - 2 * signUpButton.Width - 5, workingHeight - signUpButton.Height - 5);
+            signUpButton.Location = new Point(loginButton.Location.X - signUpButton.Width - 5, workingHeight - signUpButton.Height - 5);
             signUpButton.Text = "create account";
             signUpButton.BackColor = Color.White;
             Controls.Add(signUpButton);
             signUpButton.Click += SignUp;
 
+            resestPasswdButton = new Button();
+            resestPasswdButton.Size = new Size (60, 25);
+            resestPasswdButton.Location = new Point(signUpButton.Location.X - resestPasswdButton.Width - 5, workingHeight - resestPasswdButton.Height - 5);
+            resestPasswdButton.Text = "reset password";
+            resestPasswdButton.BackColor = Color.White;
+            Controls.Add(resestPasswdButton);
+            resestPasswdButton.Click += ResestPasswdButton_Click;
+
             BackColor = Color.Black;
 
             label = new Label();
             label.Text = "";
+            label.AutoSize = true;
             label.ForeColor = Color.White;
             label.Location = new Point(10, 10);
             Controls.Add(label);
         }
+
+        private void ResestPasswdButton_Click(object sender, EventArgs e)
+        {
+            ResetPassword rp = new ResetPassword();
+            rp.ShowDialog();
+        }
+
         private void LoginClick(object sender, EventArgs e)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand cmd = new SqlCommand("SELECT Count(*) FROM Players WHERE Username=@username AND Password=@password", sqlConnection);
+                SqlCommand cmd = new SqlCommand($"SELECT Count(*) FROM Players WHERE Username=@username AND Password=@password", sqlConnection);
                 SqlParameter paramUser = new SqlParameter();
                 paramUser.ParameterName = "@username";
                 paramUser.Value = usernameInput.Text.Trim();
@@ -114,7 +130,7 @@ namespace planimals
                 paramPasswd.ParameterName = "@password";
                 paramPasswd.Value = passwordInput.Text.Trim();
                 cmd.Parameters.Add(paramPasswd);
-                sqlConnection.Open(); Console.WriteLine($"{sqlConnection.ToString()}'s opened");
+                sqlConnection.Open();
                 int b = (int) cmd.ExecuteScalar();
                 if (b == 1)
                 {
@@ -133,7 +149,7 @@ namespace planimals
                     label.Text = "Incorrect username or password";
                     passwordInput.Text = "";
                 }
-                sqlConnection.Close(); Console.WriteLine($"{sqlConnection.ToString()}'s closed");
+                sqlConnection.Close();
             }
         }
         private void Cancel(object sender, EventArgs e) => Close();
