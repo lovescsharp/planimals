@@ -40,7 +40,7 @@ namespace planimals
             label = new Label
             {
                 Location = new Point(10, 10),
-                ForeColor = Color.White,
+                AutoSize = true
             };
             Controls.Add(label);
 
@@ -54,7 +54,6 @@ namespace planimals
                 Size = new Size(100, 25),
                 Location = new Point(usernameInput.Location.X, usernameInput.Location.Y - 15),
                 Text = "username:",
-                ForeColor = Color.White
             };
             Controls.Add(usernameInput);
             Controls.Add(l1);
@@ -69,7 +68,6 @@ namespace planimals
             {
                 Location = new Point(passwordInput.Location.X, passwordInput.Location.Y - 15),
                 Text = "password:",
-                ForeColor = Color.White
             };
             Controls.Add(passwordInput);
             Controls.Add(l2);
@@ -83,7 +81,6 @@ namespace planimals
             {
                 Location = new Point(emailInput.Location.X, emailInput.Location.Y - 15),
                 Text = "email:",
-                ForeColor = Color.White
             };
             Controls.Add(emailInput);
             Controls.Add(l3);
@@ -92,7 +89,6 @@ namespace planimals
             createButton.Size = new Size(90, 25);
             createButton.Location = new Point(workingWidth - createButton.Width - 5, workingHeight - createButton.Height - 5);
             createButton.Text = "create account";
-            createButton.BackColor = Color.White;
             Controls.Add(createButton);
             createButton.Click += Create;
 
@@ -100,22 +96,27 @@ namespace planimals
             cancelButton.Size = new Size(60, 25);
             cancelButton.Location = new Point(5, workingHeight - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
-            cancelButton.BackColor = Color.White;
             Controls.Add(cancelButton);
             cancelButton.Click += Cancel;
 
-            BackColor = Color.Black;
+            BackColor = Color.DarkSeaGreen;
+            foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
         }
         private void Cancel(object sender, EventArgs e) => Close();
         private void Create(object sender, EventArgs e) 
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand userExists = new SqlCommand("SELECT COUNT(*) FROM Players WHERE Username=@username", sqlConnection);
+                SqlCommand userExists = new SqlCommand("SELECT COUNT(*) FROM Players WHERE Username=@username OR Email=@email", sqlConnection);
                 SqlParameter username = new SqlParameter();
                 username.ParameterName = "username";
                 username.Value = usernameInput.Text.Trim();
                 userExists.Parameters.Add(username);
+
+                SqlParameter email = new SqlParameter();
+                email.ParameterName = "email";
+                email.Value = emailInput.Text.Trim();
+                userExists.Parameters.Add(email);
 
                 sqlConnection.Open();
                 int b = (int) userExists.ExecuteScalar();
@@ -123,14 +124,14 @@ namespace planimals
                 MessageBox.Show(b.ToString());
                 if (b == 0)
                 {
+                    if (passwordInput.Text.Trim() == string.Empty) 
+                    {
+                        label.Text = "please enter a valid password";
+                        return;
+                    }
                     SqlCommand createUser = new SqlCommand("INSERT INTO Players(Username, GamesPlayed, Email, Password, Points) VALUES (@username, 0, @email, @password, 0)", sqlConnection);
 
                     createUser.Parameters.Add(username);
-
-                    SqlParameter email = new SqlParameter();
-                    email.ParameterName = "email";
-                    email.Value = emailInput.Text;
-                    createUser.Parameters.Add(email);
 
                     SqlParameter password = new SqlParameter();
                     password.ParameterName = "password";
@@ -142,7 +143,7 @@ namespace planimals
                 }
                 else
                 {
-                    label.Text = "username already exists";
+                    label.Text = "username and/or email is/are already taken/registered";
                     usernameInput.Text = "";
                     passwordInput.Text = "";
                 }

@@ -80,9 +80,9 @@ public partial class MainForm : Form
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
-        //BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
-        //BackgroundImageLayout = ImageLayout.Stretch;
-        BackColor = Color.DarkSeaGreen;
+        BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
+        BackgroundImageLayout = ImageLayout.Stretch;
+        //BackColor = Color.DarkSeaGreen;
         stats = new Label()
         {
             Size = new Size(300, 100),
@@ -287,7 +287,7 @@ public partial class MainForm : Form
 
         #endregion
         Paint += new PaintEventHandler(Draw);
-        //Resize += new EventHandler(OnResize);
+        Resize += new EventHandler(OnResize);
         gameControls = new List<Control>()
         {
             label,
@@ -324,15 +324,15 @@ public partial class MainForm : Form
                 c.Enabled = false;
             }
         }
-        foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.LightGreen;
+        foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
     }
 
     private void openEditorButton_Click(object sender, EventArgs e)
     {
-        Editor editor = new Editor(this);
+        Editor editor = new Editor();
         editor.ShowDialog();
     }
-
+    
     private void playButton_Click(object sender, EventArgs e)
     {
         foreach (Control control in menuControls)

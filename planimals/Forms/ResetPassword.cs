@@ -36,7 +36,6 @@ public partial class ResetPassword : Form
         {
             Location = new Point(usernameInput.Location.X, usernameInput.Location.Y - 15),
             Text = "username:",
-            ForeColor = Color.White
         };
         Controls.Add(usernameInput);
         Controls.Add(l1);
@@ -51,7 +50,6 @@ public partial class ResetPassword : Form
         {
             Location = new Point(emailInput.Location.X, emailInput.Location.Y - 15),
             Text = "email:",
-            ForeColor = Color.White
         };
         Controls.Add(emailInput);
         Controls.Add(l2);
@@ -60,7 +58,6 @@ public partial class ResetPassword : Form
         seePasswd.Size = new Size(60, 25);
         seePasswd.Location = new Point(workingWidth - seePasswd.Width - 5, workingHeight - seePasswd.Height - 5);
         seePasswd.Text = "log in";
-        seePasswd.BackColor = Color.White;
         Controls.Add(seePasswd);
         seePasswd.Click += seePasswdClick;
 
@@ -68,10 +65,12 @@ public partial class ResetPassword : Form
 
         label = new Label();
         label.Text = "";
-        label.Size = new Size(30, 25);
-        label.ForeColor = Color.White;
+        label.AutoSize = true;
         label.Location = new Point(10, 10);
         Controls.Add(label);
+
+        BackColor = Color.DarkSeaGreen;
+        foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
     }
 
     private void seePasswdClick(object sender, EventArgs e)
