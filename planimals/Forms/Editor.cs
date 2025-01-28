@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace planimals.Forms
@@ -8,9 +9,14 @@ namespace planimals.Forms
     //https://www.youtube.com/watch?v=XWB7gbSQom4
     public partial class Editor : Form
     {
+        List<string> existingConsumes;
+        List<string> existingConsumedBy;
         public Editor()
         {
             InitializeComponent();
+
+            existingConsumes = new List<string>();
+            existingConsumedBy = new List<string>();
 
             pictureInput.AllowDrop = true;
             pictureEditInput.AllowDrop = true;
@@ -43,8 +49,8 @@ namespace planimals.Forms
                         consumesInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
                         consumedByInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
                         */
-                        consumesInput.Items.Add(r["Common_name"].ToString());
-                        consumedByInput.Items.Add(r["Common_name"].ToString());
+                        consumesInput.Items.Add(r["Scientific_name"].ToString());
+                        consumedByInput.Items.Add(r["Scientific_name"].ToString());
                     }
                 }
                 sqlConnection.Close();
@@ -77,8 +83,8 @@ namespace planimals.Forms
                         consumesEditInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
                         consumedByEditInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
                         */
-                        consumesEditInput.Items.Add(r["Common_name"].ToString());
-                        consumedByEditInput.Items.Add(r["Common_name"].ToString());
+                        consumesEditInput.Items.Add(r["Scientific_name"].ToString());
+                        consumedByEditInput.Items.Add(r["Scientific_name"].ToString());
                     }
                 }
                 sqlConnection.Close();
@@ -112,16 +118,21 @@ namespace planimals.Forms
         void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
         void editButton_Click(object sender, System.EventArgs e)
         {
-
+            if (scientificNameEditInput.Text.Trim() == string.Empty)
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+            {
+                SqlCommand insert = new SqlCommand("", sqlConnection);
+                foreach (object item in consumesEditInput.CheckedItems) 
+                {
+                    if (existingConsumes.Contains(item.ToString())) continue;
+                    insert.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{scientificNameEditInput.Text}', '{item.ToString()}');";
+                }
+            }
         }
         void searchEditButton_Click(object sender, System.EventArgs e)
         {
+            foreach (object organism in consumedByEditInput.CheckedItems) ; //update
             string sci_name = normalizeScientificName(scientificNameEditInput.Text);
-            if (consumedByEditInput.Items.Contains(sci_name))
-            {
-                label.Text = "Please type scientific name of an organism";
-                return;
-            }
             scientificNameEditInput.Text = sci_name;
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -138,11 +149,11 @@ namespace planimals.Forms
                     }
                 }
                 SqlCommand getRelations = new SqlCommand($"SELECT " +
-                    "(SELECT STRING_AGG(Organisms.Common_name, ',') " +
+                    "(SELECT STRING_AGG(Organisms.Scientific_name, ',') " +
                         "FROM Relations " +
                         "JOIN Organisms ON Relations.Consumed = Organisms.Scientific_name " +
                         "WHERE Relations.Consumer = 'Turdus merula') AS Consumes, " +
-                    "(SELECT STRING_AGG(Organisms.Common_name, ',') " +
+                    "(SELECT STRING_AGG(Organisms.Scientific_name, ',') " +
                         "FROM Relations " +
                         "JOIN Organisms ON Relations.Consumer = Organisms.Scientific_name " +
                         "WHERE Relations.Consumed = 'Turdus merula') AS ConsumedBy;", sqlConnection);
@@ -163,6 +174,7 @@ namespace planimals.Forms
                     if (consumes[i] == ',')
                     {
                         consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true); // i find organism with common name @organismCommonNameBuff and check it
+                        existingConsumes.Add(organismCommonNameBuff);
                         organismCommonNameBuff = "";
                     }
                     else organismCommonNameBuff += consumes[i];
@@ -173,6 +185,7 @@ namespace planimals.Forms
                     if (consumes[i] == ',')
                     {
                         consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true);
+                        existingConsumedBy.Add(organismCommonNameBuff);
                         organismCommonNameBuff = "";
                     }
                     else organismCommonNameBuff += consumes[i];
