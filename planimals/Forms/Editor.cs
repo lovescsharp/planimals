@@ -13,31 +13,44 @@ namespace planimals.Forms
             InitializeComponent();
 
             pictureInput.AllowDrop = true;
+            pictureEditInput.AllowDrop = true;
+
+            consumedByInput.ColumnWidth = 120;
+            consumesInput.ColumnWidth = 100;
+            consumesEditInput.ColumnWidth = 100;
+            consumedByEditInput.ColumnWidth = 100;
+
             getHabitatsAdd();
+            getHabitatsEdit();
             getOrganismsAdd();
+            getOrganismsEdit();
             
             BackColor = Color.DarkSeaGreen;
             foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
             commonNameInput.TabIndex = 0;
         }
-        private void getOrganismsAdd() 
+        void getOrganismsAdd() //adding organisms to check box list on Add Tab
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand getOrganisms = new SqlCommand("SELECT Scientific_name FROM Organisms", sqlConnection);
+                SqlCommand getOrganisms = new SqlCommand("SELECT Scientific_name, Common_name FROM Organisms", sqlConnection);
                 sqlConnection.Open();
                 using (SqlDataReader r = getOrganisms.ExecuteReader())
                 {
                     while (r.Read())
                     {
-                        consumesInput.Items.Add(r["Scientific_name"].ToString());
-                        consumedByInput.Items.Add(r["Scientific_name"].ToString());
+                        /*
+                        consumesInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
+                        consumedByInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
+                        */
+                        consumesInput.Items.Add(r["Common_name"].ToString());
+                        consumedByInput.Items.Add(r["Common_name"].ToString());
                     }
                 }
                 sqlConnection.Close();
             }
         }
-        private void getHabitatsAdd() 
+        void getHabitatsAdd() 
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -45,32 +58,33 @@ namespace planimals.Forms
                 sqlConnection.Open();
                 using (SqlDataReader r = getOrganisms.ExecuteReader())
                 {
-                    while (r.Read())
-                    {
-                        habitatInput.Items.Add(r["Habitat"].ToString());
-                    }
+                    while (r.Read()) habitatInput.Items.Add(r["Habitat"].ToString());
                 }
                 sqlConnection.Close();
             }
         }
-        private void getOrganismsEdit()
+        void getOrganismsEdit()
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand getOrganisms = new SqlCommand("SELECT Scientific_name FROM Organisms", sqlConnection);
+                SqlCommand getOrganisms = new SqlCommand("SELECT Scientific_name, Common_name FROM Organisms", sqlConnection);
                 sqlConnection.Open();
                 using (SqlDataReader r = getOrganisms.ExecuteReader())
                 {
                     while (r.Read())
                     {
-                        consumesEditInput.Items.Add(r["Scientific_name"].ToString());
-                        consumedByEditInput.Items.Add(r["Scientific_name"].ToString());
+                        /*
+                        consumesEditInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
+                        consumedByEditInput.Items.Add(r["Common_name"].ToString() + ' ' + '(' + r["Scientific_name"].ToString() + ')');
+                        */
+                        consumesEditInput.Items.Add(r["Common_name"].ToString());
+                        consumedByEditInput.Items.Add(r["Common_name"].ToString());
                     }
                 }
                 sqlConnection.Close();
             }
         }
-        private void getHabitatsEdit()
+        void getHabitatsEdit()
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -86,15 +100,7 @@ namespace planimals.Forms
                 sqlConnection.Close();
             }
         }
-        private void button1_Click(object sender, System.EventArgs e)
-        {
-            if (scientificNameInput.Text == string.Empty) 
-            {
-                label.Text = "binomial name must not be empty";
-
-            }
-        }
-        private void pictureInput_DragDrop(object sender, DragEventArgs e)
+        void pictureInput_DragDrop(object sender, DragEventArgs e)
         {
             object data = e.Data.GetData(DataFormats.FileDrop);
             if (data != null) 
@@ -103,38 +109,79 @@ namespace planimals.Forms
                 if (filename.Length > 0) pictureInput.Image = Image.FromFile(filename[0]);
             }
         }
-        private void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
-
-        private void editTab_Click(object sender, System.EventArgs e)
-        {
-            getHabitatsEdit();
-            getOrganismsEdit();
-            
-        }
-
-        private void editButton_Click(object sender, System.EventArgs e)
+        void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
+        void editButton_Click(object sender, System.EventArgs e)
         {
 
         }
-
-        private void searchEditButton_Click(object sender, System.EventArgs e)
+        void searchEditButton_Click(object sender, System.EventArgs e)
         {
             string sci_name = normalizeScientificName(scientificNameEditInput.Text);
             if (consumedByEditInput.Items.Contains(sci_name))
             {
-                label.Text = "Please type scientific name of an organism in the field below.";
+                label.Text = "Please type scientific name of an organism";
                 return;
             }
             scientificNameEditInput.Text = sci_name;
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
-                SqlCommand getData = new SqlCommand("", sqlConnection);
+                sqlConnection.Open();
+                SqlCommand getOrganismData = new SqlCommand($"SELECT Common_name, Habitat, Hierarchy, Description FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
+                using (SqlDataReader r = getOrganismData.ExecuteReader()) 
+                {
+                    while (r.Read())
+                    {
+                        commonNameEditInput.Text = r["Common_name"].ToString();
+                        habitatEditInput.SelectedIndex = habitatEditInput.FindStringExact(r["Habitat"].ToString());
+                        hierarchyEditInput.SelectedIndex = hierarchyEditInput.FindStringExact(r["Hierarchy"].ToString());
+                        descriptionEditInput.Text = r["Description"].ToString();
+                    }
+                }
+                SqlCommand getRelations = new SqlCommand($"SELECT " +
+                    "(SELECT STRING_AGG(Organisms.Common_name, ',') " +
+                        "FROM Relations " +
+                        "JOIN Organisms ON Relations.Consumed = Organisms.Scientific_name " +
+                        "WHERE Relations.Consumer = 'Turdus merula') AS Consumes, " +
+                    "(SELECT STRING_AGG(Organisms.Common_name, ',') " +
+                        "FROM Relations " +
+                        "JOIN Organisms ON Relations.Consumer = Organisms.Scientific_name " +
+                        "WHERE Relations.Consumed = 'Turdus merula') AS ConsumedBy;", sqlConnection);
+                string consumes = "";
+                string consumedBy = "";
+                using (SqlDataReader r = getRelations.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        consumes = r["Consumes"].ToString();
+                        consumedBy = r["ConsumedBy"].ToString();
+                    }
+                }
+                //now we parse our strings
+                string organismCommonNameBuff = "";
+                for (int i = 0; i < consumes.Length; i++)
+                {
+                    if (consumes[i] == ',')
+                    {
+                        consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true); // i find organism with common name @organismCommonNameBuff and check it
+                        organismCommonNameBuff = "";
+                    }
+                    else organismCommonNameBuff += consumes[i];
+                }
+                organismCommonNameBuff = "";
+                for (int i = 0; i < consumedBy.Length; i++)
+                {
+                    if (consumes[i] == ',')
+                    {
+                        consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true);
+                        organismCommonNameBuff = "";
+                    }
+                    else organismCommonNameBuff += consumes[i];
+                }
             }
         }
-        private string normalizeScientificName(string s)
+        string normalizeScientificName(string s)
         {
             string nrms = s[0].ToString().Trim().ToUpper();
-
             for (int i = 1; i < s.Length; i++)
             {
                 if (s[i] == ' ') 
@@ -143,9 +190,21 @@ namespace planimals.Forms
                     continue;
                 }
                 nrms += s[i].ToString().Trim().ToLower();
+            } return nrms;
+        }
+        void addButton_Click(object sender, System.EventArgs e)
+        {
+            if (scientificNameInput.Text.Trim() == string.Empty) 
+            {
+                label.Text = "Please enter a valid binomial name";
+                return;
             }
-
-            return nrms;
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+            {
+                SqlCommand insert = new SqlCommand(
+                    ""
+                    ,sqlConnection);
+            }
         }
     }
 }

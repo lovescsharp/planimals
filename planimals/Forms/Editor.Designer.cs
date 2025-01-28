@@ -47,14 +47,9 @@
             this.label = new System.Windows.Forms.Label();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.addTab = new System.Windows.Forms.TabPage();
-            this.editTab = new System.Windows.Forms.TabPage();
             this.photographLabel = new System.Windows.Forms.Label();
-            this.photographEditLabel = new System.Windows.Forms.Label();
-            this.pictureEditInput = new System.Windows.Forms.PictureBox();
-            this.scientificNameEditLabel = new System.Windows.Forms.Label();
-            this.scientificNameEditInput = new System.Windows.Forms.TextBox();
-            this.commonNameEditLabel = new System.Windows.Forms.Label();
-            this.commonNameEditInput = new System.Windows.Forms.TextBox();
+            this.editTab = new System.Windows.Forms.TabPage();
+            this.searchEditButton = new System.Windows.Forms.Button();
             this.editButton = new System.Windows.Forms.Button();
             this.consumesEditInput = new System.Windows.Forms.CheckedListBox();
             this.consumedByEditInput = new System.Windows.Forms.CheckedListBox();
@@ -66,7 +61,12 @@
             this.descriptionEditLabel = new System.Windows.Forms.Label();
             this.habitatEditInput = new System.Windows.Forms.ComboBox();
             this.habitatEditLabel = new System.Windows.Forms.Label();
-            this.searchEditButton = new System.Windows.Forms.Button();
+            this.scientificNameEditInput = new System.Windows.Forms.TextBox();
+            this.commonNameEditLabel = new System.Windows.Forms.Label();
+            this.commonNameEditInput = new System.Windows.Forms.TextBox();
+            this.scientificNameEditLabel = new System.Windows.Forms.Label();
+            this.pictureEditInput = new System.Windows.Forms.PictureBox();
+            this.photographEditLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureInput)).BeginInit();
             this.tabControl.SuspendLayout();
             this.addTab.SuspendLayout();
@@ -76,19 +76,19 @@
             // 
             // addButton
             // 
-            this.addButton.Location = new System.Drawing.Point(761, 1047);
-            this.addButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.addButton.Location = new System.Drawing.Point(760, 1048);
+            this.addButton.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(100, 41);
+            this.addButton.Size = new System.Drawing.Size(100, 42);
             this.addButton.TabIndex = 0;
             this.addButton.Text = "Add";
             this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.button1_Click);
+            this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
             // scientificNameInput
             // 
-            this.scientificNameInput.Location = new System.Drawing.Point(11, 354);
-            this.scientificNameInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.scientificNameInput.Location = new System.Drawing.Point(10, 354);
+            this.scientificNameInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.scientificNameInput.Name = "scientificNameInput";
             this.scientificNameInput.Size = new System.Drawing.Size(850, 26);
             this.scientificNameInput.TabIndex = 1;
@@ -96,7 +96,7 @@
             // scientificNameLabel
             // 
             this.scientificNameLabel.AutoSize = true;
-            this.scientificNameLabel.Location = new System.Drawing.Point(6, 330);
+            this.scientificNameLabel.Location = new System.Drawing.Point(6, 329);
             this.scientificNameLabel.Name = "scientificNameLabel";
             this.scientificNameLabel.Size = new System.Drawing.Size(293, 20);
             this.scientificNameLabel.TabIndex = 2;
@@ -105,7 +105,7 @@
             // commonNameLabel
             // 
             this.commonNameLabel.AutoSize = true;
-            this.commonNameLabel.Location = new System.Drawing.Point(6, 384);
+            this.commonNameLabel.Location = new System.Drawing.Point(6, 385);
             this.commonNameLabel.Name = "commonNameLabel";
             this.commonNameLabel.Size = new System.Drawing.Size(117, 20);
             this.commonNameLabel.TabIndex = 3;
@@ -114,9 +114,9 @@
             // commonNameInput
             // 
             this.commonNameInput.Location = new System.Drawing.Point(10, 408);
-            this.commonNameInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.commonNameInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.commonNameInput.Name = "commonNameInput";
-            this.commonNameInput.Size = new System.Drawing.Size(851, 26);
+            this.commonNameInput.Size = new System.Drawing.Size(852, 26);
             this.commonNameInput.TabIndex = 4;
             // 
             // hierarchyLabel
@@ -138,7 +138,7 @@
             "4",
             "5"});
             this.hierarchyInput.Location = new System.Drawing.Point(10, 462);
-            this.hierarchyInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.hierarchyInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.hierarchyInput.Name = "hierarchyInput";
             this.hierarchyInput.Size = new System.Drawing.Size(136, 28);
             this.hierarchyInput.TabIndex = 6;
@@ -146,8 +146,8 @@
             // habitatInput
             // 
             this.habitatInput.FormattingEnabled = true;
-            this.habitatInput.Location = new System.Drawing.Point(163, 462);
-            this.habitatInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.habitatInput.Location = new System.Drawing.Point(164, 462);
+            this.habitatInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.habitatInput.Name = "habitatInput";
             this.habitatInput.Size = new System.Drawing.Size(136, 28);
             this.habitatInput.TabIndex = 7;
@@ -173,10 +173,10 @@
             // descriptionInput
             // 
             this.descriptionInput.Location = new System.Drawing.Point(10, 518);
-            this.descriptionInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.descriptionInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.descriptionInput.Multiline = true;
             this.descriptionInput.Name = "descriptionInput";
-            this.descriptionInput.Size = new System.Drawing.Size(851, 73);
+            this.descriptionInput.Size = new System.Drawing.Size(852, 73);
             this.descriptionInput.TabIndex = 10;
             // 
             // pictureInput
@@ -184,9 +184,9 @@
             this.pictureInput.BackColor = System.Drawing.Color.PaleGoldenrod;
             this.pictureInput.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pictureInput.Location = new System.Drawing.Point(6, 40);
-            this.pictureInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.pictureInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.pictureInput.Name = "pictureInput";
-            this.pictureInput.Size = new System.Drawing.Size(855, 286);
+            this.pictureInput.Size = new System.Drawing.Size(854, 286);
             this.pictureInput.TabIndex = 11;
             this.pictureInput.TabStop = false;
             this.pictureInput.DragDrop += new System.Windows.Forms.DragEventHandler(this.pictureInput_DragDrop);
@@ -195,7 +195,7 @@
             // consumesLabel
             // 
             this.consumesLabel.AutoSize = true;
-            this.consumesLabel.Location = new System.Drawing.Point(7, 605);
+            this.consumesLabel.Location = new System.Drawing.Point(8, 605);
             this.consumesLabel.Name = "consumesLabel";
             this.consumesLabel.Size = new System.Drawing.Size(89, 20);
             this.consumesLabel.TabIndex = 12;
@@ -204,7 +204,7 @@
             // consumedByLabel
             // 
             this.consumedByLabel.AutoSize = true;
-            this.consumedByLabel.Location = new System.Drawing.Point(7, 827);
+            this.consumedByLabel.Location = new System.Drawing.Point(8, 828);
             this.consumedByLabel.Name = "consumedByLabel";
             this.consumedByLabel.Size = new System.Drawing.Size(110, 20);
             this.consumedByLabel.TabIndex = 13;
@@ -213,8 +213,8 @@
             // consumedByInput
             // 
             this.consumedByInput.FormattingEnabled = true;
-            this.consumedByInput.Location = new System.Drawing.Point(11, 851);
-            this.consumedByInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.consumedByInput.Location = new System.Drawing.Point(10, 851);
+            this.consumedByInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.consumedByInput.MultiColumn = true;
             this.consumedByInput.Name = "consumedByInput";
             this.consumedByInput.Size = new System.Drawing.Size(850, 188);
@@ -224,8 +224,8 @@
             // 
             this.consumesInput.CheckOnClick = true;
             this.consumesInput.FormattingEnabled = true;
-            this.consumesInput.Location = new System.Drawing.Point(11, 629);
-            this.consumesInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.consumesInput.Location = new System.Drawing.Point(10, 629);
+            this.consumesInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.consumesInput.MultiColumn = true;
             this.consumesInput.Name = "consumesInput";
             this.consumesInput.Size = new System.Drawing.Size(850, 188);
@@ -234,7 +234,7 @@
             // label
             // 
             this.label.AutoSize = true;
-            this.label.Location = new System.Drawing.Point(133, 9);
+            this.label.Location = new System.Drawing.Point(134, 9);
             this.label.Name = "label";
             this.label.Size = new System.Drawing.Size(0, 20);
             this.label.TabIndex = 17;
@@ -247,7 +247,7 @@
             this.tabControl.Location = new System.Drawing.Point(12, 12);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(879, 1127);
+            this.tabControl.Size = new System.Drawing.Size(879, 1128);
             this.tabControl.TabIndex = 18;
             // 
             // addTab
@@ -271,11 +271,20 @@
             this.addTab.Controls.Add(this.habitatLabel);
             this.addTab.Location = new System.Drawing.Point(4, 29);
             this.addTab.Name = "addTab";
-            this.addTab.Padding = new System.Windows.Forms.Padding(3);
-            this.addTab.Size = new System.Drawing.Size(871, 1094);
+            this.addTab.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.addTab.Size = new System.Drawing.Size(871, 1095);
             this.addTab.TabIndex = 1;
             this.addTab.Text = "Add";
             this.addTab.UseVisualStyleBackColor = true;
+            // 
+            // photographLabel
+            // 
+            this.photographLabel.AutoSize = true;
+            this.photographLabel.Location = new System.Drawing.Point(8, 8);
+            this.photographLabel.Name = "photographLabel";
+            this.photographLabel.Size = new System.Drawing.Size(523, 20);
+            this.photographLabel.TabIndex = 17;
+            this.photographLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
             // 
             // editTab
             // 
@@ -299,82 +308,28 @@
             this.editTab.Controls.Add(this.photographEditLabel);
             this.editTab.Location = new System.Drawing.Point(4, 29);
             this.editTab.Name = "editTab";
-            this.editTab.Padding = new System.Windows.Forms.Padding(3);
-            this.editTab.Size = new System.Drawing.Size(871, 1094);
+            this.editTab.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.editTab.Size = new System.Drawing.Size(871, 1095);
             this.editTab.TabIndex = 0;
             this.editTab.Text = "Edit";
             this.editTab.UseVisualStyleBackColor = true;
-            this.editTab.Click += new System.EventHandler(this.editTab_Click);
             // 
-            // photographLabel
+            // searchEditButton
             // 
-            this.photographLabel.AutoSize = true;
-            this.photographLabel.Location = new System.Drawing.Point(7, 7);
-            this.photographLabel.Name = "photographLabel";
-            this.photographLabel.Size = new System.Drawing.Size(523, 20);
-            this.photographLabel.TabIndex = 17;
-            this.photographLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
-            // 
-            // photographEditLabel
-            // 
-            this.photographEditLabel.AutoSize = true;
-            this.photographEditLabel.Location = new System.Drawing.Point(6, 3);
-            this.photographEditLabel.Name = "photographEditLabel";
-            this.photographEditLabel.Size = new System.Drawing.Size(523, 20);
-            this.photographEditLabel.TabIndex = 18;
-            this.photographEditLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
-            // 
-            // pictureEditInput
-            // 
-            this.pictureEditInput.BackColor = System.Drawing.Color.PaleGoldenrod;
-            this.pictureEditInput.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureEditInput.Location = new System.Drawing.Point(6, 27);
-            this.pictureEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pictureEditInput.Name = "pictureEditInput";
-            this.pictureEditInput.Size = new System.Drawing.Size(853, 297);
-            this.pictureEditInput.TabIndex = 19;
-            this.pictureEditInput.TabStop = false;
-            // 
-            // scientificNameEditLabel
-            // 
-            this.scientificNameEditLabel.AutoSize = true;
-            this.scientificNameEditLabel.Location = new System.Drawing.Point(10, 328);
-            this.scientificNameEditLabel.Name = "scientificNameEditLabel";
-            this.scientificNameEditLabel.Size = new System.Drawing.Size(117, 20);
-            this.scientificNameEditLabel.TabIndex = 20;
-            this.scientificNameEditLabel.Text = "Binomial name:";
-            // 
-            // scientificNameEditInput
-            // 
-            this.scientificNameEditInput.Location = new System.Drawing.Point(10, 352);
-            this.scientificNameEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.scientificNameEditInput.Name = "scientificNameEditInput";
-            this.scientificNameEditInput.Size = new System.Drawing.Size(742, 26);
-            this.scientificNameEditInput.TabIndex = 21;
-            // 
-            // commonNameEditLabel
-            // 
-            this.commonNameEditLabel.AutoSize = true;
-            this.commonNameEditLabel.Location = new System.Drawing.Point(10, 382);
-            this.commonNameEditLabel.Name = "commonNameEditLabel";
-            this.commonNameEditLabel.Size = new System.Drawing.Size(117, 20);
-            this.commonNameEditLabel.TabIndex = 22;
-            this.commonNameEditLabel.Text = "Common name";
-            // 
-            // commonNameEditInput
-            // 
-            this.commonNameEditInput.Location = new System.Drawing.Point(10, 406);
-            this.commonNameEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.commonNameEditInput.Name = "commonNameEditInput";
-            this.commonNameEditInput.Size = new System.Drawing.Size(849, 26);
-            this.commonNameEditInput.TabIndex = 23;
+            this.searchEditButton.Location = new System.Drawing.Point(760, 346);
+            this.searchEditButton.Name = "searchEditButton";
+            this.searchEditButton.Size = new System.Drawing.Size(100, 37);
+            this.searchEditButton.TabIndex = 35;
+            this.searchEditButton.Text = "Search";
+            this.searchEditButton.UseVisualStyleBackColor = true;
+            this.searchEditButton.Click += new System.EventHandler(this.searchEditButton_Click);
             // 
             // editButton
             // 
-            this.editButton.Location = new System.Drawing.Point(758, 1050);
-            this.editButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.editButton.Location = new System.Drawing.Point(758, 1049);
+            this.editButton.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.editButton.Name = "editButton";
-            this.editButton.Size = new System.Drawing.Size(100, 41);
+            this.editButton.Size = new System.Drawing.Size(100, 42);
             this.editButton.TabIndex = 24;
             this.editButton.Text = "Edit";
             this.editButton.UseVisualStyleBackColor = true;
@@ -385,20 +340,20 @@
             this.consumesEditInput.CheckOnClick = true;
             this.consumesEditInput.FormattingEnabled = true;
             this.consumesEditInput.Location = new System.Drawing.Point(10, 632);
-            this.consumesEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.consumesEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.consumesEditInput.MultiColumn = true;
             this.consumesEditInput.Name = "consumesEditInput";
-            this.consumesEditInput.Size = new System.Drawing.Size(855, 188);
+            this.consumesEditInput.Size = new System.Drawing.Size(854, 188);
             this.consumesEditInput.TabIndex = 34;
             // 
             // consumedByEditInput
             // 
             this.consumedByEditInput.FormattingEnabled = true;
-            this.consumedByEditInput.Location = new System.Drawing.Point(10, 850);
-            this.consumedByEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.consumedByEditInput.Location = new System.Drawing.Point(10, 849);
+            this.consumedByEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.consumedByEditInput.MultiColumn = true;
             this.consumedByEditInput.Name = "consumedByEditInput";
-            this.consumedByEditInput.Size = new System.Drawing.Size(851, 188);
+            this.consumedByEditInput.Size = new System.Drawing.Size(852, 188);
             this.consumedByEditInput.TabIndex = 33;
             // 
             // consumedByEditLabel
@@ -422,7 +377,7 @@
             // hierarchyEditLabel
             // 
             this.hierarchyEditLabel.AutoSize = true;
-            this.hierarchyEditLabel.Location = new System.Drawing.Point(6, 436);
+            this.hierarchyEditLabel.Location = new System.Drawing.Point(6, 435);
             this.hierarchyEditLabel.Name = "hierarchyEditLabel";
             this.hierarchyEditLabel.Size = new System.Drawing.Size(76, 20);
             this.hierarchyEditLabel.TabIndex = 25;
@@ -430,11 +385,11 @@
             // 
             // descriptionEditInput
             // 
-            this.descriptionEditInput.Location = new System.Drawing.Point(10, 521);
-            this.descriptionEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.descriptionEditInput.Location = new System.Drawing.Point(10, 522);
+            this.descriptionEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.descriptionEditInput.Multiline = true;
             this.descriptionEditInput.Name = "descriptionEditInput";
-            this.descriptionEditInput.Size = new System.Drawing.Size(855, 73);
+            this.descriptionEditInput.Size = new System.Drawing.Size(854, 73);
             this.descriptionEditInput.TabIndex = 30;
             // 
             // hierarchyEditInput
@@ -447,7 +402,7 @@
             "4",
             "5"});
             this.hierarchyEditInput.Location = new System.Drawing.Point(10, 460);
-            this.hierarchyEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.hierarchyEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.hierarchyEditInput.Name = "hierarchyEditInput";
             this.hierarchyEditInput.Size = new System.Drawing.Size(136, 28);
             this.hierarchyEditInput.TabIndex = 26;
@@ -465,7 +420,7 @@
             // 
             this.habitatEditInput.FormattingEnabled = true;
             this.habitatEditInput.Location = new System.Drawing.Point(160, 460);
-            this.habitatEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.habitatEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.habitatEditInput.Name = "habitatEditInput";
             this.habitatEditInput.Size = new System.Drawing.Size(136, 28);
             this.habitatEditInput.TabIndex = 27;
@@ -473,30 +428,75 @@
             // habitatEditLabel
             // 
             this.habitatEditLabel.AutoSize = true;
-            this.habitatEditLabel.Location = new System.Drawing.Point(156, 436);
+            this.habitatEditLabel.Location = new System.Drawing.Point(156, 435);
             this.habitatEditLabel.Name = "habitatEditLabel";
             this.habitatEditLabel.Size = new System.Drawing.Size(61, 20);
             this.habitatEditLabel.TabIndex = 28;
             this.habitatEditLabel.Text = "Habitat";
             // 
-            // searchEditButton
+            // scientificNameEditInput
             // 
-            this.searchEditButton.Location = new System.Drawing.Point(758, 352);
-            this.searchEditButton.Name = "searchEditButton";
-            this.searchEditButton.Size = new System.Drawing.Size(100, 37);
-            this.searchEditButton.TabIndex = 35;
-            this.searchEditButton.Text = "Search";
-            this.searchEditButton.UseVisualStyleBackColor = true;
-            this.searchEditButton.Click += new System.EventHandler(this.searchEditButton_Click);
+            this.scientificNameEditInput.Location = new System.Drawing.Point(10, 352);
+            this.scientificNameEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.scientificNameEditInput.Name = "scientificNameEditInput";
+            this.scientificNameEditInput.Size = new System.Drawing.Size(742, 26);
+            this.scientificNameEditInput.TabIndex = 21;
+            // 
+            // commonNameEditLabel
+            // 
+            this.commonNameEditLabel.AutoSize = true;
+            this.commonNameEditLabel.Location = new System.Drawing.Point(10, 382);
+            this.commonNameEditLabel.Name = "commonNameEditLabel";
+            this.commonNameEditLabel.Size = new System.Drawing.Size(117, 20);
+            this.commonNameEditLabel.TabIndex = 22;
+            this.commonNameEditLabel.Text = "Common name";
+            // 
+            // commonNameEditInput
+            // 
+            this.commonNameEditInput.Location = new System.Drawing.Point(10, 406);
+            this.commonNameEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.commonNameEditInput.Name = "commonNameEditInput";
+            this.commonNameEditInput.Size = new System.Drawing.Size(848, 26);
+            this.commonNameEditInput.TabIndex = 23;
+            // 
+            // scientificNameEditLabel
+            // 
+            this.scientificNameEditLabel.AutoSize = true;
+            this.scientificNameEditLabel.Location = new System.Drawing.Point(10, 328);
+            this.scientificNameEditLabel.Name = "scientificNameEditLabel";
+            this.scientificNameEditLabel.Size = new System.Drawing.Size(117, 20);
+            this.scientificNameEditLabel.TabIndex = 20;
+            this.scientificNameEditLabel.Text = "Binomial name:";
+            // 
+            // pictureEditInput
+            // 
+            this.pictureEditInput.BackColor = System.Drawing.Color.PaleGoldenrod;
+            this.pictureEditInput.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pictureEditInput.Location = new System.Drawing.Point(6, 28);
+            this.pictureEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.pictureEditInput.Name = "pictureEditInput";
+            this.pictureEditInput.Size = new System.Drawing.Size(853, 296);
+            this.pictureEditInput.TabIndex = 19;
+            this.pictureEditInput.TabStop = false;
+            // 
+            // photographEditLabel
+            // 
+            this.photographEditLabel.AutoSize = true;
+            this.photographEditLabel.Location = new System.Drawing.Point(6, 3);
+            this.photographEditLabel.Name = "photographEditLabel";
+            this.photographEditLabel.Size = new System.Drawing.Size(523, 20);
+            this.photographEditLabel.TabIndex = 18;
+            this.photographEditLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
             // 
             // Editor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(899, 1145);
+            this.ClientSize = new System.Drawing.Size(898, 1144);
             this.Controls.Add(this.label);
             this.Controls.Add(this.tabControl);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.Name = "Editor";
             this.Text = "Editor";
             ((System.ComponentModel.ISupportInitialize)(this.pictureInput)).EndInit();

@@ -7,15 +7,12 @@ using System.IO;
 public class Chain : List<List<Card>>
 {
     private Game game;
-    private string lastOrganism;
     private int longestChainIndex;
     private int earned;
 
     public Chain(Game g)
     {
         game = g;
-
-        lastOrganism = String.Empty;
         longestChainIndex = -1;
     }
     public override string ToString()
@@ -61,7 +58,7 @@ public class Chain : List<List<Card>>
             for (int j = 0; j < this[i].Count; j++) count++;
         return count;
     }
-    public void lastLink()
+    public string lastLink()
     {
         int longestChainCount = -1;
         for (int i = 0; i < Count; i++)
@@ -72,8 +69,7 @@ public class Chain : List<List<Card>>
                 longestChainIndex = i;
             }
         }
-
-        lastOrganism = this[longestChainIndex][this[longestChainIndex].Count - 1].ScientificName;
+        return this[longestChainIndex][this[longestChainIndex].Count - 1].ScientificName;
     }
     private void FixChainIndices(List<Card> chain)
     {
@@ -102,7 +98,7 @@ public class Chain : List<List<Card>>
         }
         else
         {
-            lastLink();
+            string lastOrganism = lastLink();
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand disposeChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}'", sqlConnection);
@@ -138,6 +134,7 @@ public class Chain : List<List<Card>>
                             game.form.Invalidate();
                             sqlConnection.Close(); ;
                             Console.WriteLine("terminating as no common predator");
+                            if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                             return false;
                         }
                     }
@@ -183,6 +180,7 @@ public class Chain : List<List<Card>>
                                 Clear();
                                 game.UpdateCells();
                                 game.form.Invalidate();
+                                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                                 return false;
                             }
                         }
@@ -207,16 +205,17 @@ public class Chain : List<List<Card>>
                         )
                     );
                 }//updating cards locations in chain
-                foreach (List<Card> subchain in this) 
-                    for (int i = 0; i < subchain.Count; i++) 
+                foreach (List<Card> subchain in this)
+                    for (int i = 0; i < subchain.Count; i++)
                         game.form.Controls.Remove(subchain[i]);
-                sqlConnection.Close(); 
+                sqlConnection.Close();
                 Clear();
                 game.form.Display($"+{earned} points");
                 earned = 0;
                 game.UpdateCells();
                 game.form.Invalidate();
                 if (!game.playerHand.IsHot() && game.deck.Count == 0) game.Stop();
+                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                 return true;
             }
         }
@@ -268,6 +267,7 @@ public class Chain : List<List<Card>>
                 while (Count <= rowNo) Add(new List<Card>());
                 this[rowNo].Add(c);
                 game.form.Controls.Add(c);
+
             }
             sqlConnection.Close();
         }

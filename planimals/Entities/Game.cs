@@ -247,7 +247,7 @@ public class Game
             }
         }
     }
-    void fancyDealership()
+    void fancyCardDealerShip()
     {
         foreach (Card c in playerHand) c.MoveCard(c.prevLocation);
         foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard(c.rectLocation);

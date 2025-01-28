@@ -21,7 +21,6 @@ namespace planimals
         private TextBox passwordInput;
 
         private Label label;
-
         public LoginForm(MainForm f)
         {
             InitializeComponent();
@@ -109,13 +108,11 @@ namespace planimals
             label.Location = new Point(10, 10);
             Controls.Add(label);
         }
-
         private void ResestPasswdButton_Click(object sender, EventArgs e)
         {
             ResetPassword rp = new ResetPassword();
             rp.ShowDialog();
         }
-
         private void LoginClick(object sender, EventArgs e)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
@@ -159,7 +156,6 @@ namespace planimals
             CreateAccountForm createAccountForm = new CreateAccountForm(form);
             createAccountForm.Show();
             createAccountForm.BringToFront();
-            
         }           
     }
 }

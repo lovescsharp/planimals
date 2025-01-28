@@ -28,12 +28,12 @@ public partial class Deck : Stack<int>
         rnd = new Random();
         deckStr = d;
         game = g;
-        LoadDeck();
+        Load();
         size = Count;
         organisms = new List<string>();
         GetOrganisms();
     }
-    private void GetOrganisms() 
+    void GetOrganisms() 
     {
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING)) 
         {
@@ -68,8 +68,8 @@ public partial class Deck : Stack<int>
     }
     public void DrawCard(object sender, EventArgs e)
     {
-        Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
-        if (game.playerHand.Count + game.playerChain.CountAll() < 10)
+        //Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
+        if (game.playerHand.Count <= 10 || !game.playerHand.IsHot())
         {
             string sciname;
             for (int i = 0; i < 3; i++)
@@ -102,7 +102,7 @@ public partial class Deck : Stack<int>
                     sqlConnection.Close();
                     if (Count > 0)                    
                     {
-                        if (game.username != string.Empty)
+                        if (game.username != string.Empty) //just save deck state and continue the dealing cards
                         {
                             SqlCommand removeCard = new SqlCommand($"UPDATE Games SET Deck='{deckStr}' WHERE Username='{game.username}'", sqlConnection);
                             sqlConnection.Open();
@@ -110,7 +110,7 @@ public partial class Deck : Stack<int>
                             sqlConnection.Close();
                         }
                     }
-                    else
+                    else //there is no more cards in the deck so we must terminate for loop that deals cards
                     {
                         if (game.username != string.Empty)
                         {
@@ -124,28 +124,19 @@ public partial class Deck : Stack<int>
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
-                    /*
-                        if (game.playerHand.Count > 10)
-                        {
-                            foreach (Card c in game.playerHand) c.ScaleDown();
-                            game.playerHand.ShiftCards();
-                        }
-                    */
-                    return;
+                        if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
+                        return;
                     }
                 }
             }
+            if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
         }
         else
         {
-            if (game.playerHand.IsHot()) game.form.Display("i think you can build a chain out of cards on your hand");
-            /*else 
-            {
-            foreach (Card c in game.playerHand) c.ScaleDown();
-            }*/
+            game.form.Display("i think you can build a chain out of cards on your hand");
         }
     }
-    public void LoadDeck()
+    public void Load()
     {
         if (deckStr == string.Empty) return;
         string[] nums = deckStr.Trim(',').Split(',');

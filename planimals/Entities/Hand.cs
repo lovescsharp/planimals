@@ -6,7 +6,7 @@ using System.IO;
 
 public class Hand : List<Card>
 {
-    private Game game;
+    Game game;
     public Hand(Game g) : base() => game = g;
     public bool IsHot()
     {
@@ -66,6 +66,7 @@ public class Hand : List<Card>
                 c.prevLocation = new Point(Card.cardWidth * Count, game.form.workingHeight - game.form.workingWidth / 10);
                 Add(c);
                 game.form.Controls.Add(c);
+                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
             }
             sqlConnection.Close();
         }
@@ -92,5 +93,11 @@ public class Hand : List<Card>
         }
         s += " ]";
         return s;
+    }
+    public void squishCards()
+    {
+        float squishingFactor = (float)game.form.ClientRectangle.Width / (float)(Count * Card.cardWidth);
+        for (int i = 0; i < Count; i++) this[i].MoveCard(this[i].prevLocation = new Point((int)(i * squishingFactor * Card.cardWidth), game.form.Height - Card.cardHeight));
+        game.form.Invalidate();
     }
 }

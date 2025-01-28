@@ -326,13 +326,11 @@ public partial class MainForm : Form
         }
         foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
     }
-
     private void openEditorButton_Click(object sender, EventArgs e)
     {
         Editor editor = new Editor();
         editor.ShowDialog();
     }
-    
     private void playButton_Click(object sender, EventArgs e)
     {
         foreach (Control control in menuControls)
@@ -353,14 +351,14 @@ public partial class MainForm : Form
                 delete from FoodChainCards where Username='player1'
                 delete from Games where Username='player1'
                 delete from Hand where Username='player1'
-                insert into Games(Username, Time, Deck) values
-                ('player1', 36, '1,1,1,1,1,1,1,1,')
+                insert into Games(Username, Time, Deck, Score) values
+                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)
 
                 insert into Hand(Username, CardID) values
                 ('player1', 'Omocestus viridulus'),
                 ('player1', 'Omocestus viridulus'),
                 ('player1', 'Omocestus viridulus');
-
+                /*
                 Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
                 ('player1', 'Poa pratensis', 0, 0),
                 ('player1', 'Omocestus viridulus', 0, 1),
@@ -371,15 +369,16 @@ public partial class MainForm : Form
                 ('player1', 'Microtus arvalis', 1, 1); 
                 */
 
-                /*//
-                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-                //sqlConnection.Open(); 
-                test.ExecuteNonQuery(); 
-                *///
+                ///
+                //SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
+                //SqlCommand testSquishing = new SqlCommand("                delete from FoodChainCards where Username='player1'\r\n                delete from Games where Username='player1'\r\n                delete from Hand where Username='player1'\r\n                insert into Games(Username, Time, Deck, Score) values\r\n                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)\r\n\r\n                insert into Hand(Username, CardID) values\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus');", sqlConnection);
+
+                sqlConnection.Open(); 
+                //testSquishing.ExecuteNonQuery(); 
+                ///
 
 
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
-                sqlConnection.Open();
                 int b = (int)cmd.ExecuteScalar();
                 sqlConnection.Close();
                 if (b == 1)
@@ -530,7 +529,7 @@ public partial class MainForm : Form
         label.Location = new Point(workingWidth / 10, workingHeight / 8);
         Invalidate();
     }
-    public void Draw(object sender, PaintEventArgs e)
+    private void Draw(object sender, PaintEventArgs e)
     {
         if (game != null)
             if (game.countDownTimer.Enabled)
