@@ -134,7 +134,6 @@ public class Chain : List<List<Card>>
                             game.form.Invalidate();
                             sqlConnection.Close(); ;
                             Console.WriteLine("terminating as no common predator");
-                            if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                             return false;
                         }
                     }
@@ -180,7 +179,6 @@ public class Chain : List<List<Card>>
                                 Clear();
                                 game.UpdateCells();
                                 game.form.Invalidate();
-                                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                                 return false;
                             }
                         }
@@ -215,7 +213,6 @@ public class Chain : List<List<Card>>
                 game.UpdateCells();
                 game.form.Invalidate();
                 if (!game.playerHand.IsHot() && game.deck.Count == 0) game.Stop();
-                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
                 return true;
             }
         }

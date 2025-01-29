@@ -67,7 +67,6 @@ public class Hand : List<Card>
                 c.prevLocation = new Point(Card.cardWidth * Count, game.form.workingHeight - game.form.workingWidth / 10);
                 Add(c);
                 game.form.Controls.Add(c);
-                if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
             }
             sqlConnection.Close();
         }
@@ -94,15 +93,5 @@ public class Hand : List<Card>
         }
         s += " ]";
         return s;
-    }
-    public void squishCards()
-    {
-        int x = game.form.ClientRectangle.Width;
-        int m = 260;
-        int p = (x - m) / (Count);
-
-        for (int i = 0; i < Count; i++)
-            this[i].Location = new Point(i * p + 260, game.form.ClientRectangle.Height - 382);
-        game.form.Invalidate();
     }
 }
