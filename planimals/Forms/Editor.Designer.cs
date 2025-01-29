@@ -47,7 +47,7 @@
             this.label = new System.Windows.Forms.Label();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.addTab = new System.Windows.Forms.TabPage();
-            this.photographLabel = new System.Windows.Forms.Label();
+            this.pictureLabel = new System.Windows.Forms.Label();
             this.editTab = new System.Windows.Forms.TabPage();
             this.searchEditButton = new System.Windows.Forms.Button();
             this.editButton = new System.Windows.Forms.Button();
@@ -66,7 +66,7 @@
             this.commonNameEditInput = new System.Windows.Forms.TextBox();
             this.scientificNameEditLabel = new System.Windows.Forms.Label();
             this.pictureEditInput = new System.Windows.Forms.PictureBox();
-            this.photographEditLabel = new System.Windows.Forms.Label();
+            this.pictureEditLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureInput)).BeginInit();
             this.tabControl.SuspendLayout();
             this.addTab.SuspendLayout();
@@ -252,7 +252,7 @@
             // 
             // addTab
             // 
-            this.addTab.Controls.Add(this.photographLabel);
+            this.addTab.Controls.Add(this.pictureLabel);
             this.addTab.Controls.Add(this.addButton);
             this.addTab.Controls.Add(this.consumesInput);
             this.addTab.Controls.Add(this.scientificNameInput);
@@ -271,20 +271,20 @@
             this.addTab.Controls.Add(this.habitatLabel);
             this.addTab.Location = new System.Drawing.Point(4, 29);
             this.addTab.Name = "addTab";
-            this.addTab.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.addTab.Padding = new System.Windows.Forms.Padding(3);
             this.addTab.Size = new System.Drawing.Size(871, 1095);
             this.addTab.TabIndex = 1;
             this.addTab.Text = "Add";
             this.addTab.UseVisualStyleBackColor = true;
             // 
-            // photographLabel
+            // pictureLabel
             // 
-            this.photographLabel.AutoSize = true;
-            this.photographLabel.Location = new System.Drawing.Point(8, 8);
-            this.photographLabel.Name = "photographLabel";
-            this.photographLabel.Size = new System.Drawing.Size(523, 20);
-            this.photographLabel.TabIndex = 17;
-            this.photographLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
+            this.pictureLabel.AutoSize = true;
+            this.pictureLabel.Location = new System.Drawing.Point(8, 8);
+            this.pictureLabel.Name = "pictureLabel";
+            this.pictureLabel.Size = new System.Drawing.Size(523, 20);
+            this.pictureLabel.TabIndex = 17;
+            this.pictureLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
             // 
             // editTab
             // 
@@ -305,10 +305,10 @@
             this.editTab.Controls.Add(this.commonNameEditInput);
             this.editTab.Controls.Add(this.scientificNameEditLabel);
             this.editTab.Controls.Add(this.pictureEditInput);
-            this.editTab.Controls.Add(this.photographEditLabel);
+            this.editTab.Controls.Add(this.pictureEditLabel);
             this.editTab.Location = new System.Drawing.Point(4, 29);
             this.editTab.Name = "editTab";
-            this.editTab.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.editTab.Padding = new System.Windows.Forms.Padding(3);
             this.editTab.Size = new System.Drawing.Size(871, 1095);
             this.editTab.TabIndex = 0;
             this.editTab.Text = "Edit";
@@ -478,15 +478,17 @@
             this.pictureEditInput.Size = new System.Drawing.Size(853, 296);
             this.pictureEditInput.TabIndex = 19;
             this.pictureEditInput.TabStop = false;
+            this.pictureEditInput.DragDrop += new System.Windows.Forms.DragEventHandler(this.pictureEditInput_DragDrop);
+            this.pictureEditInput.DragEnter += new System.Windows.Forms.DragEventHandler(this.pictureEditInput_DragEnter);
             // 
-            // photographEditLabel
+            // pictureEditLabel
             // 
-            this.photographEditLabel.AutoSize = true;
-            this.photographEditLabel.Location = new System.Drawing.Point(6, 3);
-            this.photographEditLabel.Name = "photographEditLabel";
-            this.photographEditLabel.Size = new System.Drawing.Size(523, 20);
-            this.photographEditLabel.TabIndex = 18;
-            this.photographEditLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
+            this.pictureEditLabel.AutoSize = true;
+            this.pictureEditLabel.Location = new System.Drawing.Point(6, 3);
+            this.pictureEditLabel.Name = "pictureEditLabel";
+            this.pictureEditLabel.Size = new System.Drawing.Size(523, 20);
+            this.pictureEditLabel.TabIndex = 18;
+            this.pictureEditLabel.Text = "Organism\'s photograph (drag and drop the photograph to yellow section):";
             // 
             // Editor
             // 
@@ -533,9 +535,9 @@
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage addTab;
         private System.Windows.Forms.TabPage editTab;
-        private System.Windows.Forms.Label photographLabel;
+        private System.Windows.Forms.Label pictureLabel;
         private System.Windows.Forms.PictureBox pictureEditInput;
-        private System.Windows.Forms.Label photographEditLabel;
+        private System.Windows.Forms.Label pictureEditLabel;
         private System.Windows.Forms.TextBox scientificNameEditInput;
         private System.Windows.Forms.Label commonNameEditLabel;
         private System.Windows.Forms.TextBox commonNameEditInput;

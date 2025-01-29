@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 public class Hand : List<Card>
 {
@@ -10,7 +11,7 @@ public class Hand : List<Card>
     public Hand(Game g) : base() => game = g;
     public bool IsHot()
     {
-        if (Count > 1 && game.playerChain.Count == 0)
+        if (Count > 1)
         {
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -96,8 +97,12 @@ public class Hand : List<Card>
     }
     public void squishCards()
     {
-        float squishingFactor = (float)game.form.ClientRectangle.Width / (float)(Count * Card.cardWidth);
-        for (int i = 0; i < Count; i++) this[i].MoveCard(this[i].prevLocation = new Point((int)(i * squishingFactor * Card.cardWidth), game.form.Height - Card.cardHeight));
+        int x = game.form.ClientRectangle.Width;
+        int m = 260;
+        int p = (x - m) / (Count);
+
+        for (int i = 0; i < Count; i++)
+            this[i].Location = new Point(i * p + 260, game.form.ClientRectangle.Height - 382);
         game.form.Invalidate();
     }
 }

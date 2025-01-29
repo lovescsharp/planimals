@@ -328,8 +328,15 @@ public partial class MainForm : Form
     }
     private void openEditorButton_Click(object sender, EventArgs e)
     {
-        Editor editor = new Editor();
-        editor.ShowDialog();
+        if (username == "admin")
+        {
+            Editor editor = new Editor();
+            editor.ShowDialog();
+        }
+        else
+        {
+            MessageBox.Show("Only admin can access editor");
+        }
     }
     private void playButton_Click(object sender, EventArgs e)
     {
@@ -371,10 +378,10 @@ public partial class MainForm : Form
 
                 ///
                 //SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-                //SqlCommand testSquishing = new SqlCommand("                delete from FoodChainCards where Username='player1'\r\n                delete from Games where Username='player1'\r\n                delete from Hand where Username='player1'\r\n                insert into Games(Username, Time, Deck, Score) values\r\n                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)\r\n\r\n                insert into Hand(Username, CardID) values\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus');", sqlConnection);
+                SqlCommand testSquishing = new SqlCommand("                delete from FoodChainCards where Username='player1'\r\n                delete from Games where Username='player1'\r\n                delete from Hand where Username='player1'\r\n                insert into Games(Username, Time, Deck, Score) values\r\n                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)\r\n\r\n                insert into Hand(Username, CardID) values\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus');", sqlConnection);
 
                 sqlConnection.Open(); 
-                //testSquishing.ExecuteNonQuery(); 
+                testSquishing.ExecuteNonQuery(); 
                 ///
 
 
@@ -436,6 +443,7 @@ public partial class MainForm : Form
             }
         }
         DisposeCards();
+
         game = null;
         Invalidate();
     }

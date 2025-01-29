@@ -247,9 +247,11 @@ public class Game
             }
         }
     }
-    void fancyCardDealerShip()
-    {
-        foreach (Card c in playerHand) c.MoveCard(c.prevLocation);
-        foreach (List<Card> ch in playerChain) foreach (Card c in ch) c.MoveCard(c.rectLocation);
+    ~Game()
+    { 
+        playerChain = null;
+        playerHand = null;
+        deck = null;
+        cells = null;
     }
 }

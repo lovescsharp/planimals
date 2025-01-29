@@ -124,12 +124,12 @@ public partial class Deck : Stack<int>
                         game.form.Display("the deck is empty");
                         game.form.drawCardButton.Enabled = false;
                         game.form.drawCardButton.Hide();
-                        if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
+                        if (game.playerHand.Count * Card.cardWidth > game.form.workingWidth) game.playerHand.squishCards();
                         return;
                     }
                 }
             }
-            if (game.playerHand.Count * Card.cardWidth > game.form.Width) game.playerHand.squishCards();
+            if (game.playerHand.Count * Card.cardWidth > game.form.workingWidth) game.playerHand.squishCards();
         }
         else
         {

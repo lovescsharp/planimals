@@ -14,6 +14,9 @@ namespace planimals.Forms
     {
         List<string> existingConsumes;
         List<string> existingConsumedBy;
+        
+        string imagePathAddTab = "";
+        string imagePathEditTab = "";
 
         public Editor()
         {
@@ -46,12 +49,12 @@ namespace planimals.Forms
             if (data != null)
             {
                 string[] filename = data as string[];
-                if (filename.Length > 0) pictureInput.Image = Image.FromFile(filename[0]);
+                if (filename.Length > 0) pictureInput.Image = Image.FromFile(imagePathAddTab = filename[0]);
             }
         }
         void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
 
-        void addButton_Click(object sender, System.EventArgs e)
+        void addButton_Click(object sender, EventArgs e)
         {
             if (scientificNameInput.Text.Trim() == string.Empty)
             {
@@ -66,6 +69,7 @@ namespace planimals.Forms
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 string sci_name = normalizeScientificName(scientificNameInput.Text);
+                File.Copy(imagePathAddTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 sqlConnection.Open();
                 SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
                 int b = (int)exists.ExecuteScalar();
@@ -83,6 +87,8 @@ namespace planimals.Forms
                 
                 insertOrganism.ExecuteNonQuery();
                 if (insertRelations.CommandText != string.Empty) insertRelations.ExecuteNonQuery();
+
+                label.Text = $"Successfully added {sci_name}";
 
                 sqlConnection.Close();
             }
@@ -133,6 +139,7 @@ namespace planimals.Forms
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 string sci_name = normalizeScientificName(scientificNameEditInput.Text);
+                File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 sqlConnection.Open();
                 SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
                 int b = (int)exists.ExecuteScalar();
@@ -162,6 +169,7 @@ namespace planimals.Forms
                 updateOrganism.ExecuteNonQuery();
                 if (insertRelations.CommandText != string    .    Empty) insertRelations.ExecuteNonQuery();
 
+                label.Text = $"Successfully edited {sci_name}";
                 sqlConnection.Close();
             }
         }
@@ -250,8 +258,12 @@ namespace planimals.Forms
                     }
                     else organismCommonNameBuff += consumedBy[i];
                 }
-
-                pictureEditInput.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
+                try
+                {
+                    pictureEditInput.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
+                }
+                catch { }
+                    
                 sqlConnection.Close();
             }
         }
@@ -308,5 +320,17 @@ namespace planimals.Forms
                 sqlConnection.Close();
             }
         }
+
+        private void pictureEditInput_DragDrop(object sender, DragEventArgs e)
+        {
+            object data = e.Data.GetData(DataFormats.FileDrop);
+            if (data != null)
+            {
+                string[] filename = data as string[];
+                if (filename.Length > 0) pictureEditInput.Image = Image.FromFile(imagePathEditTab = filename[0]);
+            }
+        }
+
+        private void pictureEditInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
     }
 }
