@@ -81,8 +81,6 @@ public class Card : PictureBox
     {
         using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
     }
-    public void ScaleUp() => Size = new Size(cardWidth, cardHeight);
-    public void ScaleDown() => Size = new Size((int) (cardWidth * 0.8), (int) (cardHeight * 0.8));
     private void card_MouseDown(object sender, MouseEventArgs e)
     {
         for (int i = 0; i < game.playerHand.Count; i++)
@@ -111,7 +109,6 @@ public class Card : PictureBox
                         {
                             if (game.cells[i].Count == 1) game.playerChain.Add(new List<Card>());
                             Drop(this);
-                            ScaleUp();
                             Location = game.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (game.cells[i][j].Item1, true);
                             game.cells[i][j] = tuple;
@@ -127,18 +124,39 @@ public class Card : PictureBox
                             game.UpdateCells();
                             game.playerHand.ShiftCards();
                             game.playerChain.ShiftCards();
-                            FindForm().Invalidate();
+                            game.form.Invalidate();
                             rectLocation = Location;
-                            //Console.WriteLine(game.playerHand.ToString());
-                            //Console.WriteLine(game.playerChain.ToString());
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
-                        else
+                        else //replacing a card in the cell with the just dropped one
                         {
                             Drop(this);
-                            Location = prevLocation;
-                            //Console.WriteLine(game.playerHand.ToString());
-                            //Console.WriteLine(game.playerChain.ToString());
+                            game.playerHand.Remove(this);
+                            if (game.username != string.Empty)
+                            {
+                                RemoveFromChain(i, j);
+                                game.playerChain[i][j].PushToHand();
+                            }
+                            game.playerChain[i][j].prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                            game.playerHand.Add(game.playerChain[i][j]);
+                            game.playerChain[i][j].rectLocation = new Point(0, 0);
+                            game.playerChain[i][j].inChain = false;
+                            game.playerChain[i][j] = this;
+                            inChain = true;
+                            game.playerChain[i][j].Location = rectLocation = game.cells[i][j].Item1.Location;
+                            if (game.username != string.Empty)
+                            {
+                                RemoveFromHand();
+                                PushToChain(i, j);
+                            }
+                            game.playerHand.ShiftCards();
+                            game.playerChain.ShiftCards();
+                            game.playerChain[i][j].MoveCard(prevLocation);
+                            Location = rectLocation = game.cells[i][j].Item1.Location;
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                     }
@@ -146,8 +164,8 @@ public class Card : PictureBox
             }
             Drop(this);
             Location = prevLocation;
-            //Console.WriteLine(game.playerHand.ToString());
-            //Console.WriteLine(game.playerChain.ToString());
+            Console.WriteLine(game.playerHand.ToString());
+            Console.WriteLine(game.playerChain.ToString());
         }
         else if (inChain)
         {
@@ -179,7 +197,6 @@ public class Card : PictureBox
                         game.playerChain.ShiftCards();
                         Drop(this);
                         Location = prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
-                        if (game.playerHand.Count > 10) ScaleDown();
                         rectLocation = new Point(0, 0);
                         inChain = false;
                         Console.WriteLine(game.playerHand.ToString());
