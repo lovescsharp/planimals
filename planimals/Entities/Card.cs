@@ -73,8 +73,8 @@ public class Card : PictureBox
         MouseDown += card_MouseDown;
         MouseUp += card_MouseUp;
         MouseMove += card_MouseMove;
-        //MouseEnter += card_MouseEnter;
-        //MouseLeave += card_MouseLeave;
+        MouseEnter += card_MouseEnter;
+        MouseLeave += card_MouseLeave;
         Paint += new PaintEventHandler(OnPaint);
     }
     protected void OnPaint(object sender, PaintEventArgs e)
@@ -87,11 +87,11 @@ public class Card : PictureBox
         {
             if (game.playerHand[i].Picked)
             {
-                Drop(game.playerHand[i]);
+                game.playerHand[i].Drop();
                 game.playerHand[i].Location = game.playerHand[i].prevLocation;
             }
         }
-        Pick(this);
+        Pick();
         //Console.WriteLine($"picked {CommonName}");
     }
     private void card_MouseUp(object sender, MouseEventArgs e)
@@ -108,7 +108,7 @@ public class Card : PictureBox
                         if (!game.cells[i][j].Item2) //cell is empty
                         {
                             if (game.cells[i].Count == 1) game.playerChain.Add(new List<Card>());
-                            Drop(this);
+                            Drop();
                             Location = game.cells[i][j].Item1.Location;
                             (Rectangle, bool) tuple = (game.cells[i][j].Item1, true);
                             game.cells[i][j] = tuple;
@@ -122,8 +122,9 @@ public class Card : PictureBox
                                 PushToChain(i, j);
                             }
                             game.UpdateCells();
-                            game.playerHand.ShiftCards();
+                            Console.WriteLine(Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width);
                             if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                            else game.playerHand.ShiftCards();
                             game.playerChain.ShiftCards();
                             game.form.Invalidate();
                             rectLocation = Location;
@@ -133,11 +134,11 @@ public class Card : PictureBox
                         }
                         else //replacing a card in the cell with the just dropped one
                         {
-                            Drop(this);
+                            Drop();
                             game.playerHand.Remove(this);
                             if (game.username != string.Empty)
                             {
-                                RemoveFromChain(i, j);
+                                game.playerChain[i][j].RemoveFromChain(i, j);
                                 game.playerChain[i][j].PushToHand();
                             }
                             game.playerChain[i][j].prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
@@ -152,7 +153,8 @@ public class Card : PictureBox
                                 RemoveFromHand();
                                 PushToChain(i, j);
                             }
-                            game.playerHand.ShiftCards();
+                            if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                            else game.playerHand.ShiftCards();
                             game.playerChain.ShiftCards();
                             game.playerChain[i][j].MoveCard(prevLocation);
                             Location = rectLocation = game.cells[i][j].Item1.Location;
@@ -163,7 +165,7 @@ public class Card : PictureBox
                     }
                 }
             }
-            Drop(this);
+            Drop();
             Location = prevLocation;
             Console.WriteLine(game.playerHand.ToString());
             Console.WriteLine(game.playerChain.ToString());
@@ -194,10 +196,10 @@ public class Card : PictureBox
                             PushToHand();
                         }
                         game.UpdateCells();
-                        game.playerHand.ShiftCards();
+                        if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                        else game.playerHand.ShiftCards();
                         game.playerChain.ShiftCards();
-                        Drop(this);
-                        MoveCard(prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight));
+                        Drop();
                         rectLocation = new Point(0, 0);
                         inChain = false;
                         Console.WriteLine(game.playerHand.ToString());
@@ -248,16 +250,16 @@ public class Card : PictureBox
             sqlConnection.Close();
         }
     }
-    private void Drop(Card c)
+    private void Drop()
     {
-        c.Picked = false;
-        c.BackColor = System.Drawing.Color.Gray;
+        Picked = false;
+        BackColor = Color.Gray;
         FindForm().Invalidate();
     }
-    private void Pick(Card c)
+    private void Pick()
     {
-        c.Picked = true;
-        c.BackColor = System.Drawing.Color.White;
+        Picked = true;
+        BackColor = Color.White;
         FindForm().Invalidate();
         BringToFront();
     }
@@ -276,8 +278,16 @@ public class Card : PictureBox
             Location = newPosition;
         }
     }
-    private void card_MouseEnter(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y - 10);
-    private void card_MouseLeave(object sender, EventArgs e) => Location = new Point(prevLocation.X, prevLocation.Y);
+    private void card_MouseEnter(object sender, EventArgs e)
+    {
+        BackColor = Color.White;
+        BringToFront();
+    }
+    private void card_MouseLeave(object sender, EventArgs e)
+    {
+        BackColor = Color.Gray;
+        SendToBack();
+    }
     public void MoveCard(Point u) 
     {
         if (isAnimating) return;

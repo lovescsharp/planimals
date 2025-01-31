@@ -132,7 +132,7 @@ namespace planimals
                 if (b == 1)
                 {
                     //log in, and assign username in form1
-                    SqlCommand getPoints = new SqlCommand($"SELECT Points FROM Players", sqlConnection);
+                    SqlCommand getPoints = new SqlCommand($"SELECT Points FROM Players WHERE Username='{usernameInput.Text.Trim()}'", sqlConnection);
                     int p = int.Parse(getPoints.ExecuteScalar().ToString());
                     form.username = usernameInput.Text.Trim();
                     form.totalPoints = p;

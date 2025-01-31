@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 public class Chain : List<List<Card>>
 {
@@ -116,8 +117,6 @@ public class Chain : List<List<Card>>
                             {
                                 for (int j = 0; j < this[k].Count; j++)
                                 {
-                                    this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
-                                    this[k][j].MoveCard(this[k][j].prevLocation);
                                     this[k][j].Picked = false;
                                     this[k][j].inChain = false;
                                     this[k][j].BackColor = Color.Gray;
@@ -127,6 +126,8 @@ public class Chain : List<List<Card>>
                                     game.cells[k][j] = tuple;
                                 }
                             }
+                            if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                            else game.playerHand.ShiftCards();
                             earned = 0;
                             Clear();
                             if (game.username != string.Empty) disposeChain.ExecuteNonQuery();
@@ -149,7 +150,7 @@ public class Chain : List<List<Card>>
                     else
                     {
                         FixChainIndices(this[index]);
-                        for (int i = 0; i < this[index].Count - 1; i++) // inefficient as i know that chains share a predator so TODO!
+                        for (int i = 0; i < this[index].Count - 1; i++) 
                         {
                             SqlCommand checkRelation = new SqlCommand($"SELECT COUNT(*) from Relations where Consumer='{this[index][i + 1].ScientificName}' AND Consumed='{this[index][i].ScientificName}'", sqlConnection);
                             Console.WriteLine(checkRelation.CommandText);
@@ -162,8 +163,6 @@ public class Chain : List<List<Card>>
                                 {
                                     for (int j = 0; j < this[k].Count; j++)
                                     {
-                                        this[k][j].prevLocation = new Point(this[k][j].Width * game.playerHand.Count, game.form.workingHeight - this[k][j].Height);
-                                        this[k][j].MoveCard(this[k][j].prevLocation);
                                         this[k][j].Picked = false;
                                         this[k][j].inChain = false;
                                         this[k][j].BackColor = Color.Gray;
@@ -173,6 +172,8 @@ public class Chain : List<List<Card>>
                                         game.cells[k][j] = tuple;
                                     }
                                 }
+                                if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                                else game.playerHand.ShiftCards();
                                 earned = 0;
                                 if (game.username != string.Empty) disposeChain.ExecuteNonQuery();
                                 sqlConnection.Close();
@@ -183,6 +184,7 @@ public class Chain : List<List<Card>>
                             }
                         }
                         game.overallScore += CalcScore(this[index].Count); //lessgooo everything is okay
+                        game.form.currentScore.Text = $"points : {game.overallScore}";
                         earned += CalcScore(this[index].Count);
                     }
                 }//iterating through the chain
@@ -193,16 +195,6 @@ public class Chain : List<List<Card>>
                     updatePoints.ExecuteNonQuery();
                     disposeChain.ExecuteNonQuery();
                 }
-                for (int j = 0; j < game.playerHand.Count; j++)
-                {
-                    game.playerHand[j].MoveCard(
-                        game.playerHand[j].prevLocation =
-                            new Point(
-                                Card.cardWidth * j,
-                                game.form.workingHeight - Card.cardHeight
-                        )
-                    );
-                }//updating cards locations in chain
                 foreach (List<Card> subchain in this)
                     for (int i = 0; i < subchain.Count; i++)
                         game.form.Controls.Remove(subchain[i]);
@@ -213,6 +205,8 @@ public class Chain : List<List<Card>>
                 game.UpdateCells();
                 game.form.Invalidate();
                 if (!game.playerHand.IsHot() && game.deck.Count == 0) game.Stop();
+                if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                else game.playerHand.ShiftCards();
                 return true;
             }
         }
@@ -264,7 +258,6 @@ public class Chain : List<List<Card>>
                 while (Count <= rowNo) Add(new List<Card>());
                 this[rowNo].Add(c);
                 game.form.Controls.Add(c);
-
             }
             sqlConnection.Close();
         }

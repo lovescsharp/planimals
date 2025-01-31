@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -51,6 +52,7 @@ public class Game
         form.labelTimer.Show();
         form.labelTimer.Text = "";
         overallScore = 0;
+        form.currentScore.Text = $"points : {overallScore}";
         form.label.Show();
         form.label.Text = "";
         form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
@@ -63,6 +65,7 @@ public class Game
                 sqlConnection.Open();                
                 createGame.ExecuteNonQuery();
                 overallScore = 0;
+                form.currentScore.Text = $"points : {overallScore}";
                 sqlConnection.Close(); 
             }
         }
@@ -81,6 +84,7 @@ public class Game
         username = u;
         time = t;
         overallScore = s;
+        form.currentScore.Text = $"points : {overallScore}";
 
         deck = new Deck(this, d);
 

@@ -32,6 +32,7 @@ public partial class MainForm : Form
     public Label label;
     public Label stats;
     public Label labelTimer;
+    public Label currentScore;
 
     public PictureBox readySteadyGo;
 
@@ -84,9 +85,10 @@ public partial class MainForm : Form
         BackgroundImageLayout = ImageLayout.Stretch;
         stats = new Label()
         {
-            Size = new Size(300, 100),
             Location = new Point(workingWidth - 300, 10),
             ForeColor = Color.White,
+            BackColor = Color.Transparent,
+            AutoSize = true
         };
         Controls.Add(stats);
 
@@ -137,6 +139,7 @@ public partial class MainForm : Form
             AutoSize = true,
             Font = largeFont,
             ForeColor = Color.White,
+            BackColor = Color.Transparent
         };
         title.Location = new Point((workingWidth - title.Size.Width) / 2, workingHeight / 8);
         Controls.Add(title);
@@ -251,7 +254,8 @@ public partial class MainForm : Form
         {
             Location = new Point(workingWidth / 10, workingHeight / 20),
             ForeColor = Color.White,
-            AutoSize = true
+            AutoSize = true,
+            BackColor = Color.Transparent
         };
         Controls.Add(label);
 
@@ -262,9 +266,18 @@ public partial class MainForm : Form
             Location = new Point(
                 (int)(workingWidth * 0.9),
                 (int)((double)workingHeight / 10)),
-            Size = new Size(100, 100)
+            AutoSize = true
         };
         Controls.Add(labelTimer);
+
+        currentScore = new Label()
+        {
+            ForeColor = Color.White,
+            Font = new Font(label.Font.FontFamily, 25),
+            AutoSize = true,
+            Location = new Point(labelTimer.Location.X, labelTimer.Location.Y + 105)
+        };
+        Controls.Add(currentScore);
 
         foreach (Control control in Controls)
         {
@@ -286,13 +299,13 @@ public partial class MainForm : Form
 
         #endregion
         Paint += new PaintEventHandler(Draw);
-        Resize += new EventHandler(OnResize);
         gameControls = new List<Control>()
         {
             label,
             drawCardButton,
             chainButton,
-            goToMenuInGameButton
+            goToMenuInGameButton,
+            currentScore
         };
         menuControls = new List<Control>()
         {
@@ -317,6 +330,7 @@ public partial class MainForm : Form
 
         foreach (Control c in Controls)
         {
+            c.BackColor = Color.Transparent;
             if (gameControls.Contains(c) || endControls.Contains(c) || youSureWannaQuitControls.Contains(c)) 
             {
                 c.Hide();
@@ -474,73 +488,6 @@ public partial class MainForm : Form
             }
         }
         game.countDownTimer.Start();
-        Invalidate();
-    }
-    private void OnResize(object sender, EventArgs e)
-    {
-        Height = (int)(Width * 0.5625);
-        workingHeight = ClientRectangle.Height;
-        workingWidth = ClientRectangle.Width;
-
-        foreach (Control c in menuControls)
-        {
-            c.Size = new Size(50, 30);
-            c.Location = new Point(workingWidth / 2 - c.Location.X / 2, workingHeight / 2 - c.Location.Y / 2);
-        }
-
-        if (game != null)
-        {
-            using (Pen pen = new Pen(Color.NavajoWhite, 6.0f))
-                foreach (List<(Rectangle, bool)> tuples in game.cells)
-                    foreach ((Rectangle, bool) tuple in tuples)
-                    {
-                        Size = new Size(workingWidth / 8, workingHeight / 6);
-                        game.cell.Location = new Point(workingHeight / 8 + 3, workingWidth / 10 + 3);
-                    }
-            
-
-            drawCardButton.Width = workingHeight / 8;
-            drawCardButton.Height = workingWidth / 10;
-
-            drawCardButton.Location = new Point(
-                drawCardButton.Width - workingHeight / 100 * 5,
-                workingHeight / 2 - drawCardButton.Height / 2);
-
-            chainButton.Width = workingWidth / 10;
-            chainButton.Height = workingHeight / 10;
-            chainButton.Location = new Point(
-                workingWidth - drawCardButton.Width - workingHeight / 10,
-                workingHeight / 2 - drawCardButton.Height / 2);
-
-            labelTimer.Location = new Point((int)(workingWidth * 0.9), (int)((double)workingHeight / 10));
-
-            Card.cardWidth = workingHeight / 8;
-            Card.cardHeight = workingWidth / 10;
-
-            for (int i = 0; i < game.playerHand.Count; i++)
-            {
-                game.playerHand[i].Width = workingHeight / 8;
-                game.playerHand[i].Height = workingWidth / 10;
-                game.playerHand[i].Location = game.playerHand[i].prevLocation = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
-            }
-            foreach (List<Card> chain in game.playerChain)
-            {
-                for (int i = 0; i < chain.Count; i++)
-                {
-                    chain[i].Width = workingHeight / 8;
-                    chain[i].Height = workingWidth / 10;
-                    //this[i].Location = new Point((int)(this[i].Location.X * 0.5625), (int)(this[i].Location.Y * 0.5625));
-                    chain[i].prevLocation = new Point(game.playerHand.LastOrDefault().Location.X + Card.cardWidth * i, workingHeight - Card.cardHeight);
-                }
-            }
-            for (int i = 0; i < game.playerHand.Count; i++)
-            {
-                game.playerHand[i].Width = workingHeight / 8;
-                game.playerHand[i].Height = workingWidth / 10;
-                game.playerHand[i].Location = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
-            }
-        }
-        label.Location = new Point(workingWidth / 10, workingHeight / 8);
         Invalidate();
     }
     private void Draw(object sender, PaintEventArgs e)

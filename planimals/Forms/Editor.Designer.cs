@@ -187,6 +187,7 @@
             this.pictureInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.pictureInput.Name = "pictureInput";
             this.pictureInput.Size = new System.Drawing.Size(854, 286);
+            this.pictureInput.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureInput.TabIndex = 11;
             this.pictureInput.TabStop = false;
             this.pictureInput.DragDrop += new System.Windows.Forms.DragEventHandler(this.pictureInput_DragDrop);
@@ -476,6 +477,7 @@
             this.pictureEditInput.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.pictureEditInput.Name = "pictureEditInput";
             this.pictureEditInput.Size = new System.Drawing.Size(853, 296);
+            this.pictureEditInput.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureEditInput.TabIndex = 19;
             this.pictureEditInput.TabStop = false;
             this.pictureEditInput.DragDrop += new System.Windows.Forms.DragEventHandler(this.pictureEditInput_DragDrop);

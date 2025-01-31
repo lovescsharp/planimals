@@ -139,7 +139,6 @@ namespace planimals.Forms
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 string sci_name = normalizeScientificName(scientificNameEditInput.Text);
-                File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 sqlConnection.Open();
                 SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
                 int b = (int)exists.ExecuteScalar();
@@ -148,6 +147,7 @@ namespace planimals.Forms
                     label.Text = "No organism found";
                     return;
                 }
+                File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
 
                 SqlCommand updateOrganism = new SqlCommand($"update Organisms\r\nset Scientific_name='{sci_name}', Common_name='{commonNameEditInput.Text}', Habitat='{habitatEditInput.Text}', Hierarchy='{hierarchyEditInput.Text}', Description='{descriptionEditInput.Text}'\r\nwhere Scientific_name='{sci_name}'", sqlConnection);
 

@@ -64,10 +64,11 @@ public class Hand : List<Card>
                     game.form.drawCardButton.Location,
                     false
                     );
-                c.prevLocation = new Point(Card.cardWidth * Count, game.form.workingHeight - game.form.workingWidth / 10);
                 Add(c);
                 game.form.Controls.Add(c);
             }
+            if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+            else game.playerHand.ShiftCards();
             sqlConnection.Close();
         }
     }
@@ -95,17 +96,10 @@ public class Hand : List<Card>
     }
     public void putCardsOnTopOfEachOther()
     {
-        /*
-        int shift = game.form.workingWidth - Card.cardWidth / (Count - 1);
-        for (int i = 0; i < Count; i++)
-            this[i].MoveCard(this[i].Location = new Point(i * shift, game.form.workingHeight - Card.cardHeight));
-        */
         int avail = game.form.ClientRectangle.Width - Card.cardWidth;
         int f = avail / (Count - 1);
-
         for (int i = 0; i < Count; i++)
-        {
             this[i].MoveCard(this[i].prevLocation = new Point(i * f, game.form.ClientRectangle.Height - Card.cardHeight));
-        }
+        
     }
 }
