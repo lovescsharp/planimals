@@ -38,7 +38,7 @@
               "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
-              "ViewState": "AgIAAPwAAAAAAAAAAAAywGEBAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAAYBAAAAAAAAAAAAwCMBAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-29T18:38:29.018Z",
               "IsPinned": true,
@@ -55,8 +55,7 @@
               "ViewState": "AgIAABcAAAAAAAAAAAAWwDQAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-31T09:36:21.808Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -69,8 +68,7 @@
               "ViewState": "AgIAAHoAAAAAAAAAAAAnwJkAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-30T14:24:39.339Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -83,8 +81,7 @@
               "ViewState": "AgIAABAAAAAAAAAAAAAUwJgAAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-31T12:04:55.343Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -104,8 +101,7 @@
               "RelativeToolTip": "planimals\\Forms\\LoginForm.cs",
               "ViewState": "AgIAABEAAAAAAAAAAAAAwIYAAACDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-31T13:00:15.644Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-31T13:00:15.644Z"
             },
             {
               "$type": "Document",
@@ -117,8 +113,7 @@
               "RelativeToolTip": "planimals\\Entities\\Deck.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAUwDcAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-31T11:52:42.415Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-31T11:52:42.415Z"
             }
           ]
         }
