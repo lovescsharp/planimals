@@ -70,7 +70,7 @@ public partial class Deck : Stack<int>
     {
         //Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
         //if (game.playerHand.Count <= 10 || !game.playerHand.IsHot())
-        if (game.playerHand.Count <= 100)
+        if (Card.cardWidth * game.playerHand.Count < game.form.ClientRectangle.Width || !game.playerHand.IsHot())
         {
             string sciname;
             for (int i = 0; i < 3; i++)
