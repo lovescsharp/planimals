@@ -123,6 +123,7 @@ public class Card : PictureBox
                             }
                             game.UpdateCells();
                             game.playerHand.ShiftCards();
+                            if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                             game.playerChain.ShiftCards();
                             game.form.Invalidate();
                             rectLocation = Location;
@@ -174,13 +175,13 @@ public class Card : PictureBox
             {
                 for (int j = 0; j < game.cells[i].Count; j++)
                 {
-                    if (game.cells[i][j].Item1.Location == rectLocation)
+                    if (game.cells[i][j].Item1.Location == rectLocation) //found a cell in which a card is in
                     {
                         (Rectangle, bool) tuple = (game.cells[i][j].Item1, false);
                         game.cells[i][j] = tuple;
                         //Console.WriteLine($"before removing {CommonName}: {playerChain[i].Count}");
                         game.playerChain[i].Remove(this);
-                        //Console.WriteLine($"afte r : {playerChain[i].Count}");
+                        //Console.WriteLine($"after : {playerChain[i].Count}");
                         if (game.playerChain[i].Count == 0)
                         {
                             //Console.WriteLine($"removing chain[{i}]");
@@ -196,7 +197,7 @@ public class Card : PictureBox
                         game.playerHand.ShiftCards();
                         game.playerChain.ShiftCards();
                         Drop(this);
-                        Location = prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                        MoveCard(prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight));
                         rectLocation = new Point(0, 0);
                         inChain = false;
                         Console.WriteLine(game.playerHand.ToString());
@@ -288,23 +289,23 @@ public class Card : PictureBox
         s.Restart();
         isAnimating = true;
     }
-    private double f(double t) => Math.Sin(Math.PI * t / 2); //example of ease out function
+    private double f(double t) => Math.Sin(3.1415 * t / 2);  //example of ease out function
     private void Tick(object sender, EventArgs e)
     {
-        double elapsed = s.ElapsedMilliseconds / 1000.0; //divding by a 1000 converts to seconds
+        double elapsed = s.ElapsedMilliseconds / 1000.0;        //divding by a 1000 converts to seconds
         
-        if (elapsed > animationTime) //the card moves o.6 seconds 
+        if (elapsed > animationTime)                            //the card moves o.6 seconds 
         {
             t.Stop();
             isAnimating = false;
             return;
         }
 
-        double easingFactor = f(elapsed / animationTime); //normalizing the value passed, so that it is in range [0, 1]
+        double easingFactor = f(elapsed / animationTime);       //normalizing the value passed, so that it is in range [0, 1]
 
         Location = new Point(
-            (int)(pv.X * easingFactor + p.X), //move in x direction of pv from the current x coordinate
-            (int)(pv.Y * easingFactor + p.Y)  //move in y directon of pv from the current y coordinate
+            (int)(pv.X * easingFactor + p.X),                   //move in x direction of pv from the current x coordinate
+            (int)(pv.Y * easingFactor + p.Y)                    //move in y directon of pv from the current y coordinate
         );
     }
 }

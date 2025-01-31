@@ -65,6 +65,7 @@ public partial class MainForm : Form
         InitializeComponent();
         #region ux/ui
         MinimumSize = new Size(1120, 620);
+        MaximumSize = new Size(1400, 850);
         Text = "planimals";
         StartPosition = FormStartPosition.CenterScreen;
         DoubleBuffered = true;
@@ -75,14 +76,12 @@ public partial class MainForm : Form
 
         //static size
         FormBorderStyle = FormBorderStyle.Fixed3D;
-        //Size = new Size(1366, 768);
         Size = new Size(1600, 900);
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
         BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
         BackgroundImageLayout = ImageLayout.Stretch;
-        //BackColor = Color.DarkSeaGreen;
         stats = new Label()
         {
             Size = new Size(300, 100),
@@ -359,7 +358,7 @@ public partial class MainForm : Form
                 delete from Games where Username='player1'
                 delete from Hand where Username='player1'
                 insert into Games(Username, Time, Deck, Score) values
-                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)
+                ('player1', 36, '1,1,1,1,1,1,1,1,', 4)
 
                 insert into Hand(Username, CardID) values
                 ('player1', 'Omocestus viridulus'),
@@ -375,16 +374,9 @@ public partial class MainForm : Form
                 ('player1', 'Poa pratensis', 1, 0),
                 ('player1', 'Microtus arvalis', 1, 1); 
                 */
-
-                ///
-                //SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,')\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-                SqlCommand testSquishing = new SqlCommand("                delete from FoodChainCards where Username='player1'\r\n                delete from Games where Username='player1'\r\n                delete from Hand where Username='player1'\r\n                insert into Games(Username, Time, Deck, Score) values\r\n                ('player1', 100, '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,', 1)\r\n\r\n                insert into Hand(Username, CardID) values\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus'),\r\n                ('player1', 'Omocestus viridulus');", sqlConnection);
-
+                //SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck, Score) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,', 4)\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
+                
                 sqlConnection.Open(); 
-                testSquishing.ExecuteNonQuery(); 
-                ///
-
-
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
                 int b = (int)cmd.ExecuteScalar();
                 sqlConnection.Close();
@@ -395,7 +387,6 @@ public partial class MainForm : Form
                         control.Enabled = false;
                         control.Hide();
                     }
-
                     SqlCommand pullTimeHand = new SqlCommand($"SELECT Time, Deck, Score FROM Games WHERE Username='{username}'", sqlConnection);
                     sqlConnection.Open();
                     SqlDataReader r = pullTimeHand.ExecuteReader();
@@ -491,48 +482,63 @@ public partial class MainForm : Form
         workingHeight = ClientRectangle.Height;
         workingWidth = ClientRectangle.Width;
 
-        drawCardButton.Width = workingHeight / 8;
-        drawCardButton.Height = workingWidth / 10;
-
-        drawCardButton.Location = new Point(
-            drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
-
-        chainButton.Width = workingWidth / 10;
-        chainButton.Height = workingHeight / 10;
-        chainButton.Location = new Point(
-            workingWidth - drawCardButton.Width - workingHeight / 10,
-            workingHeight / 2 - drawCardButton.Height / 2);
-
         foreach (Control c in menuControls)
         {
             c.Size = new Size(50, 30);
-            c.Location = new Point(workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - loginButton.Height / 2);
+            c.Location = new Point(workingWidth / 2 - c.Location.X / 2, workingHeight / 2 - c.Location.Y / 2);
         }
 
-        Card.cardWidth = workingHeight / 8;
-        Card.cardHeight = workingWidth / 10;
-        for (int i = 0; i < game.playerHand.Count; i++)
+        if (game != null)
         {
-            game.playerHand[i].Width = workingHeight / 8;
-            game.playerHand[i].Height = workingWidth / 10;
-            game.playerHand[i].Location = game.playerHand[i].prevLocation = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
-        }
-        foreach (List<Card> chain in game.playerChain)
-        {
-            for (int i = 0; i < chain.Count; i++)
+            using (Pen pen = new Pen(Color.NavajoWhite, 6.0f))
+                foreach (List<(Rectangle, bool)> tuples in game.cells)
+                    foreach ((Rectangle, bool) tuple in tuples)
+                    {
+                        Size = new Size(workingWidth / 8, workingHeight / 6);
+                        game.cell.Location = new Point(workingHeight / 8 + 3, workingWidth / 10 + 3);
+                    }
+            
+
+            drawCardButton.Width = workingHeight / 8;
+            drawCardButton.Height = workingWidth / 10;
+
+            drawCardButton.Location = new Point(
+                drawCardButton.Width - workingHeight / 100 * 5,
+                workingHeight / 2 - drawCardButton.Height / 2);
+
+            chainButton.Width = workingWidth / 10;
+            chainButton.Height = workingHeight / 10;
+            chainButton.Location = new Point(
+                workingWidth - drawCardButton.Width - workingHeight / 10,
+                workingHeight / 2 - drawCardButton.Height / 2);
+
+            labelTimer.Location = new Point((int)(workingWidth * 0.9), (int)((double)workingHeight / 10));
+
+            Card.cardWidth = workingHeight / 8;
+            Card.cardHeight = workingWidth / 10;
+
+            for (int i = 0; i < game.playerHand.Count; i++)
             {
-                chain[i].Width = workingHeight / 8;
-                chain[i].Height = workingWidth / 10;
-                //this[i].Location = new Point((int)(this[i].Location.X * 0.5625), (int)(this[i].Location.Y * 0.5625));
-                chain[i].prevLocation = new Point(game.playerHand.LastOrDefault().Location.X + Card.cardWidth * i, workingHeight - Card.cardHeight);
+                game.playerHand[i].Width = workingHeight / 8;
+                game.playerHand[i].Height = workingWidth / 10;
+                game.playerHand[i].Location = game.playerHand[i].prevLocation = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
             }
-        }
-        for (int i = 0; i < game.playerHand.Count; i++)
-        {
-            game.playerHand[i].Width = workingHeight / 8;
-            game.playerHand[i].Height = workingWidth / 10;
-            game.playerHand[i].Location = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
+            foreach (List<Card> chain in game.playerChain)
+            {
+                for (int i = 0; i < chain.Count; i++)
+                {
+                    chain[i].Width = workingHeight / 8;
+                    chain[i].Height = workingWidth / 10;
+                    //this[i].Location = new Point((int)(this[i].Location.X * 0.5625), (int)(this[i].Location.Y * 0.5625));
+                    chain[i].prevLocation = new Point(game.playerHand.LastOrDefault().Location.X + Card.cardWidth * i, workingHeight - Card.cardHeight);
+                }
+            }
+            for (int i = 0; i < game.playerHand.Count; i++)
+            {
+                game.playerHand[i].Width = workingHeight / 8;
+                game.playerHand[i].Height = workingWidth / 10;
+                game.playerHand[i].Location = new Point(Card.cardWidth * i, workingHeight - Card.cardHeight);
+            }
         }
         label.Location = new Point(workingWidth / 10, workingHeight / 8);
         Invalidate();

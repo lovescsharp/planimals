@@ -74,10 +74,9 @@ public class Hand : List<Card>
     public void ShiftCards()
     {
         for (int i = 0; i < Count; i++)
-            this[i].MoveCard(
-                this[i].prevLocation =
-                new Point(this[i].Width * i, game.form.workingHeight - this[i].Height)
-        );
+        this[i].MoveCard(
+            this[i].prevLocation =
+            new Point(this[i].Width * i, game.form.workingHeight - this[i].Height));
     }
     public override string ToString() {
         string s = "[ ";
@@ -93,5 +92,20 @@ public class Hand : List<Card>
         }
         s += " ]";
         return s;
+    }
+    public void putCardsOnTopOfEachOther()
+    {
+        /*
+        int shift = game.form.workingWidth - Card.cardWidth / (Count - 1);
+        for (int i = 0; i < Count; i++)
+            this[i].MoveCard(this[i].Location = new Point(i * shift, game.form.workingHeight - Card.cardHeight));
+        */
+        int avail = game.form.ClientRectangle.Width - Card.cardWidth;
+        int f = avail / (Count - 1);
+
+        for (int i = 0; i < Count; i++)
+        {
+            this[i].MoveCard(this[i].prevLocation = new Point(i * f, game.form.ClientRectangle.Height - Card.cardHeight));
+        }
     }
 }

@@ -20,8 +20,7 @@ public class Game
     public Hand playerHand;
     public Chain playerChain;
     public List<List<(Rectangle, bool)>> cells;
-    public static Rectangle cell;
-    public Rectangle liRectangle;
+    public Rectangle cell;
 
     public int overallScore; //points earned in this round
 
