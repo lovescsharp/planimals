@@ -20,7 +20,7 @@ public partial class Deck : Stack<int>
         size = 40;
         organisms = new List<string> ();
         GetOrganisms();
-        //Console.WriteLine($"# of organisms = {organisms.Count}");
+        Console.WriteLine($"# of organisms = {organisms.Count}");
         GenerateDeck();
     }
     public Deck(Game g, string d) : base() // loader
@@ -53,7 +53,7 @@ public partial class Deck : Stack<int>
         for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, upperBound);
-            //Console.WriteLine(randIdx);
+            Console.WriteLine($"random index of a card in deck is : {randIdx}");
             Push(randIdx);
             deckStr += randIdx + ",";
         }
@@ -69,8 +69,8 @@ public partial class Deck : Stack<int>
     public void DrawCard(object sender, EventArgs e)
     {
         //Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
-        //if (game.playerHand.Count <= 10 || !game.playerHand.IsHot())
-        if (Card.cardWidth * game.playerHand.Count < game.form.ClientRectangle.Width || !game.playerHand.IsHot())
+        if (game.playerHand.Count <= 20 || !game.playerHand.IsHot())
+        //if (Card.cardWidth * game.playerHand.Count < game.form.ClientRectangle.Width || !game.playerHand.IsHot())
         {
             string sciname;
             for (int i = 0; i < 3; i++)

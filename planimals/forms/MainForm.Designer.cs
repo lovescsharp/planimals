@@ -28,16 +28,18 @@ partial class MainForm
     /// </summary>
     private void InitializeComponent()
     {
-        this.SuspendLayout();
-        // 
-        // Form1
-        // 
-        this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(1898, 1024);
-        this.Name = "Form1";
-        this.Text = "Form1";
-        this.ResumeLayout(false);
+            this.SuspendLayout();
+            // 
+            // MainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(481, 312);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Name = "MainForm";
+            this.Text = "Form1";
+            this.ResumeLayout(false);
+
     }
 
     #endregion

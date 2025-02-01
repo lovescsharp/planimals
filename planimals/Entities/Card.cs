@@ -91,8 +91,7 @@ public class Card : PictureBox
                 game.playerHand[i].Location = game.playerHand[i].prevLocation;
             }
         }
-        Pick();
-        //Console.WriteLine($"picked {CommonName}");
+        Pick();    
     }
     private void card_MouseUp(object sender, MouseEventArgs e)
     {

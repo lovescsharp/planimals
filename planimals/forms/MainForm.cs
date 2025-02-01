@@ -309,6 +309,7 @@ public partial class MainForm : Form
         };
         menuControls = new List<Control>()
         {
+            label,
             loginButton,
             playButton,
             loadButton,
@@ -333,6 +334,7 @@ public partial class MainForm : Form
             c.BackColor = Color.Transparent;
             if (gameControls.Contains(c) || endControls.Contains(c) || youSureWannaQuitControls.Contains(c)) 
             {
+                if (c == label) continue;
                 c.Hide();
                 c.Enabled = false;
             }
@@ -348,7 +350,7 @@ public partial class MainForm : Form
         }
         else
         {
-            MessageBox.Show("Only admin can access editor");
+            Display("Only admin can access editor");
         }
     }
     private void playButton_Click(object sender, EventArgs e)
@@ -366,31 +368,10 @@ public partial class MainForm : Form
         {
             using (SqlConnection sqlConnection = new SqlConnection(CONNECTION_STRING))
             {
-                /* testing load feature */
-                /*
-                delete from FoodChainCards where Username='player1'
-                delete from Games where Username='player1'
-                delete from Hand where Username='player1'
-                insert into Games(Username, Time, Deck, Score) values
-                ('player1', 36, '1,1,1,1,1,1,1,1,', 4)
+                SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck, Score) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,', 4)\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
 
-                insert into Hand(Username, CardID) values
-                ('player1', 'Omocestus viridulus'),
-                ('player1', 'Omocestus viridulus'),
-                ('player1', 'Omocestus viridulus');
-                /*
-                Insert into FoodChainCards(Username, CardID, RowNo, PositionNo) values
-                ('player1', 'Poa pratensis', 0, 0),
-                ('player1', 'Omocestus viridulus', 0, 1),
-                ('player1', 'Turdus merula', 0, 2),
-                ('player1', 'Pantherophis obsoletus', 0, 3),
-                ('player1', 'Tyto alba', 0, 4),
-                ('player1', 'Poa pratensis', 1, 0),
-                ('player1', 'Microtus arvalis', 1, 1); 
-                */
-                //SqlCommand test = new SqlCommand("delete from FoodChainCards where Username='player1'\r\ndelete from Games where Username='player1'\r\ndelete from Hand where Username='player1'\r\ninsert into Games(Username, Time, Deck, Score) values\r\n('player1', 36, '1,1,1,1,1,1,1,1,', 4)\r\n\r\ninsert into Hand(Username, CardID) values\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus'),\r\n('player1', 'Omocestus viridulus');\r\n\r\nInsert into FoodChainCards(Username, CardID, RowNo, PositionNo) values\r\n('player1', 'Poa pratensis', 0, 0),\r\n('player1', 'Omocestus viridulus', 0, 1),\r\n('player1', 'Turdus merula', 0, 2),\r\n('player1', 'Pantherophis obsoletus', 0, 3),\r\n('player1', 'Tyto alba', 0, 4),\r\n('player1', 'Poa pratensis', 1, 0),\r\n('player1', 'Microtus arvalis', 1, 1);", sqlConnection);
-                
-                sqlConnection.Open(); 
+                sqlConnection.Open();
+                //test.ExecuteNonQuery();
                 SqlCommand cmd = new SqlCommand($"SELECT COUNT(*) FROM Games WHERE Username='{username}'", sqlConnection);
                 int b = (int)cmd.ExecuteScalar();
                 sqlConnection.Close();
@@ -446,6 +427,7 @@ public partial class MainForm : Form
                 c.Enabled = true; 
                 c.Show();
             }
+            label.Show();
         }
         DisposeCards();
 

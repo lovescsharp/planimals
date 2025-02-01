@@ -121,7 +121,7 @@ namespace planimals
                 sqlConnection.Open();
                 int b = (int) userExists.ExecuteScalar();
                 userExists.Parameters.Remove(username);
-                MessageBox.Show(b.ToString());
+                userExists.Parameters.Remove(email);
                 if (b == 0)
                 {
                     if (passwordInput.Text.Trim() == string.Empty) 
@@ -129,7 +129,7 @@ namespace planimals
                         label.Text = "please enter a valid password";
                         return;
                     }
-                    SqlCommand createUser = new SqlCommand("INSERT INTO Players(Username, GamesPlayed, Email, Password, Points) VALUES (@username, 0, @email, @password, 0)", sqlConnection);
+                    SqlCommand createUser = new SqlCommand("INSERT INTO Players(Username, Email, Password, Points) VALUES (@username, @email, @password, 0)", sqlConnection);
 
                     createUser.Parameters.Add(username);
 
@@ -137,9 +137,11 @@ namespace planimals
                     password.ParameterName = "password";
                     password.Value = passwordInput.Text;
                     createUser.Parameters.Add(password);
+                    createUser.Parameters.Add(email);
 
+                    createUser.ExecuteNonQuery();
+                    label.Text = "Account has been successfully created.";
                     form.username = usernameInput.Text.Trim();
-                    Close();
                 }
                 else
                 {

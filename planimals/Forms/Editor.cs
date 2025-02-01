@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace planimals.Forms
 {
@@ -49,22 +50,65 @@ namespace planimals.Forms
             if (data != null)
             {
                 string[] filename = data as string[];
-                if (filename.Length > 0) pictureInput.Image = Image.FromFile(imagePathAddTab = filename[0]);
+                if (filename.Length > 0)
+                {
+                    try 
+                    {
+                        pictureInput.Image = Image.FromFile(imagePathAddTab = filename[0]);
+                    }
+                    catch
+                    {
+                        label.Text = "please drop an image file (.png, .jpg, .jpeg)";
+                        return;
+                    }
+                }
             }
         }
         void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
-
+        bool IsValid(string s)
+        {
+            if (s == string.Empty) return false;
+            foreach (Char c in s)
+            {
+                if (c == ' ') continue;
+                else if (!Char.IsLetter(c)) return false;
+            }
+            return true;
+        }
+        bool isValidDescription(string s)
+        {
+            if (s == string.Empty) return false;
+            foreach (Char c in s)
+            {
+                if (c == '.' || c == ',' || c == '-' || c == ' ') continue;
+                else if (!Char.IsLetter(c)) return false;
+            }
+            return true;
+        }
         void addButton_Click(object sender, EventArgs e)
         {
-            if (scientificNameInput.Text.Trim() == string.Empty)
+            foreach (Control c in tabControl.SelectedTab.Controls)
             {
-                label.Text = "Please enter a valid binomial name";
-                return;
-            }
-            if (pictureInput.Image == null) 
-            {
-                label.Text = "Please drop a photo of an organism into the yellow field bellow";
-                return;
+                if (c == descriptionEditInput || c == descriptionInput)
+                    if (!isValidDescription(c.Text))
+                    {
+                        label.Text = $"Please enter a valid description";
+                        return;
+                    }
+                    else continue;
+                if (c is TextBox)
+                    if (!IsValid(c.Text))
+                    {
+                        label.Text = $"Please enter valid data in {c.Name} field";
+                        return;
+                    }
+
+                if (c is PictureBox) 
+                    if (((PictureBox)c).Image is null)
+                    {
+                        label.Text = "Please drag and drop an organism picture in the field below";
+                        return;
+                    }
             }
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -130,11 +174,30 @@ namespace planimals.Forms
             }
         }
 
-        void editButton_Click(object sender, System.EventArgs e)
+        void editButton_Click(object sender, EventArgs e)
         {
-            if (scientificNameEditInput.Text.Trim() == string.Empty)
+            foreach (Control c in tabControl.SelectedTab.Controls)
             {
-                label.Text = "please enter a valid binomial name";
+                if (c == descriptionEditInput || c == descriptionInput)
+                    if (!isValidDescription(c.Text))
+                    {
+                        label.Text = $"Please enter a valid description";
+                        return;
+                    }
+                    else continue;
+                if (c is TextBox)
+                    if (!IsValid(c.Text))
+                    {
+                        label.Text = $"Please enter valid data in {c.Name} field";
+                        return;
+                    }
+
+                if (c is PictureBox) 
+                    if (((PictureBox)c).Image is null)
+                    {
+                        label.Text = "Please drag and drop an organism picture in the field below";
+                        return;
+                    }
             }
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
@@ -173,7 +236,7 @@ namespace planimals.Forms
                 sqlConnection.Close();
             }
         }
-        void searchEditButton_Click(object sender, System.EventArgs e)
+        void searchEditButton_Click(object sender,EventArgs e)
         {
             string sci_name = normalizeScientificName(scientificNameEditInput.Text);
             scientificNameEditInput.Text = sci_name;
@@ -320,7 +383,6 @@ namespace planimals.Forms
                 sqlConnection.Close();
             }
         }
-
         private void pictureEditInput_DragDrop(object sender, DragEventArgs e)
         {
             object data = e.Data.GetData(DataFormats.FileDrop);
@@ -330,7 +392,6 @@ namespace planimals.Forms
                 if (filename.Length > 0) pictureEditInput.Image = Image.FromFile(imagePathEditTab = filename[0]);
             }
         }
-
         private void pictureEditInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
     }
 }

@@ -46,7 +46,6 @@ namespace planimals
             {
                 Location = new Point(usernameInput.Location.X, usernameInput.Location.Y - 15),
                 Text = "username:",
-                ForeColor = Color.White
             };
             Controls.Add(usernameInput);
             Controls.Add(l1);
@@ -62,7 +61,6 @@ namespace planimals
             {
                 Location = new Point(passwordInput.Location.X, passwordInput.Location.Y - 15),
                 Text = "password:",
-                ForeColor = Color.White
             };
             Controls.Add(passwordInput);
             Controls.Add(l2);
@@ -71,7 +69,6 @@ namespace planimals
             loginButton.Size = new Size(60, 25);
             loginButton.Location = new Point(workingWidth - loginButton.Width - 5, workingHeight - loginButton.Height - 5);
             loginButton.Text = "log in";
-            loginButton.BackColor = Color.White;
             Controls.Add(loginButton);
             loginButton.Click += LoginClick;
 
@@ -79,7 +76,6 @@ namespace planimals
             cancelButton.Size = new Size(60, 25);
             cancelButton.Location = new Point(5, workingHeight - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
-            cancelButton.BackColor = Color.White;
             Controls.Add(cancelButton);
             cancelButton.Click += Cancel;
 
@@ -87,7 +83,6 @@ namespace planimals
             signUpButton.Size = new Size(90, 25);
             signUpButton.Location = new Point(loginButton.Location.X - signUpButton.Width - 5, workingHeight - signUpButton.Height - 5);
             signUpButton.Text = "create account";
-            signUpButton.BackColor = Color.White;
             Controls.Add(signUpButton);
             signUpButton.Click += SignUp;
 
@@ -95,16 +90,15 @@ namespace planimals
             resestPasswdButton.Size = new Size (60, 25);
             resestPasswdButton.Location = new Point(signUpButton.Location.X - resestPasswdButton.Width - 5, workingHeight - resestPasswdButton.Height - 5);
             resestPasswdButton.Text = "reset password";
-            resestPasswdButton.BackColor = Color.White;
             Controls.Add(resestPasswdButton);
             resestPasswdButton.Click += ResestPasswdButton_Click;
 
-            BackColor = Color.Black;
 
+            BackColor = Color.DarkSeaGreen;
+            foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
             label = new Label();
             label.Text = "";
             label.AutoSize = true;
-            label.ForeColor = Color.White;
             label.Location = new Point(10, 10);
             Controls.Add(label);
         }
@@ -152,10 +146,8 @@ namespace planimals
         private void Cancel(object sender, EventArgs e) => Close();
         private void SignUp(object sender, EventArgs e)
         {
-            Close();
             CreateAccountForm createAccountForm = new CreateAccountForm(form);
-            createAccountForm.Show();
-            createAccountForm.BringToFront();
+            createAccountForm.ShowDialog();
         }           
     }
 }
