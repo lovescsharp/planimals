@@ -122,11 +122,11 @@
             // hierarchyLabel
             // 
             this.hierarchyLabel.AutoSize = true;
-            this.hierarchyLabel.Location = new System.Drawing.Point(5, 350);
+            this.hierarchyLabel.Location = new System.Drawing.Point(9, 366);
             this.hierarchyLabel.Name = "hierarchyLabel";
-            this.hierarchyLabel.Size = new System.Drawing.Size(65, 16);
+            this.hierarchyLabel.Size = new System.Drawing.Size(71, 16);
             this.hierarchyLabel.TabIndex = 5;
-            this.hierarchyLabel.Text = "Hierarchy";
+            this.hierarchyLabel.Text = "Hierarchy :";
             // 
             // hierarchyInput
             // 
@@ -135,18 +135,17 @@
             "1",
             "2",
             "3",
-            "4",
-            "5"});
-            this.hierarchyInput.Location = new System.Drawing.Point(9, 370);
+            "4"});
+            this.hierarchyInput.Location = new System.Drawing.Point(107, 363);
             this.hierarchyInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.hierarchyInput.Name = "hierarchyInput";
-            this.hierarchyInput.Size = new System.Drawing.Size(121, 24);
+            this.hierarchyInput.Size = new System.Drawing.Size(48, 24);
             this.hierarchyInput.TabIndex = 6;
             // 
             // habitatInput
             // 
             this.habitatInput.FormattingEnabled = true;
-            this.habitatInput.Location = new System.Drawing.Point(146, 370);
+            this.habitatInput.Location = new System.Drawing.Point(236, 363);
             this.habitatInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.habitatInput.Name = "habitatInput";
             this.habitatInput.Size = new System.Drawing.Size(121, 24);
@@ -155,16 +154,16 @@
             // habitatLabel
             // 
             this.habitatLabel.AutoSize = true;
-            this.habitatLabel.Location = new System.Drawing.Point(141, 350);
+            this.habitatLabel.Location = new System.Drawing.Point(174, 366);
             this.habitatLabel.Name = "habitatLabel";
-            this.habitatLabel.Size = new System.Drawing.Size(50, 16);
+            this.habitatLabel.Size = new System.Drawing.Size(56, 16);
             this.habitatLabel.TabIndex = 8;
-            this.habitatLabel.Text = "Habitat";
+            this.habitatLabel.Text = "Habitat :";
             // 
             // descriptionLabel
             // 
             this.descriptionLabel.AutoSize = true;
-            this.descriptionLabel.Location = new System.Drawing.Point(5, 395);
+            this.descriptionLabel.Location = new System.Drawing.Point(5, 401);
             this.descriptionLabel.Name = "descriptionLabel";
             this.descriptionLabel.Size = new System.Drawing.Size(75, 16);
             this.descriptionLabel.TabIndex = 9;
@@ -172,7 +171,7 @@
             // 
             // descriptionInput
             // 
-            this.descriptionInput.Location = new System.Drawing.Point(9, 414);
+            this.descriptionInput.Location = new System.Drawing.Point(8, 421);
             this.descriptionInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.descriptionInput.Multiline = true;
             this.descriptionInput.Name = "descriptionInput";
@@ -186,7 +185,7 @@
             this.pictureInput.Location = new System.Drawing.Point(5, 32);
             this.pictureInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureInput.Name = "pictureInput";
-            this.pictureInput.Size = new System.Drawing.Size(760, 230);
+            this.pictureInput.Size = new System.Drawing.Size(760, 227);
             this.pictureInput.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureInput.TabIndex = 11;
             this.pictureInput.TabStop = false;
@@ -382,11 +381,11 @@
             // hierarchyEditLabel
             // 
             this.hierarchyEditLabel.AutoSize = true;
-            this.hierarchyEditLabel.Location = new System.Drawing.Point(5, 348);
+            this.hierarchyEditLabel.Location = new System.Drawing.Point(8, 368);
             this.hierarchyEditLabel.Name = "hierarchyEditLabel";
-            this.hierarchyEditLabel.Size = new System.Drawing.Size(65, 16);
+            this.hierarchyEditLabel.Size = new System.Drawing.Size(71, 16);
             this.hierarchyEditLabel.TabIndex = 25;
-            this.hierarchyEditLabel.Text = "Hierarchy";
+            this.hierarchyEditLabel.Text = "Hierarchy :";
             // 
             // descriptionEditInput
             // 
@@ -406,10 +405,10 @@
             "3",
             "4",
             "5"});
-            this.hierarchyEditInput.Location = new System.Drawing.Point(9, 368);
+            this.hierarchyEditInput.Location = new System.Drawing.Point(107, 363);
             this.hierarchyEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.hierarchyEditInput.Name = "hierarchyEditInput";
-            this.hierarchyEditInput.Size = new System.Drawing.Size(121, 24);
+            this.hierarchyEditInput.Size = new System.Drawing.Size(57, 24);
             this.hierarchyEditInput.TabIndex = 26;
             // 
             // descriptionEditLabel
@@ -424,7 +423,7 @@
             // habitatEditInput
             // 
             this.habitatEditInput.FormattingEnabled = true;
-            this.habitatEditInput.Location = new System.Drawing.Point(142, 368);
+            this.habitatEditInput.Location = new System.Drawing.Point(269, 363);
             this.habitatEditInput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.habitatEditInput.Name = "habitatEditInput";
             this.habitatEditInput.Size = new System.Drawing.Size(121, 24);
@@ -433,11 +432,11 @@
             // habitatEditLabel
             // 
             this.habitatEditLabel.AutoSize = true;
-            this.habitatEditLabel.Location = new System.Drawing.Point(139, 348);
+            this.habitatEditLabel.Location = new System.Drawing.Point(207, 368);
             this.habitatEditLabel.Name = "habitatEditLabel";
-            this.habitatEditLabel.Size = new System.Drawing.Size(50, 16);
+            this.habitatEditLabel.Size = new System.Drawing.Size(56, 16);
             this.habitatEditLabel.TabIndex = 28;
-            this.habitatEditLabel.Text = "Habitat";
+            this.habitatEditLabel.Text = "Habitat :";
             // 
             // scientificNameEditInput
             // 

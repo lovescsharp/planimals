@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Net.Mail;
 using System.Windows.Forms;
 
 namespace planimals
@@ -103,8 +104,25 @@ namespace planimals
             foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
         }
         private void Cancel(object sender, EventArgs e) => Close();
+        bool isValid(string emailAddr)
+        {
+            try
+            {
+                MailAddress mailAddress = new MailAddress(emailAddr);
+                return true;
+            }
+            catch 
+            {
+                return false;
+            }
+        }
         private void Create(object sender, EventArgs e) 
         {
+            if (!isValid(emailInput.Text)) 
+            {
+                label.Text = "Please enter a valid email address";
+                return;
+            }
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand userExists = new SqlCommand("SELECT COUNT(*) FROM Players WHERE Username=@username OR Email=@email", sqlConnection);

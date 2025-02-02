@@ -348,10 +348,7 @@ public partial class MainForm : Form
             Editor editor = new Editor();
             editor.ShowDialog();
         }
-        else
-        {
-            Display("Only admin can access editor");
-        }
+        else Display("Only admin can access editor");
     }
     private void playButton_Click(object sender, EventArgs e)
     {

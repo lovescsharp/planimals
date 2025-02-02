@@ -4,20 +4,19 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace planimals.Forms
 {
     //drap and drop effect
     //https://www.youtube.com/watch?v=XWB7gbSQom4
+
     public partial class Editor : Form
     {
         List<string> existingConsumes;
         List<string> existingConsumedBy;
-        
-        string imagePathAddTab = "";
-        string imagePathEditTab = "";
+ 
+        string imagePathAddTab;
+        string imagePathEditTab;
 
         public Editor()
         {
@@ -34,6 +33,12 @@ namespace planimals.Forms
             consumesEditInput.ColumnWidth = 100;
             consumedByEditInput.ColumnWidth = 100;
 
+            hierarchyInput.DropDownStyle = ComboBoxStyle.DropDownList;
+            hierarchyEditInput.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            habitatInput.DropDownStyle = ComboBoxStyle.DropDown;
+            habitatEditInput.DropDownStyle = ComboBoxStyle.DropDown;
+
             getHabitatsAdd();
             getHabitatsEdit();
             getOrganismsAdd();
@@ -41,8 +46,6 @@ namespace planimals.Forms
             
             BackColor = Color.DarkSeaGreen;
             foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
-            commonNameInput.TabIndex = 0;
-
         }
         void pictureInput_DragDrop(object sender, DragEventArgs e)
         {
@@ -65,78 +68,6 @@ namespace planimals.Forms
             }
         }
         void pictureInput_DragEnter(object sender, DragEventArgs e) => e.Effect = DragDropEffects.Copy;
-        bool IsValid(string s)
-        {
-            if (s == string.Empty) return false;
-            foreach (Char c in s)
-            {
-                if (c == ' ') continue;
-                else if (!Char.IsLetter(c)) return false;
-            }
-            return true;
-        }
-        bool isValidDescription(string s)
-        {
-            if (s == string.Empty) return false;
-            foreach (Char c in s)
-            {
-                if (c == '.' || c == ',' || c == '-' || c == ' ') continue;
-                else if (!Char.IsLetter(c)) return false;
-            }
-            return true;
-        }
-        void addButton_Click(object sender, EventArgs e)
-        {
-            foreach (Control c in tabControl.SelectedTab.Controls)
-            {
-                if (c == descriptionEditInput || c == descriptionInput)
-                    if (!isValidDescription(c.Text))
-                    {
-                        label.Text = $"Please enter a valid description";
-                        return;
-                    }
-                    else continue;
-                if (c is TextBox)
-                    if (!IsValid(c.Text))
-                    {
-                        label.Text = $"Please enter valid data in {c.Name} field";
-                        return;
-                    }
-
-                if (c is PictureBox) 
-                    if (((PictureBox)c).Image is null)
-                    {
-                        label.Text = "Please drag and drop an organism picture in the field below";
-                        return;
-                    }
-            }
-            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
-            {
-                string sci_name = normalizeScientificName(scientificNameInput.Text);
-                File.Copy(imagePathAddTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
-                sqlConnection.Open();
-                SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
-                int b = (int)exists.ExecuteScalar();
-                if (b == 1)
-                {
-                    label.Text = "organism with this binomial name already exists";
-                    return;
-                }
-                SqlCommand insertOrganism = new SqlCommand($"INSERT INTO Organisms(Scientific_name, Common_name, Habitat, Hierarchy, Description) VALUES ('{sci_name}', '{commonNameInput.Text}', '{habitatInput.Text}', '{hierarchyInput.Text}', '{descriptionInput.Text}');", sqlConnection);
-                SqlCommand insertRelations = new SqlCommand("",sqlConnection);
-                foreach (object item in consumesInput.CheckedItems)
-                    insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{sci_name}', '{item.ToString()}');\n";
-                foreach (object item in consumedByInput.CheckedItems)
-                    insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
-                
-                insertOrganism.ExecuteNonQuery();
-                if (insertRelations.CommandText != string.Empty) insertRelations.ExecuteNonQuery();
-
-                label.Text = $"Successfully added {sci_name}";
-
-                sqlConnection.Close();
-            }
-        }
         void getOrganismsAdd() //adding organisms to check box list on Add Tab
         {
             consumesInput.Items.Clear();
@@ -173,7 +104,153 @@ namespace planimals.Forms
                 sqlConnection.Close();
             }
         }
+        bool IsValid(string s)
+        {
+            if (s == string.Empty) return false;
+            foreach (Char c in s)
+            {
+                if (c == ' ') continue;
+                else if (!Char.IsLetter(c)) return false;
+            }
+            return true;
+        }
+        bool isValidDescription(string s)
+        {
+            if (s == string.Empty) return false;
+            foreach (Char c in s)
+            {
+                if (c == '.' || c == ',' || c == '-' || c == ' ') continue;
+                else if (!Char.IsLetter(c)) return false;
+            }
+            return true;
+        }
+        bool isValidHabitat(string s)
+        {
+            if (s == string.Empty) return false;
+            foreach (Char c in s) if (!Char.IsLetter(c)) return false;
+            return true;
+        }
+        void addButton_Click(object sender, EventArgs e)
+        {
+            foreach (Control c in tabControl.SelectedTab.Controls)
+            {
+                if (c == descriptionEditInput || c == descriptionInput)
+                    if (!isValidDescription(c.Text))
+                    {
+                        label.Text = $"Please enter a valid description";
+                        return;
+                    }
+                    else continue;
+                if (c is TextBox)
+                    if (!IsValid(c.Text))
+                    {
+                        label.Text = $"Please enter valid data in {c.Name} field";
+                        return;
+                    }
 
+                if (c is ComboBox)
+                {
+                    if (c == habitatInput)
+                    {
+                        if (!isValidHabitat(c.Text))
+                        {
+                            label.Text = $"Please enter a valid habitat";
+                            return;
+                        }
+                    }
+                    if (c.Text == string.Empty)
+                    {
+                        label.Text = $"Please select organisms hierarchal order in a food chain";
+                        return;
+                    }
+                }
+
+                if (c is PictureBox) 
+                    if (((PictureBox)c).Image is null)
+                    {
+                        label.Text = "Please drag and drop an organism picture in the field below";
+                        return;
+                    }
+            }
+            using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+            {
+                string sci_name = normalizeScientificName(scientificNameInput.Text);
+                File.Copy(imagePathAddTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
+                sqlConnection.Open();
+                SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
+                int b = (int)exists.ExecuteScalar();
+                if (b == 1)
+                {
+                    label.Text = "Organism with this binomial name already exists.";
+                    return;
+                }
+                SqlCommand insertOrganism = new SqlCommand($"INSERT INTO Organisms(Scientific_name, Common_name, Habitat, Hierarchy, Description) VALUES ('{sci_name}', '{commonNameInput.Text}', '{habitatInput.Text}', {hierarchyInput.Text}, '{descriptionInput.Text}');", sqlConnection);
+                SqlCommand insertRelations = new SqlCommand("",sqlConnection);
+                foreach (object item in consumesInput.CheckedItems)
+                {
+                    SqlCommand checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
+                    string habitat = "";
+                    int hierarchyConsumed = 1;
+                    using (SqlDataReader r = checkHabitat.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            habitat = r["Habitat"].ToString();
+                            hierarchyConsumed = int.Parse(r["Hierarchy"].ToString());
+                        }
+                    }
+                    if (hierarchyConsumed <= int.Parse(hierarchyInput.SelectedItem.ToString()))
+                    {
+                        label.Text = $"{sci_name} cannot eat {item.ToString()} as {item.ToString()} has a higher/equal hierarchal order to {sci_name}";
+                        return;
+                    }
+                    if (habitat == habitatInput.SelectedItem.ToString()) insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{sci_name}', '{item.ToString()}');\n";
+                    else
+                    {
+                        label.Text = $"{sci_name} and {item.ToString()} live in different habitats";
+                        return;
+                    } 
+                }
+                foreach (object item in consumedByInput.CheckedItems)
+                {
+                    SqlCommand checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
+                    string habitat = "";
+                    int hierarchyConsumer = 5;
+                    using (SqlDataReader r = checkHabitat.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            habitat = r["Habitat"].ToString();
+                            hierarchyConsumer = int.Parse(r["Hierarchy"].ToString());
+                        }
+                    }
+                    if (hierarchyConsumer >= int.Parse(hierarchyInput.SelectedItem.ToString()))
+                    {
+                        label.Text = $"{item.ToString()} cannot consume {sci_name} as {item.ToString()} has a lower/equal hierarchal order than/to {sci_name}'s";
+                        return;
+                    }
+                    if (habitat == habitatInput.SelectedItem.ToString()) 
+                        insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
+                    else
+                    {
+                        label.Text = $"{sci_name} and {item.ToString()} live in different habitats";
+                        return;
+                    }
+                }
+                /*
+                MessageBox.Show("Everything is ok"); sqlConnection.Close();
+                MessageBox.Show($"insertRelations.CommandText = {insertRelations.CommandText}");
+                MessageBox.Show($"insertOrganism.CommandText = {insertOrganism.CommandText}");
+                return;
+                */
+                insertOrganism.ExecuteNonQuery();
+                if (insertRelations.CommandText != string.Empty) insertRelations.ExecuteNonQuery();
+
+                label.Text = $"Successfully added {sci_name}";
+
+                sqlConnection.Close();
+            }
+        }
         void editButton_Click(object sender, EventArgs e)
         {
             foreach (Control c in tabControl.SelectedTab.Controls)
@@ -191,6 +268,23 @@ namespace planimals.Forms
                         label.Text = $"Please enter valid data in {c.Name} field";
                         return;
                     }
+
+                if (c is ComboBox)
+                {
+                    if (c == habitatEditInput)
+                    {
+                        if (!isValidHabitat(c.Text))
+                        {
+                            label.Text = $"Please enter a valid habitat";
+                            return;
+                        }
+                    }
+                    if (c.Text == string.Empty)
+                    {
+                        label.Text = $"Please select organisms hierarchal order in a food chain";
+                        return;
+                    }
+                }
 
                 if (c is PictureBox) 
                     if (((PictureBox)c).Image is null)
@@ -211,24 +305,71 @@ namespace planimals.Forms
                     return;
                 }
                 File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
-
-                SqlCommand updateOrganism = new SqlCommand($"update Organisms\r\nset Scientific_name='{sci_name}', Common_name='{commonNameEditInput.Text}', Habitat='{habitatEditInput.Text}', Hierarchy='{hierarchyEditInput.Text}', Description='{descriptionEditInput.Text}'\r\nwhere Scientific_name='{sci_name}'", sqlConnection);
-
+                SqlCommand updateOrganism = new SqlCommand($"update Organisms\r\nset Scientific_name='{sci_name}', Common_name='{commonNameEditInput.Text}', Habitat='{habitatEditInput.Text}', Hierarchy={hierarchyEditInput.Text}, Description='{descriptionEditInput.Text}'\r\nwhere Scientific_name='{sci_name}'", sqlConnection);
                 SqlCommand insertRelations = new SqlCommand("", sqlConnection);
+                SqlCommand checkHabitat;
                 foreach (object item in consumesEditInput.CheckedItems) 
                 {
                     if (existingConsumes.Contains(item.ToString()) || item.ToString() == sci_name) continue;
-                    insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{sci_name}', '{item.ToString()}');\n";
+                    checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
+                    string habitat = "";
+                    int hierarchy = 1;
+                    using (SqlDataReader r = checkHabitat.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            habitat = r["Habitat"].ToString();
+                            hierarchy = int.Parse(r["Hierarchy"].ToString());
+                        }
+                    }
+                    if (hierarchy <= int.Parse(hierarchyEditInput.SelectedItem.ToString()))
+                    {
+                        label.Text = $"{sci_name} cannot eat {item.ToString()} as {item.ToString()} has a higher or equal hierarchal order";
+                        return;
+                    }
+                    if (habitat == habitatEditInput.SelectedItem.ToString())
+                        insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{sci_name}', '{item.ToString()}');\n";
+                    else
+                    {
+                        label.Text = $"{sci_name} and {item.ToString()} live in different habitats";
+                        return;
+                    } 
                     existingConsumes.Add(item.ToString());
                 }
-
                 foreach (object item in consumedByEditInput.CheckedItems)
-                { 
+                {
                     if (existingConsumedBy.Contains(item.ToString()) || item.ToString() == sci_name) continue;
-                    insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
+                    checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
+                    string habitat = "";
+                    int hierarchy = 5;
+                    using (SqlDataReader r = checkHabitat.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            habitat = r["Habitat"].ToString();
+                            hierarchy = int.Parse(r["Hierarchy"].ToString());
+                        }
+                    }
+                    if (hierarchy >= int.Parse(hierarchyEditInput.SelectedItem.ToString()))
+                    {
+                        label.Text = $"{item.ToString()} cannot consume {sci_name} as {item.ToString()} has a lower/equal hierarchal order than/to {sci_name}'s";
+                        return;
+                    }
+                    if (habitat == habitatEditInput.SelectedItem.ToString()) 
+                        insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
+                    else
+                    {
+                        label.Text = $"{item.ToString()} cannot eat {sci_name} as they live in different habitats";
+                        return;
+                    } 
                     existingConsumedBy.Add(item.ToString());
                 }
-
+                /*
+                MessageBox.Show("Everything is ok"); sqlConnection.Close();
+                MessageBox.Show($"insertRelations.CommandText = {insertRelations.CommandText}");
+                MessageBox.Show($"updateOrganism.CommandText = {updateOrganism.CommandText}");
+                return;
+                */
                 updateOrganism.ExecuteNonQuery();
                 if (insertRelations.CommandText != string    .    Empty) insertRelations.ExecuteNonQuery();
 
