@@ -69,12 +69,15 @@ public partial class Deck : Stack<int>
     public void DrawCard(object sender, EventArgs e)
     {
         //Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
-        if (game.playerHand.Count <= 20 || !game.playerHand.IsHot())
-        //if (Card.cardWidth * game.playerHand.Count < game.form.ClientRectangle.Width || !game.playerHand.IsHot())
+        if (game.playerHand.Count < 20 || !game.playerHand.IsHot())
         {
             string sciname;
             for (int i = 0; i < 3; i++)
             {
+                if (game.playerHand.Count == 20)
+                {
+                    if (game.playerHand.IsHot()) break;
+                }
                 sciname = GetScientificNameFromDeck();
                 using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
                 {
@@ -127,16 +130,17 @@ public partial class Deck : Stack<int>
                         game.form.drawCardButton.Hide();
 
                         if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                        Console.WriteLine(game.playerHand.ToString());
+                        Console.WriteLine($"hand.count = {game.playerHand.Count}");
                         return;
                     }
                 }
             }
             if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+            Console.WriteLine(game.playerHand.ToString());
+            Console.WriteLine($"hand.count = {game.playerHand.Count}");
         }
-        else
-        {
-            game.form.Display("i think you can build a chain out of cards on your hand");
-        }
+        else game.form.Display("i think you can build a chain out of cards on your hand");
     }
     public void Load()
     {

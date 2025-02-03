@@ -124,7 +124,7 @@ public class Card : PictureBox
                             Console.WriteLine(Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width);
                             if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                             else game.playerHand.ShiftCards();
-                            game.playerChain.ShiftCards();
+                            //game.playerChain.ShiftCards();
                             game.form.Invalidate();
                             rectLocation = Location;
                             Console.WriteLine(game.playerHand.ToString());
@@ -154,7 +154,6 @@ public class Card : PictureBox
                             }
                             if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                             else game.playerHand.ShiftCards();
-                            game.playerChain.ShiftCards();
                             game.playerChain[i][j].MoveCard(prevLocation);
                             Location = rectLocation = game.cells[i][j].Item1.Location;
                             Console.WriteLine(game.playerHand.ToString());
@@ -197,7 +196,7 @@ public class Card : PictureBox
                         game.UpdateCells();
                         if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                         else game.playerHand.ShiftCards();
-                        game.playerChain.ShiftCards();
+                        game.playerChain.ShiftCards(i, j);
                         Drop();
                         rectLocation = new Point(0, 0);
                         inChain = false;
@@ -241,6 +240,7 @@ public class Card : PictureBox
     }
     public void RemoveFromChain(int RowNo, int ColNo)
     {
+        Console.WriteLine($"Removing {this.CommonName} from db");
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);

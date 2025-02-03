@@ -43,3 +43,4 @@ C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\planimal
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.Forms.Editor.resources
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\planimals.LoginForm.resources
 C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\MainForm.resources
+C:\Users\vbr2\Documents\Visual Studio 2022\projects\planimals\planimals\obj\Debug\ResetPassword.resources

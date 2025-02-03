@@ -210,12 +210,29 @@ public class Chain : List<List<Card>>
             }
         }
     }
-    public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
+    public void ShiftCards(int row, int col) // when a card is removed in the middle of the chain, shift all cards to the left
     {
-        for (int i = 0; i < game.playerChain.Count; i++)
-            for (int j = 0; j < game.playerChain[i].Count; j++)
-                game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation =
-                game.cells[i][j].Item1.Location);
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+        {
+            SqlCommand updatePosn = new SqlCommand("", sqlConnection);
+            for (int i = 0; i < game.playerChain.Count; i++)
+            {
+                for (int j = 0; j < game.playerChain[i].Count; j++)
+                {
+                    game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation =
+                    game.cells[i][j].Item1.Location);
+                    SqlCommand getColRow = new SqlCommand("SELECT ");
+                    using (SqlDataReader r = )
+                        updatePosn.CommandText += $"UPDATE FoodChainCards SET RowNo={i}, PositionNo={j} WHERE RowNo={i} AND PositionNo={col++};";
+                }   
+            }
+            if (updatePosn.CommandText != string.Empty) 
+            {
+                sqlConnection.Open();
+                updatePosn.ExecuteNonQuery();
+                sqlConnection.Close();
+            }
+        }
     }
     public void Load()
     {

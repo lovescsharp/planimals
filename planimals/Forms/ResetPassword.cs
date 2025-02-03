@@ -97,8 +97,26 @@ public partial class ResetPassword : Form
                 string passwd = getPassword.ExecuteScalar().ToString();
                 MessageBox.Show($"your password is : {passwd}");
             }
-            else label.Text = "no account was found";
+            else label.Text = "Couldn't find an account with provided email address";
             sqlConnection.Close();
         }
+    }
+
+    private void InitializeComponent()
+    {
+            this.SuspendLayout();
+            // 
+            // ResetPassword
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Name = "ResetPassword";
+            this.Load += new System.EventHandler(this.ResetPassword_Load);
+            this.ResumeLayout(false);
+
+    }
+
+    private void ResetPassword_Load(object sender, EventArgs e)
+    {
+        
     }
 }

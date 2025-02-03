@@ -147,7 +147,6 @@ namespace planimals.Forms
                         label.Text = $"Please enter valid data in {c.Name} field";
                         return;
                     }
-
                 if (c is ComboBox)
                 {
                     if (c == habitatInput)
@@ -164,7 +163,6 @@ namespace planimals.Forms
                         return;
                     }
                 }
-
                 if (c is PictureBox) 
                     if (((PictureBox)c).Image is null)
                     {
@@ -324,7 +322,7 @@ namespace planimals.Forms
                     }
                     if (hierarchy <= int.Parse(hierarchyEditInput.SelectedItem.ToString()))
                     {
-                        label.Text = $"{sci_name} cannot eat {item.ToString()} as {item.ToString()} has a higher or equal hierarchal order";
+                        label.Text = $"{sci_name} does not eat {item.ToString()} as {item.ToString()} has a higher or equal hierarchal order";
                         return;
                     }
                     if (habitat == habitatEditInput.SelectedItem.ToString())
@@ -352,14 +350,14 @@ namespace planimals.Forms
                     }
                     if (hierarchy >= int.Parse(hierarchyEditInput.SelectedItem.ToString()))
                     {
-                        label.Text = $"{item.ToString()} cannot consume {sci_name} as {item.ToString()} has a lower/equal hierarchal order than/to {sci_name}'s";
+                        label.Text = $"{item.ToString()} does not eat {sci_name} as {item.ToString()} has a lower/equal hierarchal order than/to {sci_name}'s";
                         return;
                     }
                     if (habitat == habitatEditInput.SelectedItem.ToString()) 
                         insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
                     else
                     {
-                        label.Text = $"{item.ToString()} cannot eat {sci_name} as they live in different habitats";
+                        label.Text = $"{item.ToString()} does not eat {sci_name} as they live in different habitats";
                         return;
                     } 
                     existingConsumedBy.Add(item.ToString());
@@ -433,7 +431,7 @@ namespace planimals.Forms
                     {
                         try
                         {
-                            consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true); // i find organism which name is $organismCommonNameBuff and check it
+                            consumesEditInput.SetItemChecked(consumesEditInput.Items.IndexOf(organismCommonNameBuff), true); //find organism which name is $organismCommonNameBuff and check it
                         }
                         catch 
                         {
@@ -466,7 +464,10 @@ namespace planimals.Forms
                 {
                     pictureEditInput.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 }
-                catch { }
+                catch 
+                {
+                    label.Text = $"File {Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png")} does not exist";
+                }
                     
                 sqlConnection.Close();
             }
