@@ -3,7 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|c:\\users\\vbr2\\documents\\visual studio 2022\\projects\\planimals\\planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|solutionrelative:planimals\\entities\\chain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -28,7 +28,7 @@
               "RelativeDocumentMoniker": "planimals\\Entities\\Chain.cs",
               "ToolTip": "C:\\Users\\vbr2\\Documents\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Chain.cs",
               "RelativeToolTip": "planimals\\Entities\\Chain.cs",
-              "ViewState": "AgIAANAAAAAAAAAAAAAhwN8AAABCAAAAAAAAAA==",
+              "ViewState": "AgIAANAAAAAAAAAAAAAhwOEAAACQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-02T20:34:47.679Z",
               "IsPinned": true,
@@ -52,8 +52,7 @@
               "RelativeToolTip": "planimals\\Entities\\Card.cs",
               "ViewState": "AgIAAOMAAAAAAAAAAAAQwPIAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-02T20:31:16.966Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-02T20:31:16.966Z"
             }
           ]
         },
