@@ -3,10 +3,8 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
 
-public partial class ResetPassword : Form
+public partial class ForgotPassword : Form
 {
-    private int workingWidth;
-    private int workingHeight;
 
     private TextBox usernameInput;
     private TextBox emailInput;
@@ -14,9 +12,9 @@ public partial class ResetPassword : Form
     private Label label;
     private Button seePasswd;
 
-    public ResetPassword() 
+    public ForgotPassword() 
     {
-
+        Text = "Forgot my password";
         FormBorderStyle = FormBorderStyle.Fixed3D;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -24,13 +22,10 @@ public partial class ResetPassword : Form
         Width = 400;
         Height = 200;
 
-        workingHeight = ClientRectangle.Height;
-        workingWidth = ClientRectangle.Width;
-
         usernameInput = new TextBox
         {
-            Location = new Point(workingWidth / 20, workingHeight / 4 + 5),
-            Size = new Size(workingWidth - 2 * (workingWidth / 20), 25)
+            Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 5),
+            Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25)
         };
         Label l1 = new Label
         {
@@ -43,8 +38,8 @@ public partial class ResetPassword : Form
 
         emailInput = new TextBox
         {
-            Location = new Point(workingWidth / 20, workingHeight / 4 + 50),
-            Size = new Size(workingWidth - 2 * (workingWidth / 20), 25),
+            Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 50),
+            Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25),
         };
         Label l2 = new Label
         {
@@ -56,7 +51,7 @@ public partial class ResetPassword : Form
 
         seePasswd = new Button();
         seePasswd.Size = new Size(60, 25);
-        seePasswd.Location = new Point(workingWidth - seePasswd.Width - 5, workingHeight - seePasswd.Height - 5);
+        seePasswd.Location = new Point(ClientRectangle.Width - seePasswd.Width - 5, ClientRectangle.Height - seePasswd.Height - 5);
         seePasswd.Text = "log in";
         Controls.Add(seePasswd);
         seePasswd.Click += seePasswdClick;
@@ -100,23 +95,5 @@ public partial class ResetPassword : Form
             else label.Text = "Couldn't find an account with provided email address";
             sqlConnection.Close();
         }
-    }
-
-    private void InitializeComponent()
-    {
-            this.SuspendLayout();
-            // 
-            // ResetPassword
-            // 
-            this.ClientSize = new System.Drawing.Size(282, 253);
-            this.Name = "ResetPassword";
-            this.Load += new System.EventHandler(this.ResetPassword_Load);
-            this.ResumeLayout(false);
-
-    }
-
-    private void ResetPassword_Load(object sender, EventArgs e)
-    {
-        
     }
 }

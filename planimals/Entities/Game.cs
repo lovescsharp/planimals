@@ -43,7 +43,7 @@ public class Game
         playerHand = new Hand(this);
         playerChain = new Chain(this);
         cells = new List<List<(Rectangle, bool)>>();
-        cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
+        cell = new Rectangle(form.Width / 8, form.Height / 6, form.ClientRectangle.Height / 8 + 3, form.ClientRectangle.Width / 10 + 3);
         
         UpdateCells();
         imageIndex = 3;
@@ -54,7 +54,7 @@ public class Game
         form.currentScore.Text = $"points : {overallScore}";
         form.label.Show();
         form.label.Text = "";
-        form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
+        form.label.Location = new Point(form.ClientRectangle.Width / 10, form.ClientRectangle.Height / 20);
         if (username != string.Empty)
         {
             CleanDb();
@@ -94,7 +94,7 @@ public class Game
         playerChain.Load();
 
         cells = new List<List<(Rectangle, bool)>>();
-        cell = new Rectangle(form.Width / 8, form.Height / 6, form.workingHeight / 8 + 3, form.workingWidth / 10 + 3);
+        cell = new Rectangle(form.Width / 8, form.Height / 6, form.ClientRectangle.Height / 8 + 3, form.ClientRectangle.Width / 10 + 3);
 
         countDownTimer = new Timer();
         countDownTimer.Interval = 1000;
@@ -111,7 +111,7 @@ public class Game
         form.labelTimer.Text = "";
         form.label.Show();
         form.label.Text = "";
-        form.label.Location = new Point(form.workingWidth / 10, form.workingHeight / 20);
+        form.label.Location = new Point(form.ClientRectangle.Width / 10, form.ClientRectangle.Height / 20);
         form.readySteadyGo.Show();
         form.readySteadyGo.Enabled = true;
                     form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
@@ -189,7 +189,7 @@ public class Game
         if (username != string.Empty) {
             CleanDb();
         };
-        form.label.Location = new Point(form.workingWidth / 2 - form.label.Width, 100);
+        form.label.Location = new Point(form.ClientRectangle.Width / 2 - form.label.Width, 100);
         form.label.Font = form.largeFont;
         form.label.Text = "Score: " + overallScore.ToString();
         foreach (Control control in form.endControls)

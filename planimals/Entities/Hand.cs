@@ -76,7 +76,7 @@ public class Hand : List<Card>
         for (int i = 0; i < Count; i++)
         this[i].MoveCard(
             this[i].prevLocation =
-            new Point(this[i].Width * i, game.form.workingHeight - this[i].Height));
+            new Point(this[i].Width * i, game.form.ClientRectangle.Height - this[i].Height));
     }
     public override string ToString() {
         string s = "[ ";

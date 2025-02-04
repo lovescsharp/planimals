@@ -19,14 +19,14 @@ namespace planimals
         private Button cancelButton;
         private Button createButton;
 
-        private int workingWidth;
-        private int workingHeight;
+        
 
         public CreateAccountForm(MainForm f)
         {
             InitializeComponent();
 
             form = f;
+            Text = "Create account";
 
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
@@ -34,9 +34,6 @@ namespace planimals
 
             Width = 400;
             Height = 300;
-
-            workingWidth = ClientRectangle.Width;
-            workingHeight = ClientRectangle.Height;
 
             label = new Label
             {
@@ -47,8 +44,8 @@ namespace planimals
 
             usernameInput = new TextBox
             {
-                Location = new Point(workingWidth / 20, workingHeight / 4 + 5),
-                Size = new Size(workingWidth - 2 * (workingWidth / 20), 25)
+                Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 5),
+                Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25)
             };
             Label l1 = new Label
             {
@@ -61,8 +58,8 @@ namespace planimals
 
             passwordInput = new TextBox
             {
-                Location = new Point(workingWidth / 20, workingHeight / 4 + 50),
-                Size = new Size(workingWidth - 2 * (workingWidth / 20), 25),
+                Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 50),
+                Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25),
                 PasswordChar = '*'
             };
             Label l2 = new Label
@@ -75,8 +72,8 @@ namespace planimals
 
             emailInput = new TextBox
             {
-                Location = new Point(workingWidth / 20, workingHeight / 4 + 100),
-                Size = new Size(workingWidth - 2 * (workingWidth / 20), 25)
+                Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 100),
+                Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25)
             };
             Label l3 = new Label
             {
@@ -88,14 +85,14 @@ namespace planimals
 
             createButton = new Button();
             createButton.Size = new Size(90, 25);
-            createButton.Location = new Point(workingWidth - createButton.Width - 5, workingHeight - createButton.Height - 5);
+            createButton.Location = new Point(ClientRectangle.Width - createButton.Width - 5, ClientRectangle.Height - createButton.Height - 5);
             createButton.Text = "create account";
             Controls.Add(createButton);
             createButton.Click += Create;
 
             cancelButton = new Button();
             cancelButton.Size = new Size(60, 25);
-            cancelButton.Location = new Point(5, workingHeight - cancelButton.Height - 5);
+            cancelButton.Location = new Point(5, ClientRectangle.Height - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
             Controls.Add(cancelButton);
             cancelButton.Click += Cancel;

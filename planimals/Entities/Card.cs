@@ -14,6 +14,7 @@ public class Card : PictureBox
     private Stopwatch s;
 
     public bool Picked;
+    bool Hoovered;
     public Point prevLocation, rectLocation;
     private Point offset, p, v, pv;
     private double animationTime = 0.6;
@@ -62,9 +63,11 @@ public class Card : PictureBox
         SizeMode = PictureBoxSizeMode.Zoom;
         Size = new Size(cardWidth, cardHeight);
         Location = position;
-        prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
-        BackColor = Color.Gray;
+        prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - cardHeight);
+        if (game.form.currTheme == MainForm.Theme.Dark) BackColor = Color.DarkGray;
+        else BackColor = Color.LightGray;
         Picked = false;
+        Hoovered = false;
 
         ContextMenu cm = new ContextMenu();
         cm.MenuItems.Add("Show Info", new EventHandler(card_RightClick));
@@ -79,7 +82,20 @@ public class Card : PictureBox
     }
     protected void OnPaint(object sender, PaintEventArgs e)
     {
-        using (Font myFont = new Font("Mono", 10)) e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
+        using (Font myFont = new Font("Mono", 10))
+        {
+            if (!Hoovered)
+            {
+                if (game.form.currTheme == MainForm.Theme.Dark) e.Graphics.DrawString(CommonName, myFont, Brushes.LightGray, new Point(Width / 10, Height / 20));
+                else e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
+            }
+            else 
+            {
+                if (game.form.currTheme == MainForm.Theme.Dark) e.Graphics.DrawString(CommonName, myFont, Brushes.White, new Point(Width / 10, Height / 20));
+                else e.Graphics.DrawString(CommonName, myFont, Brushes.Black, new Point(Width / 10, Height / 20));
+            }
+
+        }
     }
     private void card_MouseDown(object sender, MouseEventArgs e)
     {
@@ -112,7 +128,7 @@ public class Card : PictureBox
                             game.cells[i][j] = (game.cells[i][j].Item1, true);
                             inChain = true;
                             game.playerHand.Remove(this);
-                            prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                            prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - cardHeight);
                             game.playerChain[i].Add(this);
                             if (game.username != string.Empty)
                             {
@@ -138,7 +154,7 @@ public class Card : PictureBox
                                 game.playerChain.UpdateIndices();
                                 game.playerChain[i][j].PushToHand();
                             }
-                            game.playerChain[i][j].prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.workingHeight - cardHeight);
+                            game.playerChain[i][j].prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - cardHeight);
                             game.playerHand.Add(game.playerChain[i][j]);
                             game.playerChain[i][j].rectLocation = new Point(0, 0);
                             game.playerChain[i][j].inChain = false;
@@ -325,17 +341,10 @@ public class Card : PictureBox
             sqlConnection.Close();
         }
     }
-    private void Drop()
-    {
-        Picked = false;
-        BackColor = Color.Gray;
-        FindForm().Invalidate();
-    }
+    private void Drop() => Picked = false;
     private void Pick()
     {
         Picked = true;
-        BackColor = Color.White;
-        FindForm().Invalidate();
         BringToFront();
     }
     public void card_RightClick(object sender, EventArgs e)
@@ -355,13 +364,19 @@ public class Card : PictureBox
     }
     private void card_MouseEnter(object sender, EventArgs e)
     {
-        BackColor = Color.White;
+        Hoovered = true;
+        if (game.form.currTheme == MainForm.Theme.Dark) BackColor = Color.Gray;
+        else BackColor = Color.DarkGray;
         BringToFront();
+        Invalidate();
     }
     private void card_MouseLeave(object sender, EventArgs e)
     {
-        BackColor = Color.Gray;
+        Hoovered = false;
+        if (game.form.currTheme == MainForm.Theme.Dark) BackColor = Color.DarkGray;
+        else BackColor = Color.LightGray;    
         SendToBack();
+        Invalidate();
     }
     public void MoveCard(Point u) 
     {

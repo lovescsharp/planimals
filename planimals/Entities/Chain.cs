@@ -280,10 +280,10 @@ public class Chain : List<List<Card>>
                     Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{scientificName}.png"),
                     hierarchy,
                     habitat,
-                    new Point(game.form.workingWidth, game.form.workingHeight),
+                    new Point(game.form.ClientRectangle.Width, game.form.ClientRectangle.Height),
                     true
                     );
-                c.prevLocation = new Point(Card.cardWidth * count, game.form.workingHeight - Card.cardHeight);
+                c.prevLocation = new Point(Card.cardWidth * count, game.form.ClientRectangle.Height - Card.cardHeight);
                 count++;
                 while (Count <= rowNo) Add(new List<Card>());
                 this[rowNo].Add(c);

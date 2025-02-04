@@ -92,7 +92,7 @@ public partial class Deck : Stack<int>
                                 Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.png"),
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
-                                new Point(Card.cardWidth * game.playerHand.Count, game.form.workingHeight - game.form.ClientRectangle.Width / 10),
+                                new Point(Card.cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - game.form.ClientRectangle.Width / 10),
                                 false
                                 );
                             game.playerHand.Add(c);
