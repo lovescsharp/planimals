@@ -527,7 +527,7 @@ public partial class MainForm : Form
     {
         if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
     }
-    private void chainButton_Click(object sender, EventArgs e) => game.playerChain.CHAIN(); //   \(0o0)/
+    private void chainButton_Click(object sender, EventArgs e) => game.playerChain.ChainChain(); //   \(0o0)/
     private void chainButton_MouseMove(object sender, MouseEventArgs e)
     {
         if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)

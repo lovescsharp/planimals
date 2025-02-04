@@ -97,7 +97,7 @@ public class Card : PictureBox
     {
         if (!inChain)
         {
-            Console.WriteLine("moving from hand");
+            //Console.WriteLine("moving from hand");
             for (int i = 0; i < game.cells.Count; i++)
             {
                 for (int j = 0; j < game.cells[i].Count; j++)
@@ -120,13 +120,12 @@ public class Card : PictureBox
                                 PushToChain(i, j);
                             }
                             game.UpdateCells();
-                            //Console.WriteLine(Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width);
-                            if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
+                            if (cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                             else game.playerHand.ShiftCards();
                             game.form.Invalidate();
                             rectLocation = Location;
-                            //Console.WriteLine(game.playerHand.ToString());
-                            //Console.WriteLine(game.playerChain.ToString());
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                         else //replacing a card in the cell with the just dropped one
@@ -145,7 +144,7 @@ public class Card : PictureBox
                             game.playerChain[i][j].inChain = false;
                             game.playerChain[i][j] = this;
                             inChain = true;
-                            game.playerChain[i][j].Location = rectLocation = game.cells[i][j].Item1.Location;
+                            Location = rectLocation = game.cells[i][j].Item1.Location;
                             if (game.username != string.Empty)
                             {
                                 RemoveFromHand();
@@ -153,10 +152,8 @@ public class Card : PictureBox
                             }
                             if (cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                             else game.playerHand.ShiftCards();
-                            game.playerChain[i][j].MoveCard(prevLocation);
-                            Location = rectLocation = game.cells[i][j].Item1.Location;
-                            //Console.WriteLine(game.playerHand.ToString());
-                            //Console.WriteLine(game.playerChain.ToString());
+                            Console.WriteLine(game.playerHand.ToString());
+                            Console.WriteLine(game.playerChain.ToString());
                             return;
                         }
                     }
@@ -164,8 +161,8 @@ public class Card : PictureBox
             }
             Drop();
             Location = prevLocation;
-            //Console.WriteLine(game.playerHand.ToString());
-            //Console.WriteLine(game.playerChain.ToString());
+            Console.WriteLine(game.playerHand.ToString());
+            Console.WriteLine(game.playerChain.ToString());
         }
         else if (inChain)
         {
@@ -201,8 +198,8 @@ public class Card : PictureBox
                                             PushToChain(k, l);
                                             game.playerChain.UpdateIndices();
                                         }
-                                        //Console.WriteLine(game.playerHand.ToString());
-                                        //Console.WriteLine(game.playerChain.ToString());
+                                        Console.WriteLine(game.playerHand.ToString());
+                                        Console.WriteLine(game.playerChain.ToString());
                                         return;
                                     }
                                     else if (l == game.cells[k].Count - 1) //moving this card to tail of subchain
@@ -222,8 +219,8 @@ public class Card : PictureBox
                                             game.playerChain.UpdateIndices();
                                         }
 
-                                        //Console.WriteLine(game.playerHand.ToString());
-                                        //Console.WriteLine(game.playerChain.ToString());
+                                        Console.WriteLine(game.playerHand.ToString());
+                                        Console.WriteLine(game.playerChain.ToString());
                                         return;
                                     }
 
@@ -232,16 +229,29 @@ public class Card : PictureBox
                                         Drop();
                                         Location = rectLocation;
 
-                                        //Console.WriteLine(game.playerHand.ToString());
-                                        //Console.WriteLine(game.playerChain.ToString());
+                                        Console.WriteLine(game.playerHand.ToString());
+                                        Console.WriteLine(game.playerChain.ToString());
                                         return;
                                     }
                                     //if we are here we swap 2 cards in chain
 
-                                    
+                                    if (game.username != string.Empty)
+                                    { 
+                                        RemoveFromChain(i, j);
+                                        game.playerChain[k][l].RemoveFromChain(k, l);
+                                        PushToChain(k, l);
+                                        game.playerChain[k][l].PushToChain(i, j);
+                                    }
 
-                                    //Console.WriteLine(game.playerHand.ToString());
-                                    //Console.WriteLine(game.playerChain.ToString());
+                                    Card temp = game.playerChain[k][l];
+                                    Drop();
+                                    Location = rectLocation = game.cells[k][l].Item1.Location;
+                                    game.playerChain[k][l].MoveCard( game.playerChain[k][l].rectLocation = game.cells[i][j].Item1.Location);
+                                    game.playerChain[k][l] = this;
+                                    game.playerChain[i][j] = temp;
+
+                                    Console.WriteLine(game.playerHand.ToString());
+                                    Console.WriteLine(game.playerChain.ToString());
                                     return;
                                 }
                             }
@@ -265,8 +275,8 @@ public class Card : PictureBox
                         Drop();
                         rectLocation = new Point(0, 0);
                         inChain = false;
-                        //Console.WriteLine(game.playerHand.ToString());
-                        //Console.WriteLine(game.playerChain.ToString());
+                        Console.WriteLine(game.playerHand.ToString());
+                        Console.WriteLine(game.playerChain.ToString());
                         return;
                     }
                 }
@@ -295,7 +305,7 @@ public class Card : PictureBox
     }
     public void PushToChain(int RowNo, int ColNo)
     {
-        Console.WriteLine($"pushing to chain {CommonName} to [{RowNo}][{ColNo}]");
+        //Console.WriteLine($"pushing to chain {CommonName} to [{RowNo}][{ColNo}]");
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand pushCardToChain = new SqlCommand($"INSERT INTO FoodChainCards(Username, CardID, RowNo, PositionNo) VALUES ('{game.username}', '{ScientificName}', {RowNo}, {ColNo})", sqlConnection);
@@ -306,7 +316,7 @@ public class Card : PictureBox
     }
     public void RemoveFromChain(int RowNo, int ColNo)
     {
-        Console.WriteLine($"removing from chain {CommonName} from [{RowNo}][{ColNo}]");
+        //Console.WriteLine($"removing from chain {CommonName} from [{RowNo}][{ColNo}]");
         using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
         {
             SqlCommand deleteCardFromChain = new SqlCommand($"DELETE FROM FoodChainCards WHERE Username='{game.username}' AND CardID='{ScientificName}' AND RowNo={RowNo} AND PositionNo={ColNo}", sqlConnection);
