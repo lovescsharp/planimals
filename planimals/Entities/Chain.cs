@@ -81,7 +81,7 @@ public class Chain : List<List<Card>>
     private int CalcScore(int noOfCards)
     {
         int score = 0;
-        for (int i = 0; i < noOfCards; i++) score += i + 1;
+        for (int i = 1; i < noOfCards + 1; i++) score += i;
         return score;
     }
     public void ChainChain()
@@ -224,6 +224,8 @@ public class Chain : List<List<Card>>
             List<List<(string, int, int)>> chain = new List<List<(string, int, int)>>();
             for (int i = 0; i < count; i++) chain.Add(new List<(string, int, int)>());
 
+            //Console.WriteLine($"count = {chain.Count}");
+
             int c = 0;
             int currRow = int.Parse(getRows.ExecuteScalar().ToString());
             using (SqlDataReader r = getRows.ExecuteReader())
@@ -233,7 +235,7 @@ public class Chain : List<List<Card>>
                     if (int.Parse(r["RowNo"].ToString()) > currRow) 
                     {
                         c++;
-                        currRow++;
+                        currRow = int.Parse(r["RowNo"].ToString());
                     }
                     chain[c].Add((r["CardID"].ToString(), int.Parse(r["RowNo"].ToString()), int.Parse(r["PositionNo"].ToString())));
                 }
