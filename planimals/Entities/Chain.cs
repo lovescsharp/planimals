@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 public class Chain : List<List<Card>>
@@ -218,20 +219,25 @@ public class Chain : List<List<Card>>
             sqlConnection.Open();
             int count = int.Parse(getNoOfRows.ExecuteScalar().ToString());
             if (count == 0) return;
-            SqlCommand getRows = new SqlCommand($"SELECT CardID, RowNo, PositionNo FROM FoodChainCards WHERE Username='{game.username}' ORDER BY RowNo, PositionNo;", sqlConnection);
+            SqlCommand getRows = new SqlCommand($"SELECT RowNo, CardID, PositionNo FROM FoodChainCards WHERE Username='{game.username}' ORDER BY RowNo, PositionNo;", sqlConnection);
             List<List<(string, int, int)>> chain = new List<List<(string, int, int)>>();
             for (int i = 0; i < count; i++) chain.Add(new List<(string, int, int)>());
 
-            foreach (var sublist in chain)
-            { 
+            foreach (List<(string, int, int)> sublist in chain)
+            {
                 foreach (var item in sublist) Console.WriteLine($"({item.Item1}, {item.Item2}, {item.Item3})");
-                Console.WriteLine(); 
+                Console.WriteLine();
             }
 
+            int c = 0;
+            int currRow = int.Parse(getRows.ExecuteScalar().ToString());
             using (SqlDataReader r = getRows.ExecuteReader())
                 while (r.Read())
-                    chain[ ].Add((r["CardID"].ToString(), int.Parse(r["RowNo"].ToString()), int.Parse(r["PositionNo"].ToString())));
-
+                {
+                    Console.WriteLine($"(r[\"CardID\"].ToString() = {r["CardID"].ToString()}\n {currRow}");
+                    if (int.Parse(r["RowNo"].ToString()) > currRow) c++;
+                    chain[c].Add((r["CardID"].ToString(), int.Parse(r["RowNo"].ToString()), int.Parse(r["PositionNo"].ToString())));
+                }
             SqlCommand updateIndices = new SqlCommand("", sqlConnection);
             for (int i = 0; i < chain.Count; i++)
                 for (int j = 0; j < chain[i].Count; j++)

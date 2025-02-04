@@ -219,6 +219,7 @@ public class Card : PictureBox
                                         {
                                             RemoveFromChain(i, j);
                                             PushToChain(k, l);
+                                            game.playerChain.UpdateIndices();
                                         }
 
                                         //Console.WriteLine(game.playerHand.ToString());
