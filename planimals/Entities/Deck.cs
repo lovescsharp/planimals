@@ -66,11 +66,10 @@ public partial class Deck : Stack<int>
     }
     public void DrawCard(object sender, EventArgs e)
     {
-        //Console.WriteLine($"hand.count = {game.playerHand.Count}\nchain.count = {game.playerChain.CountAll()}");
         if (game.playerHand.Count < 20 || !game.playerHand.IsHot())
         {
             string sciname;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++) //to make the game flow faster, instead of drawing just one card each click, you draw 3
             {
                 if (game.playerHand.Count == 20)
                 {
@@ -93,7 +92,7 @@ public partial class Deck : Stack<int>
                                 Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sciname}.png"),
                                 (int)reader["Hierarchy"],
                                 reader["Habitat"].ToString(),
-                                new Point(Card.cardWidth * game.playerHand.Count, game.form.workingHeight - game.form.ClientRectangle.Width / 10),
+                                new Point(Card.cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - game.form.ClientRectangle.Width / 10),
                                 false
                                 );
                             game.playerHand.Add(c);

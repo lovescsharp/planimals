@@ -9,9 +9,6 @@ namespace planimals
     {
         MainForm form;
 
-        private int workingWidth;
-        private int workingHeight;
-
         private Button loginButton;
         private Button signUpButton;
         private Button cancelButton;
@@ -26,7 +23,7 @@ namespace planimals
             InitializeComponent();
 
             form = f;
-
+            Name = "log in";
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -34,13 +31,10 @@ namespace planimals
             Width = 400;
             Height = 200;
 
-            workingHeight = ClientRectangle.Height;
-            workingWidth = ClientRectangle.Width;
-
             usernameInput = new TextBox
             {
-                Location = new Point(workingWidth / 20, workingHeight / 4 + 5),
-                Size = new Size(workingWidth - 2 * (workingWidth / 20), 25)
+                Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 5),
+                Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25)
             };
             Label l1 = new Label
             {
@@ -53,8 +47,8 @@ namespace planimals
 
             passwordInput = new TextBox
             {
-                Location = new Point(workingWidth / 20, workingHeight / 4 + 50),
-                Size = new Size(workingWidth - 2 * (workingWidth / 20), 25),
+                Location = new Point(ClientRectangle.Width / 20, ClientRectangle.Height / 4 + 50),
+                Size = new Size(ClientRectangle.Width - 2 * (ClientRectangle.Width / 20), 25),
                 PasswordChar = '*'
             };
             Label l2 = new Label
@@ -67,28 +61,28 @@ namespace planimals
 
             loginButton = new Button();
             loginButton.Size = new Size(60, 25);
-            loginButton.Location = new Point(workingWidth - loginButton.Width - 5, workingHeight - loginButton.Height - 5);
+            loginButton.Location = new Point(ClientRectangle.Width - loginButton.Width - 5, ClientRectangle.Height - loginButton.Height - 5);
             loginButton.Text = "log in";
             Controls.Add(loginButton);
             loginButton.Click += LoginClick;
 
             cancelButton = new Button();
             cancelButton.Size = new Size(60, 25);
-            cancelButton.Location = new Point(5, workingHeight - cancelButton.Height - 5);
+            cancelButton.Location = new Point(5, ClientRectangle.Height - cancelButton.Height - 5);
             cancelButton.Text = "cancel";
             Controls.Add(cancelButton);
             cancelButton.Click += Cancel;
 
             signUpButton = new Button();
             signUpButton.Size = new Size(90, 25);
-            signUpButton.Location = new Point(loginButton.Location.X - signUpButton.Width - 5, workingHeight - signUpButton.Height - 5);
+            signUpButton.Location = new Point(loginButton.Location.X - signUpButton.Width - 5, ClientRectangle.Height - signUpButton.Height - 5);
             signUpButton.Text = "create account";
             Controls.Add(signUpButton);
             signUpButton.Click += SignUp;
 
             resestPasswdButton = new Button();
             resestPasswdButton.Size = new Size (60, 25);
-            resestPasswdButton.Location = new Point(signUpButton.Location.X - resestPasswdButton.Width - 5, workingHeight - resestPasswdButton.Height - 5);
+            resestPasswdButton.Location = new Point(signUpButton.Location.X - resestPasswdButton.Width - 5, ClientRectangle.Height - resestPasswdButton.Height - 5);
             resestPasswdButton.Text = "reset password";
             Controls.Add(resestPasswdButton);
             resestPasswdButton.Click += ResestPasswdButton_Click;
@@ -104,7 +98,7 @@ namespace planimals
         }
         private void ResestPasswdButton_Click(object sender, EventArgs e)
         {
-            ResetPassword rp = new ResetPassword();
+            ForgotPassword rp = new ForgotPassword();
             rp.ShowDialog();
         }
         private void LoginClick(object sender, EventArgs e)

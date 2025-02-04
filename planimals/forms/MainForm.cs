@@ -18,9 +18,16 @@ public partial class MainForm : Form
     public int totalPoints; //total points the player has on their account
 
     Game game;
-    private static string dbPath = Path.Combine(Environment.CurrentDirectory, "cards.mdf");
+    static string dbPath = Path.Combine(Environment.CurrentDirectory, "cards.mdf");
     public static string CONNECTION_STRING = "Data Source=(LocalDB)\\MSSQLLocalDB;" + $"AttachDbFilename={dbPath}" + ";Integrated Security=True;Connect Timeout=30";
 
+
+    public enum Theme
+    {
+        Light,
+        Dark
+    }
+    public Theme currTheme;
 
     public Button playButton;
     public Button loadButton;
@@ -36,8 +43,7 @@ public partial class MainForm : Form
 
     public PictureBox readySteadyGo;
 
-    public int workingHeight;
-    public int workingWidth;
+    Button darkModeButton;
 
     public PictureBox retryButton;
 
@@ -46,7 +52,7 @@ public partial class MainForm : Form
 
     public Button yesButton;
     public Button noButton;
-    public Label youSureWannaQuitLabel;
+    public Label goToMenuLabel;
 
     public PictureBox drawCardButton;
     public Rectangle drawCardRectangle;
@@ -78,14 +84,12 @@ public partial class MainForm : Form
         //static size
         FormBorderStyle = FormBorderStyle.Fixed3D;
         Size = new Size(1600, 900);
-        workingHeight = ClientRectangle.Height;
-        workingWidth = ClientRectangle.Width;
 
         BackgroundImage = new Bitmap(Image.FromFile(Environment.CurrentDirectory + "\\assets\\photos\\background.png"));
         BackgroundImageLayout = ImageLayout.Stretch;
         stats = new Label()
         {
-            Location = new Point(workingWidth - 300, 10),
+            Location = new Point(ClientRectangle.Width - 300, 10),
             ForeColor = Color.White,
             BackColor = Color.Transparent,
             AutoSize = true
@@ -97,8 +101,8 @@ public partial class MainForm : Form
             BackColor = Color.White,
             Size = new Size(50, 30),
             Location = new Point(
-                workingWidth / 2 - 50 / 2,
-                workingHeight / 2 - 30 / 2 - 60)
+                ClientRectangle.Width / 2 - 50 / 2,
+                ClientRectangle.Height / 2 - 30 / 2 - 60)
         };
         Controls.Add(playButton);
         playButton.Click += playButton_Click;
@@ -108,7 +112,7 @@ public partial class MainForm : Form
             Text = "load",
             BackColor = Color.White,
             Size = new Size(50, 30),
-            Location = new Point(workingWidth / 2 - playButton.Width / 2, workingHeight / 2 - playButton.Height / 2 - 30)
+            Location = new Point(ClientRectangle.Width / 2 - playButton.Width / 2, ClientRectangle.Height / 2 - playButton.Height / 2 - 30)
         };
         Controls.Add(loadButton);
         loadButton.Click += continueButton_Click;
@@ -120,9 +124,19 @@ public partial class MainForm : Form
             Size = new Size(50, 30),
         };
         loginButton.Location = new Point(
-                workingWidth / 2 - loginButton.Width / 2, workingHeight / 2 - loginButton.Height / 2);
+                ClientRectangle.Width / 2 - loginButton.Width / 2, ClientRectangle.Height / 2 - loginButton.Height / 2);
         Controls.Add(loginButton);
         loginButton.Click += Login;
+
+        darkModeButton = new Button()
+        {
+            Text = "dark mode",
+            BackColor = Color.White,
+            AutoSize = true
+            };
+        darkModeButton.Location = new Point(10, ClientRectangle.Height - darkModeButton.Height - 10);
+        Controls.Add(darkModeButton);
+        darkModeButton.Click += darkModeButton_Click;
 
         openEditorButton = new Button()
         {
@@ -130,29 +144,30 @@ public partial class MainForm : Form
             BackColor = Color.White,
             Size = new Size(50, 30),
         };
-        openEditorButton.Location = new Point(workingWidth / 2 - openEditorButton.Width / 2, workingHeight / 2 - openEditorButton.Height / 2 + 30);
+        openEditorButton.Location = new Point(ClientRectangle.Width / 2 - openEditorButton.Width / 2, ClientRectangle.Height / 2 - openEditorButton.Height / 2 + 30);
         Controls.Add(openEditorButton);
         openEditorButton.Click += openEditorButton_Click;
 
         title = new Label()
-        { Text = "Planimals",
+        { 
+            Text = "planimals",
             AutoSize = true,
             Font = largeFont,
             ForeColor = Color.White,
             BackColor = Color.Transparent
         };
-        title.Location = new Point((workingWidth - title.Size.Width) / 2, workingHeight / 8);
+        title.Location = new Point((ClientRectangle.Width - title.Size.Width) / 2, ClientRectangle.Height / 8);
         Controls.Add(title);
 
         retryButton = new PictureBox()
         {
             Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "retry.png")),
             SizeMode = PictureBoxSizeMode.StretchImage,
-            Size = new Size(workingWidth / 10, workingWidth / 10),
+            Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Width / 10),
         };
         retryButton.Location = new Point(
-            workingWidth / 2 - retryButton.Width / 2,
-            workingHeight / 2 - retryButton.Height / 2);
+            ClientRectangle.Width / 2 - retryButton.Width / 2,
+            ClientRectangle.Height / 2 - retryButton.Height / 2);
         Controls.Add(retryButton);
         retryButton.Click += retryButton_Click;
 
@@ -160,11 +175,11 @@ public partial class MainForm : Form
         {
             Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "exit.png")),
             SizeMode = PictureBoxSizeMode.StretchImage,
-            Size = new Size(workingWidth / 10, workingWidth / 8),
+            Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Width / 8),
         };
         goToMenuButton.Location = new Point(
-            workingWidth / 2 + goToMenuButton.Width,
-            workingHeight / 2 - goToMenuButton.Height / 2);
+            ClientRectangle.Width / 2 + goToMenuButton.Width,
+            ClientRectangle.Height / 2 - goToMenuButton.Height / 2);
         Controls.Add(goToMenuButton);
         goToMenuButton.Click += goToMenuButton_Click;
 
@@ -172,59 +187,58 @@ public partial class MainForm : Form
         {
             Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "exit.png")),
             SizeMode = PictureBoxSizeMode.StretchImage,
-            Size = new Size(workingWidth / 20, workingWidth / 16),
+            Size = new Size(ClientRectangle.Width / 20, ClientRectangle.Width / 16),
             Location = new Point(5, 5)
         };
         Controls.Add(goToMenuInGameButton);
         goToMenuInGameButton.Click += goToMenuInGameButton_Click;
 
-        yesButton = new Button()
-        {
-            Text = "yes",
-            BackColor = Color.White,
-            Size = new Size(50, 30),
-        };
-        yesButton.Location = new Point(
-            workingWidth / 2 + yesButton.Width / 2,
-            workingHeight / 2 - yesButton.Height);
-        Controls.Add(yesButton);
-        yesButton.Click += yesButton_Click;
 
         noButton = new Button()
         {
             Text = "no",
             BackColor = Color.White,
-            Size = new Size(50, 30),
+            AutoSize = true
         };
         noButton.Location = new Point(
-                workingWidth / 2 - noButton.Width - noButton.Width / 2,
-                workingHeight / 2 - noButton.Height);
+                ClientRectangle.Width / 2 - noButton.Width / 2,
+                ClientRectangle.Height / 2 - noButton.Height / 2);
         Controls.Add(noButton);
         noButton.Click += noButton_Click;
 
-        youSureWannaQuitLabel = new Label() {
+        yesButton = new Button()
+        {
+            Text = "yes",
+            BackColor = Color.White,
+            AutoSize = true
+        };
+        yesButton.Location = new Point(ClientRectangle.Width / 2 + yesButton.Width, ClientRectangle.Height / 2  - yesButton.Height / 2);
+        Controls.Add(yesButton);
+        yesButton.Click += yesButton_Click;
+
+        goToMenuLabel = new Label() {
             AutoSize = true,
-            Text = "Are you sure you want to quit?",
+            Text = "Go to main menu?",
             ForeColor = Color.White
         };
-        youSureWannaQuitLabel.Location = new Point(
-                workingWidth / 2 - youSureWannaQuitLabel.Width,
-                workingHeight / 3);
-        Controls.Add(youSureWannaQuitLabel);
+        goToMenuLabel.Location = new Point(
+                ClientRectangle.Width / 2 - goToMenuLabel.Width / 2,
+                ClientRectangle.Height / 3);
+        Controls.Add(goToMenuLabel);
 
         drawCardButton = new PictureBox()
         {
             SizeMode = PictureBoxSizeMode.StretchImage,
-            Size = new Size(workingHeight / 8, workingWidth / 10),
+            Size = new Size(ClientRectangle.Height / 8, ClientRectangle.Width / 10),
             Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "back.png"))
         };
         drawCardButton.Location = new Point(
-            drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
+            drawCardButton.Width - ClientRectangle.Height / 100 * 5,
+            ClientRectangle.Height / 2 - drawCardButton.Height / 2);
 
         Point initPos = new Point(
-            drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
+            drawCardButton.Width - ClientRectangle.Height / 100 * 5,
+            ClientRectangle.Height / 2 - drawCardButton.Height / 2);
         drawCardRectangle = new Rectangle(drawCardButton.Location.X, drawCardButton.Location.Y, drawCardButton.Width, drawCardButton.Height);
         Controls.Add(drawCardButton);
         drawCardButton.MouseClick += drawCardButton_Click;
@@ -234,17 +248,17 @@ public partial class MainForm : Form
         chainButton = new PictureBox()
         {
             SizeMode = PictureBoxSizeMode.StretchImage,
-            Size = new Size(workingWidth / 10, workingHeight / 10),
+            Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Height / 10),
             Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "chain.png"))
         };
         chainButton.Location = new Point(
-                workingWidth - drawCardButton.Width - workingHeight / 10,
-                workingHeight / 2 - drawCardButton.Height / 2);
+                ClientRectangle.Width - drawCardButton.Width - ClientRectangle.Height / 10,
+                ClientRectangle.Height / 2 - drawCardButton.Height / 2);
         chainButtonRectangle = new Rectangle(
-            workingWidth - drawCardButton.Width - workingHeight / 10,
-            workingHeight / 2 - drawCardButton.Height / 2,
-            workingWidth / 10,
-            workingHeight / 10);
+            ClientRectangle.Width - drawCardButton.Width - ClientRectangle.Height / 10,
+            ClientRectangle.Height / 2 - drawCardButton.Height / 2,
+            ClientRectangle.Width / 10,
+            ClientRectangle.Height / 10);
         Controls.Add(chainButton);
         chainButton.Click += new EventHandler(chainButton_Click);
         chainButton.MouseEnter += chainButton_MouseEnter;
@@ -252,7 +266,7 @@ public partial class MainForm : Form
 
         label = new Label()
         {
-            Location = new Point(workingWidth / 10, workingHeight / 20),
+            Location = new Point(ClientRectangle.Width / 10, ClientRectangle.Height / 20),
             ForeColor = Color.White,
             AutoSize = true,
             BackColor = Color.Transparent
@@ -264,8 +278,8 @@ public partial class MainForm : Form
             ForeColor = Color.White,
             Font = new Font(label.Font.FontFamily, 25),
             Location = new Point(
-                (int)(workingWidth * 0.9),
-                (int)((double)workingHeight / 10)),
+                (int)(ClientRectangle.Width * 0.9),
+                (int)((double)ClientRectangle.Height / 10)),
             AutoSize = true
         };
         Controls.Add(labelTimer);
@@ -289,16 +303,17 @@ public partial class MainForm : Form
         }
         readySteadyGo = new PictureBox()
         {
-            Size = new Size(workingWidth / 10, workingWidth / 4),
+            Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Width / 4),
             SizeMode = PictureBoxSizeMode.CenterImage,
         };
         readySteadyGo.Location = new Point(
-            workingWidth / 2 - readySteadyGo.Width / 2,
-            workingHeight / 2 - readySteadyGo.Height / 2);
+            ClientRectangle.Width / 2 - readySteadyGo.Width / 2,
+            ClientRectangle.Height / 2 - readySteadyGo.Height / 2);
         Controls.Add(readySteadyGo);
 
         #endregion
         Paint += new PaintEventHandler(Draw);
+        KeyDown += new KeyEventHandler(escPress);
         gameControls = new List<Control>()
         {
             label,
@@ -315,7 +330,8 @@ public partial class MainForm : Form
             loadButton,
             stats,
             title,
-            openEditorButton
+            openEditorButton,
+            darkModeButton
         };
         endControls = new List<Control>()
         {
@@ -326,7 +342,7 @@ public partial class MainForm : Form
         {
             yesButton,
             noButton,
-            youSureWannaQuitLabel
+            goToMenuLabel
         };
 
         foreach (Control c in Controls)
@@ -340,6 +356,47 @@ public partial class MainForm : Form
             }
         }
         foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
+    }
+
+    private void darkModeButton_Click(object sender, EventArgs e)
+    {
+        if (currTheme == Theme.Light)
+        {
+            currTheme = Theme.Dark;
+            BackgroundImage = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "background_dark.png"));
+            foreach (Control c in Controls)
+            {
+                if (c is Label) c.ForeColor = Color.LightGray;
+                if (c is Button)
+                {
+                    c.BackColor = Color.DarkGray;
+                    c.ForeColor = Color.LightGray;
+                }
+            }
+        }
+        else
+        {
+            currTheme = Theme.Light;
+            BackgroundImage = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", "background.png"));
+            foreach (Control c in Controls)
+            {
+                if (c is Label) c.ForeColor = Color.BlueViolet;
+                if (c is Button)
+                {
+                    c.BackColor = Color.White;
+                    c.ForeColor = Color.Black;
+                }
+            }
+        }
+    }
+
+    private void escPress(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            if (game.countDownTimer.Enabled) goToMenuInGameButton_Click(sender, e);
+            else Close();
+        }
     }
     private void openEditorButton_Click(object sender, EventArgs e)
     {
@@ -493,9 +550,9 @@ public partial class MainForm : Form
     private void drawCardButton_MouseLeave(object sender, EventArgs e)
     {
         drawCardButton.Location = new Point(
-            drawCardButton.Width - workingHeight / 100 * 5,
-            workingHeight / 2 - drawCardButton.Height / 2);
-        drawCardButton.Size = new Size(workingHeight / 8, workingWidth / 10);
+            drawCardButton.Width - ClientRectangle.Height / 100 * 5,
+            ClientRectangle.Height / 2 - drawCardButton.Height / 2);
+        drawCardButton.Size = new Size(ClientRectangle.Height / 8, ClientRectangle.Width / 10);
     }
     private void chainButton_MouseEnter(object sender, EventArgs e)
     {
@@ -505,9 +562,9 @@ public partial class MainForm : Form
     private void chainButton_MouseLeave(object sender, EventArgs e)
     {
         chainButton.Location = new Point(
-            workingWidth - drawCardButton.Width - workingHeight / 10,
-            workingHeight / 2 - drawCardButton.Height / 2);
-        chainButton.Size = new Size(workingWidth / 10, workingHeight / 10);
+            ClientRectangle.Width - drawCardButton.Width - ClientRectangle.Height / 10,
+            ClientRectangle.Height / 2 - drawCardButton.Height / 2);
+        chainButton.Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Height / 10);
     }
     private void Login(object sender, EventArgs e)
     {
@@ -527,18 +584,18 @@ public partial class MainForm : Form
     {
         if (username != "") stats.Text = $"Hey, {username}!\ntotal points: {totalPoints}";
     }
-    private void chainButton_Click(object sender, EventArgs e) => game.playerChain.CHAIN(); //   \(0o0)/
+    private void chainButton_Click(object sender, EventArgs e) => game.playerChain.ChainChain(); //   \(0o0)/
     private void chainButton_MouseMove(object sender, MouseEventArgs e)
     {
         if (MousePosition.X < chainButtonRectangle.Right && MousePosition.X > chainButtonRectangle.Left && MousePosition.Y < chainButtonRectangle.Bottom && MousePosition.Y > chainButtonRectangle.Top)
         {
-            chainButton.Width = workingWidth / 10 + 5;
-            chainButton.Height = workingHeight / 10 + 5;
+            chainButton.Width = ClientRectangle.Width / 10 + 5;
+            chainButton.Height = ClientRectangle.Height / 10 + 5;
         }
         else
         {
-            chainButton.Width = workingWidth / 10;
-            chainButton.Height = workingHeight / 10;
+            chainButton.Width = ClientRectangle.Width / 10;
+            chainButton.Height = ClientRectangle.Height / 10;
         }
     }
     public void DisposeCards() 
