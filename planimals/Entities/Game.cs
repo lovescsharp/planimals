@@ -117,11 +117,8 @@ public class Game
                     form.readySteadyGo.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", imageIndex.ToString() + ".png"));
         UpdateCells();
         for (int i = 0; i < playerChain.Count; i++)
-            for (int j = 0; j < playerChain[i].Count; j++)
-            {
-                Console.WriteLine($"card.rectLocation[{i}][{j}] = {cells[i][j].Item1.Location}");
+            for (int j = 0; j < playerChain[i].Count; j++) //Console.WriteLine($"card.rectLocation[{i}][{j}] = {cells[i][j].Item1.Location}");
                 playerChain[i][j].rectLocation = cells[i][j].Item1.Location;
-            }
         foreach (List<Card> chain in playerChain) foreach (Card c in chain) c.Hide();
         foreach (Card c in playerHand) c.Hide();
         readySteadyGoTimer.Start();

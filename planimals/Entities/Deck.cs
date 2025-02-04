@@ -20,7 +20,7 @@ public partial class Deck : Stack<int>
         size = 40;
         organisms = new List<string> ();
         GetOrganisms();
-        Console.WriteLine($"# of organisms = {organisms.Count}");
+        //Console.WriteLine($"# of organisms = {organisms.Count}");
         GenerateDeck();
     }
     public Deck(Game g, string d) : base() // loader
@@ -40,9 +40,7 @@ public partial class Deck : Stack<int>
             SqlCommand get = new SqlCommand("SELECT Scientific_name FROM Organisms ORDER BY Scientific_name", sqlConnection);
             sqlConnection.Open();
             using (SqlDataReader r = get.ExecuteReader()) 
-            {
                 while (r.Read()) organisms.Add(r["Scientific_name"].ToString());
-            }
             sqlConnection.Close();
         }
     }
@@ -53,7 +51,7 @@ public partial class Deck : Stack<int>
         for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, upperBound);
-            Console.WriteLine($"random index of a card in deck is : {randIdx}");
+            //Console.WriteLine($"random index of a card in deck is : {randIdx}");
             Push(randIdx);
             deckStr += randIdx + ",";
         }

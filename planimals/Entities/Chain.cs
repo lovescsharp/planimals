@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 public class Chain : List<List<Card>>
 {
@@ -50,13 +51,6 @@ public class Chain : List<List<Card>>
         }
         s += " ]";
         return s;
-    }
-    public int CountAll()
-    {
-        int count = 0;
-        for (int i = 0; i < Count; i++)
-            for (int j = 0; j < this[i].Count; j++) count++;
-        return count;
     }
     public string lastLink()
     {
@@ -213,12 +207,39 @@ public class Chain : List<List<Card>>
     public void ShiftCards() // when a card is removed in the middle of the chain, shift all cards to the left
     {
         for (int i = 0; i < game.playerChain.Count; i++)
-            for (int j = 0; j < game.playerChain[i].Count; j++)
-            {
-                Console.WriteLine(game.playerChain[i][j]);
-                Console.WriteLine(game.cells[i][j]);
-                game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation = game.cells[i][j].Item1.Location);
+            for (int j = 0; j < game.playerChain[i].Count; j++) game.playerChain[i][j].MoveCard(game.playerChain[i][j].rectLocation = game.cells[i][j].Item1.Location);
+    }
+    public void UpdateIndices()
+    {
+        using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
+        {
+
+            SqlCommand getNoOfRows = new SqlCommand($"SELECT COUNT(DISTINCT RowNo) FROM FoodChainCards WHERE Username='{game.username}';", sqlConnection);
+            sqlConnection.Open();
+            int count = int.Parse(getNoOfRows.ExecuteScalar().ToString());
+            if (count == 0) return;
+            SqlCommand getRows = new SqlCommand($"SELECT CardID, RowNo, PositionNo FROM FoodChainCards WHERE Username='{game.username}' ORDER BY RowNo, PositionNo;", sqlConnection);
+            List<List<(string, int, int)>> chain = new List<List<(string, int, int)>>();
+            for (int i = 0; i < count; i++) chain.Add(new List<(string, int, int)>());
+
+            foreach (var sublist in chain)
+            { 
+                foreach (var item in sublist) Console.WriteLine($"({item.Item1}, {item.Item2}, {item.Item3})");
+                Console.WriteLine(); 
             }
+
+            using (SqlDataReader r = getRows.ExecuteReader())
+                while (r.Read())
+                    chain[ ].Add((r["CardID"].ToString(), int.Parse(r["RowNo"].ToString()), int.Parse(r["PositionNo"].ToString())));
+
+            SqlCommand updateIndices = new SqlCommand("", sqlConnection);
+            for (int i = 0; i < chain.Count; i++)
+                for (int j = 0; j < chain[i].Count; j++)
+                    updateIndices.CommandText += $"UPDATE FoodChainCards SET RowNo={i}, PositionNo={j} WHERE CardID='{chain[i][j].Item1}' AND RowNo={chain[i][j].Item2} AND PositionNo={chain[i][j].Item3};\n";
+
+            if (updateIndices.CommandText != string.Empty) updateIndices.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
     }
     public void Load()
     {
