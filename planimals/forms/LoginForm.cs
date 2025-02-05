@@ -83,7 +83,7 @@ namespace planimals
             resestPasswdButton = new Button();
             resestPasswdButton.Size = new Size (60, 25);
             resestPasswdButton.Location = new Point(signUpButton.Location.X - resestPasswdButton.Width - 5, ClientRectangle.Height - resestPasswdButton.Height - 5);
-            resestPasswdButton.Text = "reset password";
+            resestPasswdButton.Text = "forgot password";
             Controls.Add(resestPasswdButton);
             resestPasswdButton.Click += ResestPasswdButton_Click;
 

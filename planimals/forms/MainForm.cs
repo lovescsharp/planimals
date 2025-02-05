@@ -357,7 +357,6 @@ public partial class MainForm : Form
         }
         foreach (Control control in Controls) if (control is Label) control.ForeColor = Color.BlueViolet;
     }
-
     private void darkModeButton_Click(object sender, EventArgs e)
     {
         if (currTheme == Theme.Light)
@@ -369,7 +368,7 @@ public partial class MainForm : Form
                 if (c is Label) c.ForeColor = Color.LightGray;
                 if (c is Button)
                 {
-                    c.BackColor = Color.DarkGray;
+                    c.BackColor = Color.DarkBlue;
                     c.ForeColor = Color.LightGray;
                 }
             }
@@ -389,14 +388,10 @@ public partial class MainForm : Form
             }
         }
     }
-
     private void escPress(object sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Escape)
-        {
             if (game.countDownTimer.Enabled) goToMenuInGameButton_Click(sender, e);
-            else Close();
-        }
     }
     private void openEditorButton_Click(object sender, EventArgs e)
     {

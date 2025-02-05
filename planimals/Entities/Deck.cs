@@ -17,7 +17,7 @@ public partial class Deck : Stack<int>
         rnd = new Random();
         deckStr = "";
         game = g;
-        size = 40;
+        size = 5;
         organisms = new List<string> ();
         GetOrganisms();
         //Console.WriteLine($"# of organisms = {organisms.Count}");

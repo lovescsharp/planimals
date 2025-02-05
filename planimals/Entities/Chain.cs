@@ -199,6 +199,7 @@ public class Chain : List<List<Card>>
                 game.UpdateCells();
                 game.form.Invalidate();
                 if (!game.playerHand.IsHot() && game.deck.Count == 0) game.Stop();
+                else if (game.playerHand.IsHot() && game.deck.Count == 0) game.form.Display("i see some cards on your hand that can form a chain");
                 if (Card.cardWidth * game.playerHand.Count > game.form.ClientRectangle.Width) game.playerHand.putCardsOnTopOfEachOther();
                 else game.playerHand.ShiftCards();
                 return;
