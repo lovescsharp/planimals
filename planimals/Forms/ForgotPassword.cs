@@ -5,7 +5,6 @@ using System.Windows.Forms;
 
 public partial class ForgotPassword : Form
 {
-
     private TextBox usernameInput;
     private TextBox emailInput;
 
@@ -34,7 +33,6 @@ public partial class ForgotPassword : Form
         };
         Controls.Add(usernameInput);
         Controls.Add(l1);
-
 
         emailInput = new TextBox
         {

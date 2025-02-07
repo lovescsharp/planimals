@@ -173,7 +173,6 @@ namespace planimals.Forms
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 string sci_name = normalizeScientificName(scientificNameInput.Text);
-                File.Copy(imagePathAddTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 sqlConnection.Open();
                 SqlCommand exists = new SqlCommand($"SELECT COUNT(*) FROM Organisms WHERE Scientific_name='{sci_name}';", sqlConnection);
                 int b = (int)exists.ExecuteScalar();
@@ -244,6 +243,7 @@ namespace planimals.Forms
                 insertOrganism.ExecuteNonQuery();
                 if (insertRelations.CommandText != string.Empty) insertRelations.ExecuteNonQuery();
 
+                File.Copy(imagePathAddTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 label.Text = $"Successfully added {sci_name}";
 
                 sqlConnection.Close();
@@ -302,13 +302,19 @@ namespace planimals.Forms
                     label.Text = "No organism found";
                     return;
                 }
-                File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
+                try
+                {
+                    File.Copy(imagePathEditTab, Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"), true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
                 SqlCommand updateOrganism = new SqlCommand($"update Organisms\r\nset Scientific_name='{sci_name}', Common_name='{commonNameEditInput.Text}', Habitat='{habitatEditInput.Text}', Hierarchy={hierarchyEditInput.Text}, Description='{descriptionEditInput.Text}'\r\nwhere Scientific_name='{sci_name}'", sqlConnection);
                 SqlCommand insertRelations = new SqlCommand("", sqlConnection);
                 SqlCommand checkHabitat;
                 foreach (object item in consumesEditInput.CheckedItems) 
                 {
-                    if (existingConsumes.Contains(item.ToString()) || item.ToString() == sci_name) continue;
                     checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
                     string habitat = "";
                     int hierarchy = 1;
@@ -325,6 +331,7 @@ namespace planimals.Forms
                         label.Text = $"{sci_name} does not eat {item.ToString()} as {item.ToString()} has a higher or equal hierarchal order";
                         return;
                     }
+                    if (existingConsumes.Contains(item.ToString()) || item.ToString() == sci_name) continue;
                     if (habitat == habitatEditInput.SelectedItem.ToString())
                         insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{sci_name}', '{item.ToString()}');\n";
                     else
@@ -336,10 +343,9 @@ namespace planimals.Forms
                 }
                 foreach (object item in consumedByEditInput.CheckedItems)
                 {
-                    if (existingConsumedBy.Contains(item.ToString()) || item.ToString() == sci_name) continue;
                     checkHabitat = new SqlCommand($"SELECT Habitat, Hierarchy FROM Organisms WHERE Scientific_name='{item.ToString()}';", sqlConnection);
                     string habitat = "";
-                    int hierarchy = 5;
+                    int hierarchy = 6;
                     using (SqlDataReader r = checkHabitat.ExecuteReader())
                     {
                         while (r.Read())
@@ -352,11 +358,14 @@ namespace planimals.Forms
                     {
                         label.Text = $"{item.ToString()} does not eat {sci_name} as {item.ToString()} has a lower/equal hierarchal order than/to {sci_name}'s";
                         return;
-                    }
-                    if (habitat == habitatEditInput.SelectedItem.ToString()) 
+                    } 
+                    if (existingConsumedBy.Contains(item.ToString()) || item.ToString() == sci_name) continue;
+                    if (habitat == habitatEditInput.SelectedItem.ToString())
                         insertRelations.CommandText += $"INSERT INTO Relations(Consumer, Consumed) values ('{item.ToString()}', '{sci_name}');\n";
                     else
                     {
+                        MessageBox.Show(habitat);
+                        MessageBox.Show(habitatEditInput.SelectedItem.ToString());
                         label.Text = $"{item.ToString()} does not eat {sci_name} as they live in different habitats";
                         return;
                     } 
@@ -368,6 +377,7 @@ namespace planimals.Forms
                 MessageBox.Show($"updateOrganism.CommandText = {updateOrganism.CommandText}");
                 return;
                 */
+
                 updateOrganism.ExecuteNonQuery();
                 if (insertRelations.CommandText != string    .    Empty) insertRelations.ExecuteNonQuery();
 
@@ -462,13 +472,12 @@ namespace planimals.Forms
                 }
                 try
                 {
-                    pictureEditInput.Image = Image.FromFile(Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
+                    pictureEditInput.Image = Image.FromFile(imagePathEditTab = Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png"));
                 }
-                catch 
+                catch
                 {
                     label.Text = $"File {Path.Combine(Environment.CurrentDirectory, "assets", "photos", $"{sci_name}.png")} does not exist";
                 }
-                    
                 sqlConnection.Close();
             }
         }

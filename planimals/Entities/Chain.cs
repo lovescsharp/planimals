@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
-using System.Windows.Forms;
 
 public class Chain : List<List<Card>>
 {
@@ -176,8 +174,8 @@ public class Chain : List<List<Card>>
                                 game.form.Invalidate();
                                 return;
                             }
-                        }
-                        game.overallScore += CalcScore(this[index].Count); //lessgooo everything is okay
+                        } //lessgooo everything is okay
+                        game.overallScore += CalcScore(this[index].Count);
                         game.form.currentScore.Text = $"points : {game.overallScore}";
                         earned += CalcScore(this[index].Count);
                     }
@@ -225,14 +223,12 @@ public class Chain : List<List<Card>>
             List<List<(string, int, int)>> chain = new List<List<(string, int, int)>>();
             for (int i = 0; i < count; i++) chain.Add(new List<(string, int, int)>());
 
-            //Console.WriteLine($"count = {chain.Count}");
 
             int c = 0;
             int currRow = int.Parse(getRows.ExecuteScalar().ToString());
             using (SqlDataReader r = getRows.ExecuteReader())
                 while (r.Read())
                 {
-                    //Console.WriteLine($"(r[\"RowNo\"].ToString() = {int.Parse(r["RowNo"].ToString())}\n {currRow}");
                     if (int.Parse(r["RowNo"].ToString()) > currRow) 
                     {
                         c++;

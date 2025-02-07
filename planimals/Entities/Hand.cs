@@ -99,6 +99,5 @@ public class Hand : List<Card>
         int f = avail / (Count - 1);
         for (int i = 0; i < Count; i++)
             this[i].MoveCard(this[i].prevLocation = new Point(i * f, game.form.ClientRectangle.Height - Card.cardHeight));
-        
     }
 }

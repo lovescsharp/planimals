@@ -102,7 +102,18 @@ namespace planimals
             rp.ShowDialog();
         }
         private void LoginClick(object sender, EventArgs e)
-        {
+        {   foreach (Control c in Controls) 
+            {
+                if (c is TextBox)
+                foreach (char ch in ((TextBox)c).Text)
+                {
+                    if (!char.IsLetterOrDigit(ch) && ch != '_')
+                    {
+                        label.Text = "please enter only letters or digits";
+                        return;
+                    }
+                }
+            }
             using (SqlConnection sqlConnection = new SqlConnection(MainForm.CONNECTION_STRING))
             {
                 SqlCommand cmd = new SqlCommand($"SELECT Count(*) FROM Players WHERE Username=@username AND Password=@password", sqlConnection);

@@ -51,7 +51,6 @@ public partial class Deck : Stack<int>
         for (int i = 0; i < size; i++)
         {
             randIdx = rnd.Next(1, upperBound);
-            //Console.WriteLine($"random index of a card in deck is : {randIdx}");
             Push(randIdx);
             deckStr += randIdx + ",";
         }
