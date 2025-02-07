@@ -3,13 +3,16 @@
   "WorkspaceRootPath": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\card.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\forms\\loginform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -19,9 +22,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\forms\\forgotpassword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\entities\\deck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0D79C328-E8A1-423E-9F69-77EF2ED9A05E}|planimals\\planimals.csproj|\\\\esher.ac.uk\\home\\students\\2023\\233542\\visual studio 2022\\projects\\planimals\\planimals\\forms\\createaccountform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -51,17 +51,17 @@
         },
         {
           "DockedWidth": 446,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MainForm.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeDocumentMoniker": "planimals\\Forms\\MainForm.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\MainForm.cs",
               "RelativeToolTip": "planimals\\Forms\\MainForm.cs",
-              "ViewState": "AgIAAFIBAAAAAAAAAAAhwGkBAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAGIBAAAAAAAAAAAIwGUBAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-29T18:38:29.018Z",
               "IsPinned": true,
@@ -78,12 +78,11 @@
               "ViewState": "AgIAAAgAAAAAAAAAAAAmwB0AAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-31T09:36:21.808Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Card.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Card.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Card.cs",
@@ -92,12 +91,15 @@
               "ViewState": "AgIAAFoBAAAAAAAAAAAYwHgBAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-30T14:24:39.339Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Hand.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Hand.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Hand.cs",
@@ -105,12 +107,11 @@
               "RelativeToolTip": "planimals\\Entities\\Hand.cs",
               "ViewState": "AgIAADsAAAAAAAAAAAAqwE4AAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-04T16:57:22.475Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-04T16:57:22.475Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "LoginForm.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\LoginForm.cs",
               "RelativeDocumentMoniker": "planimals\\Forms\\LoginForm.cs",
@@ -118,12 +119,11 @@
               "RelativeToolTip": "planimals\\Forms\\LoginForm.cs",
               "ViewState": "AgIAAA4AAAAAAAAAAAAqwB8AAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-04T16:57:00.421Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-04T16:57:00.421Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "ForgotPassword.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Forms\\ForgotPassword.cs",
               "RelativeDocumentMoniker": "planimals\\Forms\\ForgotPassword.cs",
@@ -131,8 +131,7 @@
               "RelativeToolTip": "planimals\\Forms\\ForgotPassword.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-04T16:56:59.775Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-04T16:56:59.775Z"
             },
             {
               "$type": "Document",
@@ -144,8 +143,7 @@
               "RelativeToolTip": "planimals\\Forms\\CreateAccountForm.cs",
               "ViewState": "AgIAABwAAAAAAAAAAAAIwC4AAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-04T16:55:37.815Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-04T16:55:37.815Z"
             },
             {
               "$type": "Document",
@@ -157,18 +155,17 @@
               "RelativeToolTip": "planimals\\Entities\\Chain.cs",
               "ViewState": "AgIAAAcBAAAAAAAAAAAqwBoBAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-04T10:48:35.732Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-04T10:48:35.732Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 0,
               "Title": "Deck.cs",
               "DocumentMoniker": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Deck.cs",
               "RelativeDocumentMoniker": "planimals\\Entities\\Deck.cs",
               "ToolTip": "\\\\esher.ac.uk\\home\\Students\\2023\\233542\\Visual Studio 2022\\projects\\planimals\\planimals\\Entities\\Deck.cs",
               "RelativeToolTip": "planimals\\Entities\\Deck.cs",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAIwF4AAAByAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAmwCgAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-31T11:52:42.415Z",
               "EditorCaption": ""
