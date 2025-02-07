@@ -151,7 +151,6 @@ public class Card : PictureBox
                             if (game.username != string.Empty)
                             {
                                 game.playerChain[i][j].RemoveFromChain(i, j);
-                                game.playerChain.UpdateIndices();
                                 game.playerChain[i][j].PushToHand();
                             }
                             game.playerChain[i][j].prevLocation = new Point(cardWidth * game.playerHand.Count, game.form.ClientRectangle.Height - cardHeight);
